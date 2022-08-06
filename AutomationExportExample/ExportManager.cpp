@@ -422,7 +422,7 @@ void AuExpManager::PopulateExportDataHeader()
 	m_GeneralData.Add(L"Game Version", L"GameVersion", DataType_Float);
 	m_GeneralData.Add(L"Car Name", L"CarName", DataType_CarName);
 
-	m_CarChoicesData.Add(L"Model Name", L"TrimName", DataType_String);
+	m_CarChoicesData.Add(L"Model Name", L"ModelName", DataType_String);
 	m_CarChoicesData.Add(L"Model Year", L"ModelYear", DataType_Float);
 	m_CarChoicesData.Add(L"Wheelbase", L"BodyWheelbase", DataType_Float);
 	m_CarChoicesData.Add(L"Chassis Type", L"ChassisType", DataType_String);
