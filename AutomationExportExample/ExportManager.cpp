@@ -1097,13 +1097,13 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"FuelSys_CarbFilter_Race_Name"] = L"Race";
 	m_Translations[L"FuelSys_InjFilter_Race_Name"] = L"Race";
 
-	m_Translations[L"Header_CastLog_Name"] = L"Cast Log";
-	m_Translations[L"Header_ShortCast_Name"] = L"Short Cast";
-	m_Translations[L"Header_CastLow_Name"] = L"Short Cast Low";
-	m_Translations[L"Header_CastMid_Name"] = L"Short Cast Mid";
-	m_Translations[L"Header_Tube_Name"] = L"Tubular";
-	m_Translations[L"Header_LongTube_Name"] = L"Long Tubular";
-	m_Translations[L"Header_RaceTube_Name"] = L"Race Tubular";
+	m_Translations[L"Header_CastLog_Name"] = L"Compact Cast";
+	//m_Translations[L"Header_ShortCast_Name"] = L"Short Cast";
+	m_Translations[L"Header_CastLow_Name"] = L"Cast Low";
+	m_Translations[L"Header_CastMid_Name"] = L"Cast Mid";
+	m_Translations[L"Header_Tube_Name"] = L"Tubular Mid";
+	m_Translations[L"Header_LongTube_Name"] = L"Tubular Long";
+	m_Translations[L"Header_RaceTube_Name"] = L"Tubular Race";
 	m_Translations[L"Header_TurboShortLog_Name"] = L"Turbo Cast Log";
 	m_Translations[L"Header_TurboShortCast_Name"] = L"Turbo Short Cast";
 	m_Translations[L"Header_TurboRaceTubular_Name"] = L"Turbo Race Tubular";
