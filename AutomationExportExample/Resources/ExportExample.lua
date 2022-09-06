@@ -301,6 +301,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.FuelLeaded = EngineInfo.ModelInfo.Fuel.FuelLeaded == true and "TRUE" or "FALSE"
 	Data.FuelOctane = EngineInfo.ModelInfo.Fuel.ListedOctane
 	Data.OctaneOffset = EngineInfo.ModelInfo.Fuel.TuneOctaneOffset
+	Data.FuelType = EngineInfo.ModelInfo.Fuel.Type
 	
 	--Data.AFR = EngineInfo.ModelInfo.AFR
 	--Data.IgnitionTiming = EngineInfo.ModelInfo.IgnitionTimingSetting

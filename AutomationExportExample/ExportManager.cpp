@@ -696,6 +696,7 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineChoicesData.Add(	L"Intake Size",						L"IntakeSize",						DataType_Float);
 
 	m_EngineChoicesData.Add(	L"Leaded Fuel",						L"FuelLeaded",						DataType_String);
+	m_EngineChoicesData.Add(	L"Fuel Type",						L"FuelType",						DataType_String);
 	m_EngineChoicesData.Add(	L"Fuel Octane",						L"FuelOctane",						DataType_Float);
 	m_EngineChoicesData.Add(	L"Octane Offset",					L"OctaneOffset",					DataType_Float);
 
@@ -1123,6 +1124,8 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Muffler_Confused_Name"] = L"Baffled";
 	m_Translations[L"Muffler_Reverse_Name"] = L"Reverse Flow";
 	m_Translations[L"Muffler_Straight_Name"] = L"Straight Through";
+
+	m_Translations[L"CompressedGas"] = L"Compressed Gas";
 }
 
 void AuExpManager::GetTranslation(std::wstring* ret)
