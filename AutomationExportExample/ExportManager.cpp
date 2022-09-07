@@ -1126,6 +1126,7 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Muffler_Straight_Name"] = L"Straight Through";
 
 	m_Translations[L"CompressedGas"] = L"Compressed Gas";
+	m_Translations[L"Nitro"] = L"Nitromethane";
 }
 
 void AuExpManager::GetTranslation(std::wstring* ret)
