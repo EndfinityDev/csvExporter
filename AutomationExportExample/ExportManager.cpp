@@ -657,6 +657,7 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineChoicesData.Add(	L"Variant Displacement",			L"VariantDisplacement",				DataType_Float);
 
 	m_EngineChoicesData.Add(	L"Balance Shaft",					L"BalanceShaft",					DataType_String);
+	m_EngineChoicesData.Add(	L"Balancing Mass Setting",			L"BalancingMass",					DataType_Float);
 	m_EngineChoicesData.Add(	L"Crankshaft",						L"Crankshaft",						DataType_String);
 	m_EngineChoicesData.Add(	L"Conrods",							L"Conrods",							DataType_String);
 	m_EngineChoicesData.Add(	L"Pistons",							L"Pistons",							DataType_String);

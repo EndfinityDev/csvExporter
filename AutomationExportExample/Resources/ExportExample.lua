@@ -260,6 +260,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.VariantDisplacement = EngineInfo.ModelInfo.Capacity
 	
 	Data.BalanceShaft = EngineInfo.ModelInfo.BalanceShaft.Name
+	Data.BalancingMass = EngineInfo.ModelInfo.BalancingMassSetting
 	Data.Crankshaft = EngineInfo.ModelInfo.Crank.Name
 	Data.Conrods = EngineInfo.ModelInfo.Conrods.Name
 	Data.Pistons = EngineInfo.ModelInfo.Pistons.Name
