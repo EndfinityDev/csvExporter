@@ -819,6 +819,7 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Diff_Locker_Name"] = L"Locking";
 	m_Translations[L"Diff_AutoLocker_Name"] = L"Autolocking";
 	m_Translations[L"Diff_GearedLSD_Name"] = L"Geared LSD";
+	m_Translations[L"Diff_ClutchedLSD_Name"] = L"Clutched LSD";
 	m_Translations[L"Diff_ViscLSD_Name"] = L"Viscous LSD";
 	m_Translations[L"Diff_ElecLSD_Name"] = L"Electric LSD";
 
@@ -899,11 +900,13 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Entertain_None_Name"] = L"None";
 
 
-	m_Translations[L"DriveAssist_PowerSteer_None_Name"] = L"None";
-	m_Translations[L"DriveAssist_PowerSteer_Name"] = L"Non-Variable";
-	m_Translations[L"DriveAssist_PowerSteer_Variable_Name"] = L"Variable";
+	m_Translations[L"DriveAssist_PowerSteer_None_Name"] = L"Recirculating Ball";
+	m_Translations[L"DriveAssist_PowerSteer_RackAndPinion_Name"] = L"Rack And Pinion";
+	m_Translations[L"DriveAssist_PowerSteer_HydraulicBall_Name"] = L"Hydraulic Ball";
+	m_Translations[L"DriveAssist_PowerSteer_Name"] = L"Hydraulic R&P";
+	m_Translations[L"DriveAssist_PowerSteer_Variable_Name"] = L"Variable Hydraulic";
 	m_Translations[L"DriveAssist_PowerSteer_Electric_Name"] = L"Electric";
-	m_Translations[L"DriveAssist_PowerSteer_Electric_Variable_Name"] = L"Electric Variable";
+	m_Translations[L"DriveAssist_PowerSteer_Electric_Variable_Name"] = L"Variable Electric";
 
 	m_Translations[L"DriveAssist_None_Name"] = L"None";
 	m_Translations[L"DriveAssist_TractionPackage1_Name"] = L"ABS";
