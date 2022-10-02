@@ -804,6 +804,7 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"DriveType_TransFWD_Name"] = L"Transverse FWD";
 	m_Translations[L"DriveType_LongFWD_Name"] = L"Longitudinal FWD";
 	m_Translations[L"DriveType_Trans4WD_Name"] = L"Transverse AWD";
+	m_Translations[L"DriveType_TransRWD_Name"] = L"Transverse RWD";
 	m_Translations[L"DriveType_Long4WD_Name"] = L"Longitudinal AWD";
 	m_Translations[L"DriveType_LongRWD_Name"] = L"Longitudinal RWD";
 	m_Translations[L"DriveType_Long4X4_Name"] = L"Longitudinal 4x4";
@@ -1043,6 +1044,15 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"VVT_VVTSOHC_Name"] = L"SOHC VVT";
 	m_Translations[L"VVT_VVTDOHC_Name"] = L"DOHC VVT Both";
 	m_Translations[L"VVT_VVTIntakeCam_Name"] = L"DOHC VVT Intake";
+
+	m_Translations[L"VarValves_None_Name"] = L"None";
+	m_Translations[L"VarValves_VVTSOHC_Name"] = L"SOHC VVT";
+	m_Translations[L"VarValves_VVTDOHC_Name"] = L"DOHC VVT Both";
+	m_Translations[L"VarValves_VVTIntakeCam_Name"] = L"DOHC VVT Intake";
+	m_Translations[L"VarValves_None_Name"] = L"None";
+	m_Translations[L"VarValves_VVTSOHC_Name"] = L"SOHC VVT";
+	m_Translations[L"VarValves_VVTDOHC_Name"] = L"DOHC VVT Both";
+	m_Translations[L"VarValves_VVTIntakeCam_Name"] = L"DOHC VVT Intake";
 
 	m_Translations[L"VarValves_None_Name"] = L"None";
 	m_Translations[L"VarValves_VVL_Name"] = L"VVL";
