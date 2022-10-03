@@ -657,6 +657,7 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineChoicesData.Add(	L"Variant Displacement",			L"VariantDisplacement",				DataType_Float);
 
 	m_EngineChoicesData.Add(	L"Balance Shaft",					L"BalanceShaft",					DataType_String);
+	m_EngineChoicesData.Add(	L"Balancing Mass Setting",			L"BalancingMass",					DataType_Float);
 	m_EngineChoicesData.Add(	L"Crankshaft",						L"Crankshaft",						DataType_String);
 	m_EngineChoicesData.Add(	L"Conrods",							L"Conrods",							DataType_String);
 	m_EngineChoicesData.Add(	L"Pistons",							L"Pistons",							DataType_String);
@@ -664,9 +665,12 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineChoicesData.Add(	L"Compression",						L"Compression",						DataType_Float);
 	m_EngineChoicesData.Add(	L"Cam Profile",						L"CamProfile",						DataType_Float);
 	m_EngineChoicesData.Add(	L"Valve Spring Stiffness",			L"ValveSpringStiffness",			DataType_Float);
+	m_EngineChoicesData.Add(	L"RPM Limit",						L"RPMLimit",						DataType_Float);
 
 	m_EngineChoicesData.Add(	L"VVT",								L"VVT",								DataType_String);
 	m_EngineChoicesData.Add(	L"VVL",								L"VVL",								DataType_String);
+	m_EngineChoicesData.Add(	L"VVL Cam Profile",					L"VVLCamProfile",					DataType_Float);
+	m_EngineChoicesData.Add(	L"VVL RPM",							L"VVLRPM",							DataType_Float);
 
 	m_EngineChoicesData.Add(	L"Aspiration",						L"Aspiration",						DataType_String);
 	m_EngineChoicesData.Add(	L"Intercooler Size",				L"IntercoolerSize",					DataType_Float);
@@ -688,17 +692,21 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineChoicesData.Add(	L"Fuel System Type",				L"FuelSystemType",					DataType_String);
 	m_EngineChoicesData.Add(	L"Fuel System",						L"FuelSystem",						DataType_String);
 	m_EngineChoicesData.Add(	L"Throttle Configuration",			L"Throttles",						DataType_String);
+	m_EngineChoicesData.Add(	L"Carb Size",						L"CarbSize",						DataType_Float);
 	m_EngineChoicesData.Add(	L"Intake",							L"Intake",							DataType_String);
+	m_EngineChoicesData.Add(	L"Intake Size",						L"IntakeSize",						DataType_Float);
 
 	m_EngineChoicesData.Add(	L"Leaded Fuel",						L"FuelLeaded",						DataType_String);
+	m_EngineChoicesData.Add(	L"Fuel Type",						L"FuelType",						DataType_String);
 	m_EngineChoicesData.Add(	L"Fuel Octane",						L"FuelOctane",						DataType_Float);
 	m_EngineChoicesData.Add(	L"Octane Offset",					L"OctaneOffset",					DataType_Float);
 
-	m_EngineChoicesData.Add(	L"AFR",								L"AFR",								DataType_Float);
-	m_EngineChoicesData.Add(	L"Ignition Timing",					L"IgnitionTiming",					DataType_Float);
-	m_EngineChoicesData.Add(	L"RPM Limit",						L"RPMLimit",						DataType_Float);
+	//m_EngineChoicesData.Add(	L"AFR",								L"AFR",								DataType_Float);
+	//m_EngineChoicesData.Add(	L"Ignition Timing",					L"IgnitionTiming",					DataType_Float);
+	m_EngineChoicesData.Add(	L"Fuel Map",						L"FuelMap",							DataType_Float);
 
 	m_EngineChoicesData.Add(	L"Headers",							L"Headers",							DataType_String);
+	m_EngineChoicesData.Add(	L"Header Size",						L"HeaderSize",						DataType_Float);
 	m_EngineChoicesData.Add(	L"Exhaust Count",					L"ExhaustCount",					DataType_String);
 	m_EngineChoicesData.Add(	L"Exhaust Diameter",				L"ExhaustDiameter",					DataType_Float);
 	m_EngineChoicesData.Add(	L"Exhaust Bypass Valves",			L"BypassValves",					DataType_String);
@@ -716,7 +724,7 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineResultsData.Add(	L"Idle RPM",						L"EngineIdleRPM",					DataType_Float);
 	m_EngineResultsData.Add(	L"Max RPM",							L"EngineMaxRPM",					DataType_Float);
 
-	m_EngineResultsData.Add(	L"Min Economy RPM",					L"MinEconomyRPM",					DataType_Float);
+	//m_EngineResultsData.Add(	L"Min Economy RPM",					L"MinEconomyRPM",					DataType_Float);
 
 	m_EngineResultsData.Add(	L"Engine Weight",					L"EngineWeight",					DataType_Float);
 	m_EngineResultsData.Add(	L"Flywheel Weight",					L"EngineFlywheelWeight",			DataType_Float);
@@ -796,6 +804,7 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"DriveType_TransFWD_Name"] = L"Transverse FWD";
 	m_Translations[L"DriveType_LongFWD_Name"] = L"Longitudinal FWD";
 	m_Translations[L"DriveType_Trans4WD_Name"] = L"Transverse AWD";
+	m_Translations[L"DriveType_TransRWD_Name"] = L"Transverse RWD";
 	m_Translations[L"DriveType_Long4WD_Name"] = L"Longitudinal AWD";
 	m_Translations[L"DriveType_LongRWD_Name"] = L"Longitudinal RWD";
 	m_Translations[L"DriveType_Long4X4_Name"] = L"Longitudinal 4x4";
@@ -811,6 +820,7 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Diff_Locker_Name"] = L"Locking";
 	m_Translations[L"Diff_AutoLocker_Name"] = L"Autolocking";
 	m_Translations[L"Diff_GearedLSD_Name"] = L"Geared LSD";
+	m_Translations[L"Diff_ClutchedLSD_Name"] = L"Clutched LSD";
 	m_Translations[L"Diff_ViscLSD_Name"] = L"Viscous LSD";
 	m_Translations[L"Diff_ElecLSD_Name"] = L"Electric LSD";
 
@@ -891,11 +901,13 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Entertain_None_Name"] = L"None";
 
 
-	m_Translations[L"DriveAssist_PowerSteer_None_Name"] = L"None";
-	m_Translations[L"DriveAssist_PowerSteer_Name"] = L"Non-Variable";
-	m_Translations[L"DriveAssist_PowerSteer_Variable_Name"] = L"Variable";
+	m_Translations[L"DriveAssist_PowerSteer_None_Name"] = L"Recirculating Ball";
+	m_Translations[L"DriveAssist_PowerSteer_RackAndPinion_Name"] = L"Rack And Pinion";
+	m_Translations[L"DriveAssist_PowerSteer_HydraulicBall_Name"] = L"Hydraulic Ball";
+	m_Translations[L"DriveAssist_PowerSteer_Name"] = L"Hydraulic R&P";
+	m_Translations[L"DriveAssist_PowerSteer_Variable_Name"] = L"Variable Hydraulic";
 	m_Translations[L"DriveAssist_PowerSteer_Electric_Name"] = L"Electric";
-	m_Translations[L"DriveAssist_PowerSteer_Electric_Variable_Name"] = L"Electric Variable";
+	m_Translations[L"DriveAssist_PowerSteer_Electric_Variable_Name"] = L"Variable Electric";
 
 	m_Translations[L"DriveAssist_None_Name"] = L"None";
 	m_Translations[L"DriveAssist_TractionPackage1_Name"] = L"ABS";
@@ -1024,6 +1036,19 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Piston_Forged_Name"] = L"Forged";
 	m_Translations[L"Piston_LightForged_Name"] = L"Lightweight Forged";
 
+	m_Translations[L"VVT_None_Name"] = L"None";
+	m_Translations[L"VVT_VVTSOHC_Name"] = L"SOHC VVT";
+	m_Translations[L"VVT_VVTDOHC_Name"] = L"DOHC VVT Both";
+	m_Translations[L"VVT_VVTIntakeCam_Name"] = L"DOHC VVT Intake";
+	m_Translations[L"VVT_None_Name"] = L"None";
+	m_Translations[L"VVT_VVTSOHC_Name"] = L"SOHC VVT";
+	m_Translations[L"VVT_VVTDOHC_Name"] = L"DOHC VVT Both";
+	m_Translations[L"VVT_VVTIntakeCam_Name"] = L"DOHC VVT Intake";
+
+	m_Translations[L"VarValves_None_Name"] = L"None";
+	m_Translations[L"VarValves_VVTSOHC_Name"] = L"SOHC VVT";
+	m_Translations[L"VarValves_VVTDOHC_Name"] = L"DOHC VVT Both";
+	m_Translations[L"VarValves_VVTIntakeCam_Name"] = L"DOHC VVT Intake";
 	m_Translations[L"VarValves_None_Name"] = L"None";
 	m_Translations[L"VarValves_VVTSOHC_Name"] = L"SOHC VVT";
 	m_Translations[L"VarValves_VVTDOHC_Name"] = L"DOHC VVT Both";
@@ -1052,6 +1077,9 @@ void AuExpManager::BuildTranslations()
 
 	m_Translations[L"TurboBearing_Journal_Name"] = L"Journal Bearing";
 	m_Translations[L"TurboBearing_BallBearing_Name"] = L"Ball Bearing";
+
+	m_Translations[L"FuelSys_Carb_Name"] = L"Carburetor";
+	m_Translations[L"FuelSys_Inj_Name"] = L"Injection";
 
 	m_Translations[L"FuelSys_Carb_1Barrel_Name"] = L"1-Barrel Carburetor";
 	m_Translations[L"FuelSys_Carb_1BarrelEco_Name"] = L"1-Barrel Eco Carburetor";
@@ -1084,11 +1112,13 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"FuelSys_CarbFilter_Race_Name"] = L"Race";
 	m_Translations[L"FuelSys_InjFilter_Race_Name"] = L"Race";
 
-	m_Translations[L"Header_CastLog_Name"] = L"Cast Log";
-	m_Translations[L"Header_ShortCast_Name"] = L"Short Cast";
-	m_Translations[L"Header_Tube_Name"] = L"Tubular";
-	m_Translations[L"Header_LongTube_Name"] = L"Long Tubular";
-	m_Translations[L"Header_RaceTube_Name"] = L"Race Tubular";
+	m_Translations[L"Header_CastLog_Name"] = L"Compact Cast";
+	//m_Translations[L"Header_ShortCast_Name"] = L"Short Cast";
+	m_Translations[L"Header_CastLow_Name"] = L"Cast Low";
+	m_Translations[L"Header_CastMid_Name"] = L"Cast Mid";
+	m_Translations[L"Header_Tube_Name"] = L"Tubular Mid";
+	m_Translations[L"Header_LongTube_Name"] = L"Tubular Long";
+	m_Translations[L"Header_RaceTube_Name"] = L"Tubular Race";
 	m_Translations[L"Header_TurboShortLog_Name"] = L"Turbo Cast Log";
 	m_Translations[L"Header_TurboShortCast_Name"] = L"Turbo Short Cast";
 	m_Translations[L"Header_TurboRaceTubular_Name"] = L"Turbo Race Tubular";
@@ -1108,6 +1138,9 @@ void AuExpManager::BuildTranslations()
 	m_Translations[L"Muffler_Confused_Name"] = L"Baffled";
 	m_Translations[L"Muffler_Reverse_Name"] = L"Reverse Flow";
 	m_Translations[L"Muffler_Straight_Name"] = L"Straight Through";
+
+	m_Translations[L"CompressedGas"] = L"Compressed Gas";
+	m_Translations[L"Nitro"] = L"Nitromethane";
 }
 
 void AuExpManager::GetTranslation(std::wstring* ret)

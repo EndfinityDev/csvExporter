@@ -260,6 +260,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.VariantDisplacement = EngineInfo.ModelInfo.Capacity
 	
 	Data.BalanceShaft = EngineInfo.ModelInfo.BalanceShaft.Name
+	Data.BalancingMass = EngineInfo.ModelInfo.BalancingMassSetting
 	Data.Crankshaft = EngineInfo.ModelInfo.Crank.Name
 	Data.Conrods = EngineInfo.ModelInfo.Conrods.Name
 	Data.Pistons = EngineInfo.ModelInfo.Pistons.Name
@@ -270,6 +271,8 @@ function CExporter.ExportCarData(CarCalculator)
 	
 	Data.VVT = EngineInfo.ModelInfo.VVT.Name
 	Data.VVL = EngineInfo.ModelInfo.VVL.Name
+	Data.VVLCamProfile = EngineInfo.ModelInfo.VVLCamProfileSetting or 0
+	Data.VVLRPM = EngineInfo.ModelInfo.VVLRPM or 0
 	
 	Data.Aspiration = EngineInfo.ModelInfo.AspirationSetup.Name
 	Data.IntercoolerSize = EngineInfo.ModelInfo.IntercoolerSetting
@@ -292,18 +295,23 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.FuelSystemType = EngineInfo.ModelInfo.FuelSystemType.Name
 	Data.FuelSystem = EngineInfo.ModelInfo.FuelSystem.Name
 	Data.Throttles = EngineInfo.ModelInfo.IntakeManifold.Name
+	Data.CarbSize = EngineInfo.ModelInfo.CarbSize or 0
 	Data.Intake = EngineInfo.ModelInfo.Intake.Name
+	Data.IntakeSize = EngineInfo.ModelInfo.IntakeSize or 0
 	
 	Data.FuelLeaded = EngineInfo.ModelInfo.Fuel.FuelLeaded == true and "TRUE" or "FALSE"
 	Data.FuelOctane = EngineInfo.ModelInfo.Fuel.ListedOctane
 	Data.OctaneOffset = EngineInfo.ModelInfo.Fuel.TuneOctaneOffset
+	Data.FuelType = EngineInfo.ModelInfo.Fuel.Type
 	
-	Data.AFR = EngineInfo.ModelInfo.AFR
-	Data.IgnitionTiming = EngineInfo.ModelInfo.IgnitionTimingSetting
+	--Data.AFR = EngineInfo.ModelInfo.AFR
+	--Data.IgnitionTiming = EngineInfo.ModelInfo.IgnitionTimingSetting
+	Data.FuelMap = EngineInfo.ModelInfo.FuelMap or 0
 	
 	Data.RPMLimit = EngineInfo.ModelInfo.RPMLimit
 	
 	Data.Headers = EngineInfo.ModelInfo.Headers.Name
+	Data.HeaderSize = EngineInfo.ModelInfo.HeaderSize
 	Data.ExhaustCount = EngineInfo.ModelInfo.ExhaustCount.Name
 	Data.BypassValves = EngineInfo.ModelInfo.ExhaustBypassValves.Name
 	Data.ExhaustDiameter = EngineInfo.ModelInfo.ExhaustDiameter
@@ -327,14 +335,14 @@ function CExporter.ExportCarData(CarCalculator)
 
 	Data.EnginePower = EngineInfo.ModelInfo.Results.PeakPower
 	Data.EnginePowerRPM = EngineInfo.ModelInfo.Results.PeakPowerRPM
-	Data.EngineTorque = EngineInfo.ModelInfo.Results.torque
+	Data.EngineTorque = EngineInfo.ModelInfo.Results.PeakTorque
 	Data.EngineTorqueRPM = EngineInfo.ModelInfo.Results.PeakTorqueRPM
 	Data.EngineMaxRPM = EngineInfo.ModelInfo.Results.MaxRPM
 	Data.EngineIdleRPM = EngineInfo.ModelInfo.Results.Idle
 	Data.EnginePeakBoost = EngineInfo.ModelInfo.Results.PeakBoost
 	Data.EnginePeakBoostRPM = EngineInfo.ModelInfo.Results.PeakBoostRPM
 	
-	Data.MinEconomyRPM = EngineInfo.ModelInfo.Results.MinEconRPM
+	--Data.MinEconomyRPM = EngineInfo.ModelInfo.Results.MinEconRPM
 	
 	Data.EngineWeight = EngineInfo.ModelInfo.Results.Weight
 	Data.EngineFlywheelWeight = EngineInfo.ModelInfo.Results.FlyWheelWeight
