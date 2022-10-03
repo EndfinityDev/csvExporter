@@ -403,7 +403,5 @@ function CExporter.ExportCarFiles(CarCalculator)
 	
 	--Files["AestheticSettings.txt"] = AestheticsFile
 
-	Files["JOIN_MY_DISCORD.txt"] = "discord.gg/invite/b9pFVJFH2r"
-
 	return Files
 end
