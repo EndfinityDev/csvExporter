@@ -351,7 +351,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.EngineResponsiveness = EngineInfo.ModelInfo.Results.Responsiveness
 	Data.EngineSmoothness = EngineInfo.ModelInfo.Results.Smoothness
 
-	Data.EngineReliability= EngineInfo.ModelInfo.Results.MTTF
+	Data.EngineReliability = EngineInfo.ModelInfo.Results.MTTF
 
 	Data.EngineEmissions = EngineInfo.ModelInfo.Results.Emissions
 	Data.EngineEfficiency = EngineInfo.ModelInfo.Results.EconEff
