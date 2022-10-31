@@ -733,7 +733,9 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineResultsData.Add(	L"Engine Performance Index",		L"EnginePerformanceIndex",			DataType_Float);
 	m_EngineResultsData.Add(	L"Engine Responsiveness",			L"EngineResponsiveness",			DataType_Float);
 	m_EngineResultsData.Add(	L"Engine Smoothness",				L"EngineSmoothness",				DataType_Float);
-	//m_EngineResultsData.Add(	L"Engine Reliability",				L"EngineReliability",				DataType_Float);
+
+	m_EngineResultsData.Add(	L"Engine Reliability",				L"EngineReliability",				DataType_Float);
+
 	m_EngineResultsData.Add(	L"Engine Emissions",				L"EngineEmissions",					DataType_Float);
 	m_EngineResultsData.Add(	L"Engine Efficiency",				L"EngineEfficiency",				DataType_Float);
 	m_EngineResultsData.Add(	L"Engine Noise",					L"EngineNoise",						DataType_Float);
