@@ -109,7 +109,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring prefsFilePath = path;
-		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\BNGExporter.prefs";
+		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\csvExporter.prefs";
 		FILE* prefsFile;
 		_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"rb");
 

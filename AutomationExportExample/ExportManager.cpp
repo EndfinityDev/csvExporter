@@ -151,7 +151,7 @@ void AuExpManager::EndExport()
 		{
 			//directory exists, all good to go:
 
-			prefsFilePath += L"\\BNGExporter.prefs";
+			prefsFilePath += L"\\csvExporter.prefs";
 
 			FILE* prefsFile;
 			_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"wb");
