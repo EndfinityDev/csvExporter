@@ -168,9 +168,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="csvExporter.h" />
+    <ClInclude Include="DataType.h" />
+    <ClInclude Include="DDSHeader.h" />
+    <ClInclude Include="ExportPrefs.h" />
     <ClInclude Include="EXPVERSION.h" />
     <ClInclude Include="CSVManager.h" />
-    <ClInclude Include="DDSHeader.h" />
     <ClInclude Include="ExportManager.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="Image.h" />
@@ -183,9 +185,10 @@
   <ItemGroup>
     <ClCompile Include="csvExporter.cpp" />
     <ClCompile Include="DataType.cpp" />
+    <ClCompile Include="DDSHeader.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="LuaDataHeader.cpp" />
     <ClCompile Include="CSVManager.cpp" />
-    <ClCompile Include="DDSHeader.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -202,7 +205,6 @@
     </ClCompile>
     <ClCompile Include="ExportManager.cpp" />
     <ClCompile Include="FileManager.cpp" />
-    <ClCompile Include="Image.cpp" />
     <ClCompile Include="LuaData.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

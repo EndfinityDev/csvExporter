@@ -390,6 +390,140 @@ function CExporter.ExportCarData(CarCalculator)
 
 	Data.WeightDistribution = CarCalculator:CalculateDynamicCG(0).WeightDistribution
 
+	--Cost calculations
+
+	local function CalculateCost(engineeringTime, productionUnits, engineeringCost, materialCost, toolingCosts, 
+									employeeCount, employeeWage, automationCoef, shiftCount)
+		local employeeCostsPerShift = employeeCount * employeeWage * 8
+		local factoryProductionUnits = productionUnits / (employeeCount * automationCoef)
+
+		local carsMadePerShift = 8 / factoryProductionUnits
+		local carsMadePerDay = carsMadePerShift * shiftCount
+		local employeeCostsPerDay = employeeCostsPerShift * shiftCount
+
+		local carsMadePerMonth = carsMadePerDay * 30
+		local employeeCostsPerMonth = employeeCostsPerDay * 30
+		local employeeCostsPerCar = employeeCostsPerShift / carsMadePerShift
+
+		local monthlyEngineeringCosts = engineeringCost / 60
+		local engineeringCostsPerCar = monthlyEngineeringCosts / carsMadePerMonth
+
+		local toolingCosts = toolingCosts * (shiftCount / 2)
+
+		local totalCostPerCar = materialCost + engineeringCostsPerCar + employeeCostsPerCar + toolingCosts
+
+		return totalCostPerCar
+	end --CalculateCost
+
+		--Data.EngineEngineeringTime
+		--Data.EngineProductionUnits
+		--Data.EngineEngineeringCost
+		--Data.EngineMaterialCost
+		--Data.EngineToolingCosts
+
+		--Data.TrimEngineeringTime
+		--Data.TrimManHours
+		--Data.TrimEngCosts
+		--Data.MatCost
+		--Data.ToolingCosts
+
+	--Medium factory, cheap labor, medium automation, 2 shifts
+	Data.TrimCostPreset0 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											200, 10, 1.5, 2)
+	Data.EngineCostPreset0 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											200, 10, 1.5, 2)
+	Data.CarCostPreset0 = Data.TrimCostPreset0 + Data.EngineCostPreset0
+
+	--Large factory, cheap labor, medium automation, 2 shifts
+	Data.TrimCostPreset1 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											500, 10, 1.5, 2)
+	Data.EngineCostPreset1 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											500, 10, 1.5, 2)
+	Data.CarCostPreset1 = Data.TrimCostPreset1 + Data.EngineCostPreset1
+
+	--Medium factory, average labor, high automation, 2 shifts
+	Data.TrimCostPreset2 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											150, 20, 2, 2)
+	Data.EngineCostPreset2 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											150, 20, 2, 2)
+	Data.CarCostPreset2 = Data.TrimCostPreset2 + Data.EngineCostPreset2
+
+	--Medium factory, average labor, high automation, 3 shifts
+	Data.TrimCostPreset3 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											100, 20, 2, 3)
+	Data.EngineCostPreset3 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											100, 20, 2, 3)
+	Data.CarCostPreset3 = Data.TrimCostPreset3 + Data.EngineCostPreset3
+
+	--Small factory, average labor, medium automation, 2 shifts
+	Data.TrimCostPreset4 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											50, 20, 1.5, 2)
+	Data.EngineCostPreset4 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											50, 20, 1.5, 2)
+	Data.CarCostPreset4 = Data.TrimCostPreset4 + Data.EngineCostPreset4
+
+	--Small factory, cheap labor, medium automation, 3 shifts
+	Data.TrimCostPreset5 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											50, 10, 1.5, 3)
+	Data.EngineCostPreset5 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											50, 10, 1.5, 3)
+	Data.CarCostPreset5 = Data.TrimCostPreset5 + Data.EngineCostPreset5
+
+	--Tiny factory, cheap labor, no automation, 2 shifts
+	Data.TrimCostPreset6 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											10, 10, 1, 2)
+	Data.EngineCostPreset6 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											10, 10, 1, 2)
+	Data.CarCostPreset6 = Data.TrimCostPreset6 + Data.EngineCostPreset6
+
+	--Tiny factory, average labor, no automation, 2 shifts
+	Data.TrimCostPreset7 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											10, 20, 1, 2)
+	Data.EngineCostPreset7 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											10, 20, 1, 2)
+	Data.CarCostPreset7 = Data.TrimCostPreset7 + Data.EngineCostPreset7
+
+	--Tiny factory, expensive labor, no automation, 1 shift
+	Data.TrimCostPreset8 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											10, 30, 1, 1)
+	Data.EngineCostPreset8 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											10, 30, 1, 1)
+	Data.CarCostPreset8 = Data.TrimCostPreset8 + Data.EngineCostPreset8
+
+	--Medium factory, very cheap labor, low automation, 3 shifts
+	Data.TrimCostPreset9 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											200, 5, 1.2, 3)
+	Data.EngineCostPreset9 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											200, 5, 1.2, 3)
+	Data.CarCostPreset9 = Data.TrimCostPreset9 + Data.EngineCostPreset9
+
+	--Large factory, very cheap labor, low automation, 3 shifts
+	Data.TrimCostPreset10 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											500, 5, 1.2, 3)
+	Data.EngineCostPreset10 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											500, 5, 1.2, 3)
+	Data.CarCostPreset10 = Data.TrimCostPreset10 + Data.EngineCostPreset10
+
+	--Large factory, average labor, medium automation, 2 shifts
+	Data.TrimCostPreset11 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											500, 20, 1.5, 2)
+	Data.EngineCostPreset11 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											500, 20, 1.5, 2)
+	Data.CarCostPreset11 = Data.TrimCostPreset11 + Data.EngineCostPreset11
+
+	--Small factory, expensive labor, high automation, 2 shifts
+	Data.TrimCostPreset12 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											50, 30, 2, 2)
+	Data.EngineCostPreset12 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											50, 30, 2, 2)
+	Data.CarCostPreset12 = Data.TrimCostPreset12 + Data.EngineCostPreset12
+
+	--Tiny factory, expensive labor, high automation, 2 shifts
+	Data.TrimCostPreset13 = CalculateCost(Data.TrimEngineeringTime, Data.TrimManHours, Data.TrimEngCosts, Data.MatCost, Data.ToolingCosts,
+											10, 30, 2, 2)
+	Data.EngineCostPreset13 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
+											10, 30, 2, 2)
+	Data.CarCostPreset13 = Data.TrimCostPreset13 + Data.EngineCostPreset13
 
 	return Data
 end

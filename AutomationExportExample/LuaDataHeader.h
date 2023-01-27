@@ -20,7 +20,4 @@ struct LuaDataHeader
 	DataType DataType;
 
 	std::wstring Data;
-
-private:
-
 };

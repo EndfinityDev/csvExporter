@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include <Shlobj.h>
+#include "ExportPrefs.h"
 
 size_t FindDirDelimiter(std::wstring dir, size_t start)
 {
@@ -28,7 +29,7 @@ AuExpManager::AuExpManager() :
 {
 	s_Instance = this;
 
-	PopulateExportDataHeader();
+	//PopulateExportDataHeader();
 
 	BuildTranslations();
 }
@@ -64,6 +65,11 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 		{
 			*i = L'_';
 		}
+	}
+
+	if (exportFileName[exportFileName.size() - 1] == L' ')
+	{
+		exportFileName.resize(exportFileName.size() - 1);
 	}
 
 	//m_ExportDirectory += m_CarData->GetStringData(0)->Value;
@@ -110,7 +116,58 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 void AuExpManager::EndExport() 
 {
 	m_IsExportInProcess = true;
+
+	PopulateExportDataHeader();
+
 	ExportInternal();
+
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring prefsFilePath = path;
+		prefsFilePath += L"\\AutomationGame\\ExporterPrefs";
+
+		DWORD att = GetFileAttributes(prefsFilePath.c_str());
+
+		if (att == INVALID_FILE_ATTRIBUTES)
+		{
+			//create directory, one level at a time:
+			size_t slashPos = FindDirDelimiter(prefsFilePath, 0);
+			size_t offset = 0;
+
+			while (slashPos != std::wstring::npos)
+			{
+				CreateDirectory(prefsFilePath.substr(offset, slashPos - offset).c_str(), nullptr);
+				slashPos = FindDirDelimiter(prefsFilePath, slashPos + 1);
+			}
+
+			//last one:
+			CreateDirectory(prefsFilePath.c_str(), nullptr);
+
+			att = GetFileAttributes(prefsFilePath.c_str());
+		}
+
+		if (att != INVALID_FILE_ATTRIBUTES && att & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			//directory exists, all good to go:
+
+			prefsFilePath += L"\\BNGExporter.prefs";
+
+			FILE* prefsFile;
+			_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"wb");
+
+			if (prefsFile)
+			{
+				ExportPrefs prefs;
+				prefs.PrefsVersion = EXPPREFSVERSION;
+				prefs.PrefsFlags = 0b00000000 | (m_CarData->GetBoolData(0)->Value << 0) | (m_CarData->GetBoolData(0)->Value << 1);
+
+				fwrite(&prefs, sizeof(prefs), 1, prefsFile);
+
+				fclose(prefsFile);
+			}
+		}
+	}
 
 	m_IsExportInProcess = false;
 }
@@ -760,6 +817,16 @@ void AuExpManager::PopulateExportDataHeader()
 	m_EngineResultsData.Add(	L"Conrods Max Torque",				L"ConrodMaxTorque",					DataType_Float);
 	m_EngineResultsData.Add(	L"Pistons Max RPM",					L"PistonMaxRPM",					DataType_Float);
 	m_EngineResultsData.Add(	L"Pistons Max Torque",				L"PistonMaxTorque",					DataType_Float);
+
+	//Cost calculations
+	std::wstring costPreset = m_CarData->GetStringData(2)->Value;
+	uint8_t costPresetID = (uint8_t)_wtoi(costPreset.c_str());
+	if (costPresetID > 13)
+		costPresetID = 0;
+
+	m_CarResultsData.Add(L"Costs Per Trim", L"TrimCostPreset" + std::to_wstring(costPresetID), DataType_Float);
+	m_CarResultsData.Add(L"Costs Per Car", L"CarCostPreset" + std::to_wstring(costPresetID), DataType_Float);
+	m_EngineResultsData.Add(L"Costs Per Engine", L"EngineCostPreset" + std::to_wstring(costPresetID), DataType_Float);
 }
 
 void AuExpManager::BuildTranslations()

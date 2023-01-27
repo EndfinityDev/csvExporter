@@ -9,6 +9,8 @@
 #include "..\Include\AuCarExportDLL.h"
 
 #include "EXPVERSION.h"
+#include <ShlObj.h>
+#include "ExportPrefs.h"
 
 
 
@@ -44,8 +46,8 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber
 //Gets the number of user-supplied strings that the plugin will be requesting
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCount)
 {
-	//we will want to get 2 lots of string information from the user:
-	*retCount = 2;
+	//we will want to get 3 lots of string information from the user:
+	*retCount = 3;
 
 	return AuCarExpErrorCode_Success;
 }
@@ -53,7 +55,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCo
 //Gets the user-supplied string information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUIStringData>& stringData, wchar_t const* locale)
 {
-	if (stringData.GetCount() != 2)
+	if (stringData.GetCount() != 3)
 	{
 		//Automation has not given us the number of items we asked for
 		//(this should never happen)
@@ -69,6 +71,9 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 
 	wcscpy_s(stringData[1].Label, L"CSV Delimiter");//label
 	wcscpy_s(stringData[1].Value, L",");//default value, containing wildcards to be filled with information from Automation
+
+	wcscpy_s(stringData[2].Label, L"Cost preset (0-13)");//label
+	wcscpy_s(stringData[2].Value, L"0");
 
 	return AuCarExpErrorCode_Success;
 }
@@ -94,10 +99,48 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 
 	//set the value:
 	wcscpy_s(boolData[0].Label, L"Export Engine Separately");//label
-	boolData[0].Value = false;//default value
+	//boolData[0].Value = false;//default value
 
 	wcscpy_s(boolData[1].Label, L"Export Results Separately");//label
-	boolData[1].Value = false;//default value
+	//boolData[1].Value = false;//default value
+
+	bool readFromFile = true;
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring prefsFilePath = path;
+		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\BNGExporter.prefs";
+		FILE* prefsFile;
+		_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"rb");
+
+		if (prefsFile)
+		{
+			fseek(prefsFile, 0, SEEK_END);
+			size_t fileSize = ftell(prefsFile);
+			fseek(prefsFile, 0, SEEK_SET);
+
+			if (fileSize == sizeof(ExportPrefs))
+			{
+				ExportPrefs prefs;
+				fread_s(&prefs, sizeof(prefs), fileSize, 1, prefsFile);
+				boolData[0].Value = prefs.PrefsFlags & 0b00000001;
+				boolData[1].Value = prefs.PrefsFlags & 0b00000010;
+			}
+			else
+				readFromFile = false;
+			fclose(prefsFile);
+		}
+		else
+			readFromFile = false;
+	}
+	else
+		readFromFile = false;
+
+	if (!readFromFile)
+	{
+		boolData[0].Value = false;
+		boolData[1].Value = false;
+	}
 
 	return AuCarExpErrorCode_Success;
 }
