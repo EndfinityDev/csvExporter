@@ -67,10 +67,22 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 		}
 	}
 
-	if (exportFileName[exportFileName.size() - 1] == L' ')
-	{
-		exportFileName.resize(exportFileName.size() - 1);
-	}
+	if (exportFileName.size() > 1)
+		while (exportFileName[exportFileName.size() - 1] == L' ')
+		{
+			exportFileName.resize(exportFileName.size() - 1);
+
+			if (exportFileName.size() < 2) 
+			{
+				if (exportFileName[0] == L' ')
+					exportFileName = L"_";
+
+				break;
+			}
+		}
+	else
+		if (exportFileName[0] == L' ')
+			exportFileName = L"_";
 
 	//m_ExportDirectory += m_CarData->GetStringData(0)->Value;
 	m_ExportDirectory += exportFileName;
@@ -151,20 +163,39 @@ void AuExpManager::EndExport()
 		{
 			//directory exists, all good to go:
 
-			prefsFilePath += L"\\csvExporter.prefs";
+			std::wstring boolPrefsFilePath = prefsFilePath + L"\\csvExporter.prefs";
 
 			FILE* prefsFile;
-			_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"wb");
+			_wfopen_s(&prefsFile, boolPrefsFilePath.c_str(), L"wb");
 
 			if (prefsFile)
 			{
 				ExportPrefs prefs;
 				prefs.PrefsVersion = EXPPREFSVERSION;
-				prefs.PrefsFlags = 0b00000000 | (m_CarData->GetBoolData(0)->Value << 0) | (m_CarData->GetBoolData(0)->Value << 1);
+				prefs.PrefsFlags = 0b00000000 | (m_CarData->GetBoolData(0)->Value << 0) | (m_CarData->GetBoolData(1)->Value << 1);
 
 				fwrite(&prefs, sizeof(prefs), 1, prefsFile);
 
 				fclose(prefsFile);
+			}
+
+			std::wstring stringPrefsFilePath = prefsFilePath + L"\\csvExporterPreset.prefs";
+
+			FILE* prefsFilePreset;
+			_wfopen_s(&prefsFilePreset, stringPrefsFilePath.c_str(), L"wb");
+
+			if (prefsFilePreset)
+			{
+				ExportPrefs prefs;
+				prefs.PrefsVersion = EXPPREFSVERSION;
+
+				prefs.PrefsFlags = _wtoi(m_CarData->GetStringData(2)->Value);
+				if (prefs.PrefsFlags > 13)
+					prefs.PrefsFlags = 0;
+
+				fwrite(&prefs, sizeof(prefs), 1, prefsFilePreset);
+
+				fclose(prefsFilePreset);
 			}
 		}
 	}

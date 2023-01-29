@@ -73,7 +73,46 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	wcscpy_s(stringData[1].Value, L",");//default value, containing wildcards to be filled with information from Automation
 
 	wcscpy_s(stringData[2].Label, L"Cost preset (0-13)");//label
-	wcscpy_s(stringData[2].Value, L"0");
+	//wcscpy_s(stringData[2].Value, L"0");
+
+	bool readFromFile = true;
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring prefsFilePath = path;
+		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\csvExporterPreset.prefs";
+		FILE* prefsFile;
+		_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"rb");
+
+		if (prefsFile)
+		{
+			fseek(prefsFile, 0, SEEK_END);
+			size_t fileSize = ftell(prefsFile);
+			fseek(prefsFile, 0, SEEK_SET);
+
+			if (fileSize == sizeof(ExportPrefs))
+			{
+				ExportPrefs prefs;
+				fread_s(&prefs, sizeof(prefs), fileSize, 1, prefsFile);
+				//if (prefs.PrefsFlags > 13)
+				//	prefs.PrefsFlags = 0;
+				wcscpy_s(stringData[2].Value, std::to_wstring(prefs.PrefsFlags).c_str());
+			}
+			else
+				readFromFile = false;
+
+			fclose(prefsFile);
+		}
+		else
+			readFromFile = false;
+	}
+	else
+		readFromFile = false;
+
+	if (!readFromFile)
+	{
+		wcscpy_s(stringData[2].Value, L"0");
+	}
 
 	return AuCarExpErrorCode_Success;
 }
@@ -128,6 +167,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 			}
 			else
 				readFromFile = false;
+
 			fclose(prefsFile);
 		}
 		else
