@@ -1,6 +1,6 @@
 #pragma once
 
-#define EXPVERSION		20230127
+#define EXPVERSION 20231010
 #define EXPVERSIONWS std::to_wstring(EXPVERSION)
 
 #define EXPPREFSVERSION 0

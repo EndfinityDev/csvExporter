@@ -13,11 +13,11 @@ struct LuaDataHeader
 		DataType = type;
 	}
 
-	void SetData(std::wstring data) { Data = data; }
+	//void SetData(std::wstring data) { Data = data; }
 
 	std::wstring HeaderTitle;
 	std::wstring HeaderName;
 	DataType DataType;
 
-	std::wstring Data;
+	//std::wstring Data;
 };

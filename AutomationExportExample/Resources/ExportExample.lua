@@ -251,7 +251,7 @@ function CExporter.ExportCarData(CarCalculator)
 	
 	Data.FamilyQuality = EngineInfo.PlatformInfo.QualitySettings.Family
 	Data.FamilyTechpool = EngineInfo.PlatformInfo.TechPool.Family
-	Data.FamilyTopEndTechpool = EngineInfo.PlatformInfo.TechPool.TopEnd
+	--Data.FamilyTopEndTechpool = EngineInfo.PlatformInfo.TechPool.TopEnd
 	
 	Data.VariantYear = EngineInfo.ModelInfo.Time.Date.Year
 	Data.VariantName = EngineInfo.ModelInfo.Name
@@ -353,7 +353,30 @@ function CExporter.ExportCarData(CarCalculator)
 
 	Data.EngineReliability = EngineInfo.ModelInfo.Results.MTTF
 
-	Data.EngineEmissions = EngineInfo.ModelInfo.Results.Emissions
+	--Data.EngineEmissions = EngineInfo.ModelInfo.Results.Emissions
+
+	--local allEmissionCycles = CarInfo.TrimInfo.Results.AllEmissionsCycles
+	--local wesLevel = 0
+
+	--for i, v in ipairs(allEmissionCycles) do
+	--	local tp = type(v)
+	--	local vd = dump(v)
+	--	local br = tp + vd
+	--	if v.Passrate >= 100 then
+	--		wesLevel = math.max(wesLevel, i)
+	--	end
+	--end
+
+	Data.WES = CarInfo.TrimInfo.Results.PassedEmissionsName
+	
+	local wltp3 = CarInfo.TrimInfo.Results.EmissionsWLTP_Class3
+	Data.CO = wltp3.CO
+	Data.COPerKm = wltp3.COPerKm
+	Data.NOx = wltp3.NOx
+	Data.NOxPerKm = wltp3.NOxPerKm
+	Data.HC = wltp3.HC
+	Data.HCPerKm = wltp3.HCPerKm
+
 	Data.EngineEfficiency = EngineInfo.ModelInfo.Results.EconEff
 	Data.EngineNoise = EngineInfo.ModelInfo.Results.Noise
 	Data.IntakeNoise = EngineInfo.ModelInfo.Results.IntakeNoise

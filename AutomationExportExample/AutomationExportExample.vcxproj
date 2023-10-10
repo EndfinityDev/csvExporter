@@ -74,25 +74,25 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\Builds\$(Configuration)</OutDir>
     <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
-    <TargetName>$(ProjectName)_$(PlatformTarget)</TargetName>
+    <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\Builds\$(Configuration)</OutDir>
     <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
-    <TargetName>$(ProjectName)_$(PlatformTarget)</TargetName>
+    <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\Builds\$(Configuration)</OutDir>
     <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
-    <TargetName>$(ProjectName)_$(PlatformTarget)</TargetName>
+    <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\Builds\$(Configuration)</OutDir>
     <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
-    <TargetName>$(ProjectName)_$(PlatformTarget)</TargetName>
+    <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -101,14 +101,20 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\cJSON\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\cJSON\lib\$(Configuration)\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cJSON.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)build.bat $(SolutionDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -117,14 +123,20 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\cJSON\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\cJSON\lib\$(Configuration)\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cJSON.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)build.bat $(SolutionDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -135,16 +147,22 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\cJSON\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\cJSON\lib\$(Configuration)\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cJSON.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)build.bat $(SolutionDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -155,26 +173,30 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\cJSON\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\cJSON\lib\$(Configuration)\$(PlatformShortName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cJSON.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)build.bat $(SolutionDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="csvExporter.h" />
     <ClInclude Include="DataType.h" />
     <ClInclude Include="DDSHeader.h" />
-    <ClInclude Include="ExportPrefs.h" />
     <ClInclude Include="EXPVERSION.h" />
     <ClInclude Include="CSVManager.h" />
     <ClInclude Include="ExportManager.h" />
-    <ClInclude Include="FileManager.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="LuaDataHeader.h" />
     <ClInclude Include="LuaData.h" />
@@ -204,7 +226,6 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ExportManager.cpp" />
-    <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="LuaData.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -214,6 +235,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\csvExporter_dataset.json" />
+    <None Include="Resources\csvExporter_translations.json" />
     <None Include="Resources\ExportExample.lua" />
   </ItemGroup>
   <ItemGroup>
