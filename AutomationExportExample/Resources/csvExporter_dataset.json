@@ -3,14 +3,10 @@
 	// Translation: visible header text for the column
 	// DataType: enum for type of data (DataType_Float, DataType_String, DataType_ExporterVersion, DataType_CarName)
 	
-	"GeneralData": [
+	"Data": [
 		{"ExporterVersion": {"Translation": "Exporter Version", "DataType": "DataType_ExporterVersion"}},
 		{"GameVersion": {"Translation": "Game Version", "DataType": "DataType_Float"}},
-		{"CarName": {"Translation": "Car Name", "DataType": "DataType_CarName"}}
-	],
-	
-	
-	"CarChoicesData": [
+		{"CarName": {"Translation": "Car Name", "DataType": "DataType_CarName"}},
 		{"ModelName": {"Translation": "Model Name", "DataType": "DataType_String"}},
 		{"ModelYear": {"Translation": "Model Year", "DataType": "DataType_Float"}},
 		{"BodyWheelbase": {"Translation": "Wheelbase", "DataType": "DataType_Float"}},
@@ -90,6 +86,8 @@
 		{"RideHeight": {"Translation": "Ride Height", "DataType": "DataType_Float"}},
 		{"FrontCamber": {"Translation": "Front Camber", "DataType": "DataType_Float"}},
 		{"RearCamber": {"Translation": "Rear Camber", "DataType": "DataType_Float"}},
+		{"FrontToe":  {"Translation":  "Front Toe In", "DataType": "DataType_Float"}},
+		{"RearToe":  {"Translation":  "Rear Toe In", "DataType": "DataType_Float"}},
 		{"RimMaterial": {"Translation": "Rim Material", "DataType": "DataType_String"}},
 		{"TyreType": {"Translation": "Tyre Type", "DataType": "DataType_String"}},
 		{"TyreCompound": {"Translation": "Tyre Compound", "DataType": "DataType_String"}},
@@ -116,11 +114,7 @@
 		{"FrontBrakeForce": {"Translation": "Front Brake Force", "DataType": "DataType_Float"}},
 		{"RearBrakeForce": {"Translation": "Rear Brake Force", "DataType": "DataType_Float"}},
 		{"WeightOptimizationTune": {"Translation": "Weight Optimization Tune", "DataType": "DataType_Float"}},
-		{"WeightDistributionTune": {"Translation": "Weight Distribution Tune", "DataType": "DataType_Float"}}
-	],
-	
-	
-	"CarResultsData": [
+		{"WeightDistributionTune": {"Translation": "Weight Distribution Tune", "DataType": "DataType_Float"}},
 		{"CarWeight": {"Translation": "Trim Weight", "DataType": "DataType_Float"}},
 		{"TowWeight": {"Translation": "Tow Weight", "DataType": "DataType_Float"}},
 		{"BodyStiffness": {"Translation": "Body Stiffness", "DataType": "DataType_Float"}},
@@ -167,11 +161,7 @@
 		{"KilometerTime": {"Translation": "Kilometer Time", "DataType": "DataType_Float"}},
 		{"KilometerSpeed": {"Translation": "Kilometer Speed (km/h)", "DataType": "DataType_Float"}},
 		{"QuarterMileTime": {"Translation": "1/4 Mile Time", "DataType": "DataType_Float"}},
-		{"QuarterMileSpeed": {"Translation": "1/4 Mile Speed (km/h)", "DataType": "DataType_Float"}}
-	],
-	
-	
-	"EngineChoicesData": [
+		{"QuarterMileSpeed": {"Translation": "1/4 Mile Speed (km/h)", "DataType": "DataType_Float"}}	,
 		{"FamilyName": {"Translation": "Engine Family Name", "DataType": "DataType_String"}},
 		{"FamilyYear": {"Translation": "Engine Family Year", "DataType": "DataType_Float"}},
 		{"FamilyQuality": {"Translation": "Family Quality", "DataType": "DataType_Float"}},
@@ -249,11 +239,7 @@
 		{"BypassValves": {"Translation": "Exhaust Bypass Valves", "DataType": "DataType_String"}},
 		{"Cat": {"Translation": "Catalytic Converter", "DataType": "DataType_String"}},
 		{"Muffler1": {"Translation": "Muffler 1", "DataType": "DataType_String"}},
-		{"Muffler2": {"Translation": "Muffler 2", "DataType": "DataType_String"}}
-	],
-	
-	
-	"EngineResultsData": [
+		{"Muffler2": {"Translation": "Muffler 2", "DataType": "DataType_String"}},
 		{"EnginePower": {"Translation": "Peak Power", "DataType": "DataType_Float"}},
 		{"EnginePowerRPM": {"Translation": "Peak Power RPM", "DataType": "DataType_Float"}},
 		{"EngineTorque": {"Translation": "Peak Torque", "DataType": "DataType_Float"}},

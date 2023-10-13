@@ -137,6 +137,8 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.RideHeight = CarInfo.TrimInfo.SuspensionDetails.RideHeight
 	Data.RearCamber = CarInfo.TrimInfo.SuspensionDetails.Rear.Camber
 	Data.FrontCamber = CarInfo.TrimInfo.SuspensionDetails.Front.Camber
+	Data.RearToe = CarInfo.TrimInfo.SuspensionDetails.Rear.Toe
+	Data.FrontToe = CarInfo.TrimInfo.SuspensionDetails.Front.Toe
 	Data.RearARBStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.ARBStiffness
 	Data.FrontARBStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.ARBStiffness
 	Data.RearDamperStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.DamperStiffness

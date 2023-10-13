@@ -108,75 +108,28 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 		}
 	}
 
-	std::wstring delimiter = L"";
-	delimiter += prefs.Delimiter;
-
+	//std::wstring delimiter = L"";
+	//delimiter += prefs.Delimiter;
 	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Label, L"CSV Delimiter"); //label
-	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, delimiter.c_str()); //default value, containing wildcards to be filled with information from Automation
+	//wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, delimiter.c_str()); //default value, containing wildcards to be filled with information from Automation
+	stringData[ExporterStringData_CSVDelimiter].Value[0] = prefs.Delimiter;
+	stringData[ExporterStringData_CSVDelimiter].Value[1] = L'\0';
 
-	std::wstring luaFile = prefs.LuaFile;
-
+	//std::wstring luaFile = prefs.LuaFile;
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Label, L"Lua File");
-	wcscpy_s(stringData[ExporterStringData_LuaFileName].Value, luaFile.c_str());
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].Value, prefs.LuaFile);
 
-	std::wstring datasetFile = prefs.DataFile;
-
+	//std::wstring datasetFile = prefs.DataFile;
 	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Label, L"Dataset File");
-	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Value, datasetFile.c_str());
+	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Value, prefs.DataFile);
 
-	std::wstring translationsFile = prefs.TranslationsFile;
-
+	//std::wstring translationsFile = prefs.TranslationsFile;
 	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Label, L"Translations File");
-	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Value, translationsFile.c_str());
+	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Value, prefs.TranslationsFile);
 
-	std::wstring localeName = prefs.Locale;
-
+	//std::wstring localeName = prefs.Locale;
 	wcscpy_s(stringData[ExporterStringData_Locale].Label, L"Locale");
-	wcscpy_s(stringData[ExporterStringData_Locale].Value, localeName.c_str());
-
-	/*
-	wcscpy_s(stringData[2].Label, L"Cost preset (0-13)");//label
-	//wcscpy_s(stringData[2].Value, L"0");
-
-	bool readFromFile = true;
-	TCHAR path[MAX_PATH];
-	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-	{
-		std::wstring prefsFilePath = path;
-		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\csvExporterPreset.prefs";
-		FILE* prefsFile;
-		_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"rb");
-
-		if (prefsFile)
-		{
-			fseek(prefsFile, 0, SEEK_END);
-			size_t fileSize = ftell(prefsFile);
-			fseek(prefsFile, 0, SEEK_SET);
-
-			if (fileSize == sizeof(ExportPrefs))
-			{
-				ExportPrefs prefs;
-				fread_s(&prefs, sizeof(prefs), fileSize, 1, prefsFile);
-				//if (prefs.PrefsFlags > 13)
-				//	prefs.PrefsFlags = 0;
-				wcscpy_s(stringData[2].Value, std::to_wstring(prefs.PrefsFlags).c_str());
-			}
-			else
-				readFromFile = false;
-
-			fclose(prefsFile);
-		}
-		else
-			readFromFile = false;
-	}
-	else
-		readFromFile = false;
-
-	if (!readFromFile)
-	{
-		wcscpy_s(stringData[2].Value, L"0");
-	}
-	*/
+	wcscpy_s(stringData[ExporterStringData_Locale].Value, prefs.Locale);
 
 	return AuCarExpErrorCode_Success;
 }
