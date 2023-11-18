@@ -64,6 +64,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 
 	//set the values:
 	wcscpy_s(stringData[ExporterStringData_FileName].Label, L"File Name");//label
+	wcscpy_s(stringData[ExporterStringData_FileName].ToolTip, L"The .csv file the data will be put into");
 	wcscpy_s(stringData[ExporterStringData_FileName].Value, L"[PlayerName] [PlatformName] [TrimName]");//default value
 
 	//wcscpy_s(stringData[1].Label, L"Engine Name");//label
@@ -112,23 +113,28 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	//delimiter += prefs.Delimiter;
 	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Label, L"CSV Delimiter"); //label
 	//wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, delimiter.c_str()); //default value, containing wildcards to be filled with information from Automation
+	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].ToolTip, L"The character to use as the delimiter for columns of data");
 	stringData[ExporterStringData_CSVDelimiter].Value[0] = prefs.Delimiter;
 	stringData[ExporterStringData_CSVDelimiter].Value[1] = L'\0';
 
 	//std::wstring luaFile = prefs.LuaFile;
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Label, L"Lua File");
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].ToolTip, L"The name of the Lua code file in the CSVExporter 2 user data folder. A .lua extension is added automatically if one is not provided. The default file is used if left blank");
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Value, prefs.LuaFile);
 
 	//std::wstring datasetFile = prefs.DataFile;
 	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Label, L"Dataset File");
+	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].ToolTip, L"The name of the dataset JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank");
 	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Value, prefs.DataFile);
 
 	//std::wstring translationsFile = prefs.TranslationsFile;
 	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Label, L"Translations File");
+	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].ToolTip, L"The name of the translations JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank");
 	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Value, prefs.TranslationsFile);
 
 	//std::wstring localeName = prefs.Locale;
 	wcscpy_s(stringData[ExporterStringData_Locale].Label, L"Locale");
+	wcscpy_s(stringData[ExporterStringData_Locale].ToolTip, L"The system locale to use for data and text formatting. Can be used along with a custom delimiter to export decimal point numbers with commas as delimiters. Examples: en-US, en-GB, ru-RU");
 	wcscpy_s(stringData[ExporterStringData_Locale].Value, prefs.Locale);
 
 	return AuCarExpErrorCode_Success;

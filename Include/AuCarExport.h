@@ -318,6 +318,7 @@ public:
 
 	inline bool GetDoNotUseBlockCompression() const { return m_DoNotUseBlockCompression; }
 	inline bool IsUniqueTexture() const { return m_IsUniqueTexture; }
+	inline bool IsSRGB() const { return m_IsSRGB; }
 
 	inline unsigned int GetAdditionalMipCount() const { return m_AdditionalMipCount; }
 	const AuCarExpTexture* GetAdditionalMipMap(unsigned int index) const { return m_AdditionalMips[index]; }
@@ -338,6 +339,7 @@ protected:
 
 	bool m_DoNotUseBlockCompression = false;
 	bool m_IsUniqueTexture = false;
+	bool m_IsSRGB = false;
 
 	unsigned int m_AdditionalMipCount = 0;
 	AuCarExpTexture* m_AdditionalMips[AuCarExpMaxAdditionalMipCount];
@@ -546,9 +548,11 @@ struct AuCarExpUIStringData
 public:
 
 	static const unsigned int LABEL_STRING_LENGTH = 63;
+	static const unsigned int TOOLTIP_STRING_LENGTH = 511;
 	static const unsigned int VALUE_STRING_LENGTH = 511;
 
 	TCHAR Label[LABEL_STRING_LENGTH + 1] = TEXT("");
+	TCHAR ToolTip[TOOLTIP_STRING_LENGTH + 1] = TEXT("");
 	TCHAR Value[VALUE_STRING_LENGTH + 1] = TEXT("");
 };
 
@@ -557,8 +561,10 @@ struct AuCarExpUIBoolData
 public:
 
 	static const unsigned int LABEL_STRING_LENGTH = 63;
+	static const unsigned int TOOLTIP_STRING_LENGTH = 511;
 
 	TCHAR Label[LABEL_STRING_LENGTH + 1] = TEXT("");
+	TCHAR ToolTip[TOOLTIP_STRING_LENGTH + 1] = TEXT("");
 	bool Value = false;
 };
 
@@ -601,7 +607,7 @@ public:
 		m_SamplesBuffer(Samples),
 		m_SampleCount(SampleCount)
 	{
-#ifndef __APPLE__
+#if PLATFORM_WINDOWS
 		wcscpy_s(m_Name, Name);
 	#endif
 	}

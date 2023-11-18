@@ -14,7 +14,7 @@
 
 //This value is incremented when data structures or interface function definitions change
 //Automation will not load export DLLs whose interface version does not match the latest version
-#define AUCAREXPORT_DLL_INTERFACE_VERSION 26
+#define AUCAREXPORT_DLL_INTERFACE_VERSION 28
 
 
 #define AUCAREXPORT_MAX_DATA_ITEM_COUNT 16
@@ -38,24 +38,22 @@ extern "C" {          // we need to export the C interface
 		//Defnitions to be used within Automation
 		//Exporter projects do not need to worry about these:
         
-    #ifndef __APPLE__
-    #define AUCAREXPORTDLL_FUNCTION(Name, ...)	 typedef AuCarExpErrorCode(__cdecl *Proc ## Name)(__VA_ARGS__);\
-                                                         Proc ## Name GetProc ## Name(HMODULE dll) { return (Proc ## Name)GetProcAddress(dll, #Name); }
-            bool AuCarExpDLLInterfaceMatches(HMODULE dll) { FARPROC proc = GetProcAddress(dll, "AuCarExpDLLInterface"); return proc ? proc() == AUCAREXPORT_DLL_INTERFACE_VERSION : false;}
-#else
-    
-#define AUCAREXPORTDLL_FUNCTION(Name, ...)     typedef AuCarExpErrorCode(__cdecl *Proc ## Name)(__VA_ARGS__);\
-                    Proc ## Name GetProc ## Name(HMODULE dll) { return nullptr; }
-    
-    
-    bool AuCarExpDLLInterfaceMatches(HMODULE dll) {return false; }
-    #endif
+	#if PLATFORM_WINDOWS
+		#define AUCAREXPORTDLL_FUNCTION(Name, ...)	 typedef AuCarExpErrorCode(__cdecl *Proc ## Name)(__VA_ARGS__);\
+															Proc ## Name GetProc ## Name(HMODULE dll) { return (Proc ## Name)GetProcAddress(dll, #Name); }
+				bool AuCarExpDLLInterfaceMatches(HMODULE dll) { FARPROC proc = GetProcAddress(dll, "AuCarExpDLLInterface"); return proc ? proc() == AUCAREXPORT_DLL_INTERFACE_VERSION : false;}
+	#else
+		
+	#define AUCAREXPORTDLL_FUNCTION(Name, ...)     typedef AuCarExpErrorCode(__cdecl *Proc ## Name)(__VA_ARGS__);\
+						Proc ## Name GetProc ## Name(HMODULE dll) { return nullptr; }
+		
+		
+		bool AuCarExpDLLInterfaceMatches(HMODULE dll) {return false; }
+		#endif
 #else
 
         //Definitions to be used by exporter dll projects:
-
-#define AUCAREXPORTDLL_FUNCTION(Name, ...) __declspec(dllexport) AuCarExpErrorCode __cdecl Name(__VA_ARGS__);
-
+	#define AUCAREXPORTDLL_FUNCTION(Name, ...) __declspec(dllexport) AuCarExpErrorCode __cdecl Name(__VA_ARGS__);
         __declspec(dllexport) long long __cdecl AuCarExpDLLInterface() { return AUCAREXPORT_DLL_INTERFACE_VERSION; }
 
 #endif
