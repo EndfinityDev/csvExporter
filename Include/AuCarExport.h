@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <functional>
+
 
 #define AuCarExpErrorCode_FatalBit (0x1 << 31)
 
@@ -69,10 +71,7 @@ enum AuCarExpPixelChannel
 
 enum AuCarExpMaterialType
 {
-	AuCarExpMaterialType_Grille,
 	AuCarExpMaterialType_ClearGlass,
-	AuCarExpMaterialType_NumberPlate,
-
 	AuCarExpMaterialType_Other
 };
 
@@ -80,6 +79,7 @@ enum AuCarExpLightType
 {
 	AuCarExpLightType_HeadLight,
 	AuCarExpLightType_TailLight,
+	AuCarExpLightType_BrakeLight,
 	AuCarExpLightType_IndicatorLeft,
 	AuCarExpLightType_IndicatorRight,
 	AuCarExpLightType_Reverse,
@@ -191,6 +191,11 @@ public:
 	inline const float & operator[](int index) const { return value[index]; }
 	inline float & operator[](int index) { return value[index]; }
 
+	bool operator==(const AuCarExpVector& other) const
+	{
+		return x == other.x && y == other.y && z == other.z;
+	}
+
 #define AUCAREXPVECTOR_OPERATOR_SIMP(OP) inline AuCarExpVector operator OP (const AuCarExpVector& other) const { return AuCarExpVector(this->x OP other.x, this->y OP other.y, this->z OP other.z); }
 #define AUCAREXPVECTOR_OPERATOR_COMPOUND(OP) inline AuCarExpVector& operator OP (const AuCarExpVector& other) { this->x OP other.x; this->y OP other.y; this->z OP other.z; return *this; }
 
@@ -280,6 +285,11 @@ public:
 	const float & operator[](int index) const { return value[index]; }
 	float & operator[](int index) { return value[index]; }
 
+	bool operator==(const AuCarExpVector2& other) const
+	{
+		return x == other.x && y == other.y;
+	}
+
 	AuCarExpVector2() : x(0.0f), y(0.0f) {}
 	AuCarExpVector2(float xVal, float yVal) : x(xVal), y(yVal) {}
 };
@@ -295,6 +305,13 @@ public:
 	AuCarExpVector Binormal;
 	AuCarExpVector Tangent;
 	unsigned int Colour = 0xFFFFFFFF;
+
+	bool operator==(const AuCarExpVertex& other) const
+	{
+		return Position == other.Position && UVcoords0 == other.UVcoords0 && UVcoords1 == other.UVcoords1
+											&& Normal == other.Normal && Binormal == other.Binormal && Tangent == other.Tangent
+											&& Colour == other.Colour;
+	}
 };
 
 const unsigned int AuCarExpMaxAdditionalMipCount = 16;
@@ -543,6 +560,60 @@ public:
 	AuCarExpVector Scale = AuCarExpVector(1.0f, 1.0f, 1.0f);
 };
 
+
+template<>
+struct std::hash<AuCarExpVector>
+{
+	std::size_t operator()(const AuCarExpVector& vector) const
+	{
+		size_t outHash = 0;
+//#if PLATFORM_WINDOWS || defined(_WINDOWS)
+		outHash = std::hash<float>()(vector.x);
+		outHash ^= std::hash<float>()(vector.y) << 1;
+		outHash >>= 1;
+		outHash ^= std::hash<float>()(vector.z) << 1;
+//#endif
+		return outHash;
+	}
+};
+
+template<>
+struct std::hash<AuCarExpVector2>
+{
+	std::size_t operator()(const AuCarExpVector2& vector) const
+	{
+		size_t outHash = 0;
+//#if PLATFORM_WINDOWS	 || defined(_WINDOWS)	
+		outHash = std::hash<float>()(vector.x);
+		outHash ^= std::hash<float>()(vector.y) << 1;
+//#endif
+		return outHash;
+	}
+};
+
+template<>
+struct std::hash<AuCarExpVertex>
+{
+	std::size_t operator()(const AuCarExpVertex& vertex) const
+	{
+		size_t outHash;
+		outHash = std::hash<AuCarExpVector>()(vertex.Position);
+		outHash ^= std::hash<AuCarExpVector2>()(vertex.UVcoords0) << 1;
+		outHash >>= 1;
+		outHash ^= std::hash<AuCarExpVector2>()(vertex.UVcoords1) << 1;
+		outHash >>= 1;
+		outHash ^= std::hash<AuCarExpVector>()(vertex.Normal) << 1;
+		outHash >>= 1;
+		outHash ^= std::hash<AuCarExpVector>()(vertex.Binormal) << 1;
+		outHash >>= 1;
+		outHash ^= std::hash<AuCarExpVector>()(vertex.Tangent) << 1;
+		outHash >>= 1;
+		outHash ^= std::hash<unsigned int>()(vertex.Colour) << 1;
+
+		return outHash;
+	}
+};
+
 struct AuCarExpUIStringData
 {
 public:
@@ -607,7 +678,7 @@ public:
 		m_SamplesBuffer(Samples),
 		m_SampleCount(SampleCount)
 	{
-#if PLATFORM_WINDOWS
+#if PLATFORM_WINDOWS || defined(_WINDOWS)
 		wcscpy_s(m_Name, Name);
 	#endif
 	}
