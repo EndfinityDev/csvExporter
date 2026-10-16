@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="csvExporter.cpp" />
+    <ClCompile Include="DataType.cpp" />
+    <ClCompile Include="DDSHeader.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="LuaDataHeader.cpp" />
+    <ClCompile Include="CSVManager.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="ExportManager.cpp" />
+    <ClCompile Include="LuaData.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="csvExporter.h" />
+    <ClInclude Include="DataType.h" />
+    <ClInclude Include="DDSHeader.h" />
+    <ClInclude Include="EXPVERSION.h" />
+    <ClInclude Include="CSVManager.h" />
+    <ClInclude Include="ExportManager.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="LuaDataHeader.h" />
+    <ClInclude Include="LuaData.h" />
+    <ClInclude Include="resource2.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="csvExporter.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{ae2340bd-ab68-42b4-a5ee-949ddc6cefb3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ExportExample.lua">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\csvExporter_dataset.json">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\csvExporter_translations.json">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,7 +1,9 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by csvExporter.rc
-#define IDR_LUA_FILE	101
+#define IDR_LUA_FILE				101
+#define IDR_DATASET_FILE			102
+#define IDR_TRANSLATIONS_FILE		103
 
 // Next default values for new objects
 //

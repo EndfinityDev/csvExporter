@@ -10,11 +10,48 @@
 #include "CSVManager.h"
 #include "EXPVERSION.h"
 
+#include "CJSONReader.h"
+
+enum ExporterStringData : unsigned int
+{
+	ExporterStringData_FileName = 0,
+	ExporterStringData_CSVDelimiter,
+
+	ExporterStringData_LuaFileName,
+	ExporterStringData_DataJSONFileName,
+	ExporterStringData_TranslationsJSONFileName,
+
+	ExporterStringData_Locale,
+
+	ExporterStringData_Count
+};
+
+enum ExporterBoolData : unsigned int
+{
+
+
+	ExporterBoolData_Count
+};
+
+#define PREFS_FILE_MAX_LENGTH 25
+#define PREFS_LOCALE_MAX_LENGTH 15
+
+struct ExportPrefs
+{
+	uint8_t Version = EXPPREFSVERSION;
+	wchar_t Delimiter = L',';
+	wchar_t LuaFile[PREFS_FILE_MAX_LENGTH] = L"";
+	wchar_t DataFile[PREFS_FILE_MAX_LENGTH] = L"";
+	wchar_t TranslationsFile[PREFS_FILE_MAX_LENGTH] = L"";
+	wchar_t Locale[PREFS_LOCALE_MAX_LENGTH] = L"";
+};
+
+
 class AuExpManager
 {
 public:
 
-	static AuExpManager* Instance() { return s_Instance; }
+	static AuExpManager* GetInstance() { return s_Instance; }
 	static void CreateInstance() { if (!s_Instance) s_Instance = new AuExpManager(); }
 	static void DestroyInstance() { delete s_Instance; s_Instance = nullptr; }
 
@@ -44,33 +81,43 @@ public:
 
 	const wchar_t* GetCarName() const { return m_CarData->GetCarName(); }
 
-	const std::wstring IllegalCharacters = L"\\/:?\"<>|";
+	inline size_t GetLuaFileLength() const { return m_LuaFileLength; }
+	inline std::string GetLuaFile() const { return m_LuaFile; }
+
+	inline std::wstring GetLocale() const { return m_Locale; }
+
+	static inline void ShowMessageBox(std::wstring text, std::wstring title);
+
+	static const std::wstring s_IllegalCharacters;
 
 private:
 
 	AuExpManager();
-	void PopulateExportDataHeader();
 	~AuExpManager() {}
 
 	void ExportInternal();
 
-	void BuildCarAndEngineChoicesAndResultsCSVs();
-
 	void FillTableData(LuaData& data);
-
-	void BuildCarAndEngineCSVs();
-
-	void BuildResultAndChoiceCSVs();
 
 	void BuildSingleCSV();
 
-	void BuildTranslations();
+	std::wstring ValidateFileName(std::wstring filename, std::wstring defaultExtension);
+
+	bool LoadLuaFile(std::wstring filename, std::wstring path);
+	bool LoadLuaResource();
+	bool LoadDataFile(std::wstring filename, std::wstring path);
+	bool LoadDataResource();
+	bool LoadTranslationFile(std::wstring filename, std::wstring path);
+	bool LoadTranslationResource();
+
+	bool ParseDataJSON(std::wstring json);
+	bool ParseTranslationJSON(std::wstring json);
 
 	static AuExpManager* s_Instance;
 
 	bool m_IsExportInProcess = false;
 
-	const AuCarExpCarData* m_CarData;
+	const AuCarExpCarData* m_CarData = nullptr;
 
 	std::vector<const AuCarExpTexture*> m_AllImages;
 
@@ -82,18 +129,24 @@ private:
 	std::map<std::wstring, std::wstring> m_LuaStringData;
 	std::map<std::wstring, AuCarLuaDataFile> m_LuaFDataFiles;
 
+	std::vector<LuaDataHeader> m_LuaData;
 	std::map<std::wstring, std::wstring> m_Translations;
 
 	std::wstring m_FileName = L"";
 	std::wstring m_EngineName = L"";
 	std::wstring m_Delimiter = L"";
 
-	LuaData m_GeneralData;
-	LuaData m_CarChoicesData;
-	LuaData m_CarResultsData;
-	LuaData m_EngineChoicesData;
-	LuaData m_EngineResultsData;
+	std::string m_LuaFile = "";
+	size_t m_LuaFileLength = 0;
+
+	bool m_LuaDataAdded = false;
+
+	std::wstring m_Locale = L"";
+
+	//efc::CJSONDict* m_LuaData = nullptr;
+	//efc::CJSONDict* m_TranslationJSON
+
+	//LuaData m_GeneralData;
+
+	const HMODULE m_Module;
 };
-
-
-

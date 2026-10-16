@@ -9,7 +9,9 @@
 #include "..\Include\AuCarExportDLL.h"
 
 #include "EXPVERSION.h"
-
+#include <ShlObj.h>
+#include "ExportManager.h"
+#include "CJSONReader.h"
 
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
@@ -24,7 +26,7 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, 
 	//(looking only at the language and not the region is enough for this example)
 	
 	//default to English
-	wcscpy_s(name.GetData(), name.GetCount(), L"csvExporter");
+	wcscpy_s(name.GetData(), name.GetCount(), L"CSVExporter 2");
 	
 
 	return AuCarExpErrorCode_Success;
@@ -44,8 +46,8 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber
 //Gets the number of user-supplied strings that the plugin will be requesting
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCount)
 {
-	//we will want to get 2 lots of string information from the user:
-	*retCount = 2;
+	//we will want to get 3 lots of string information from the user:
+	*retCount = ExporterStringData_Count;
 
 	return AuCarExpErrorCode_Success;
 }
@@ -53,7 +55,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCo
 //Gets the user-supplied string information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUIStringData>& stringData, wchar_t const* locale)
 {
-	if (stringData.GetCount() != 2)
+	if (stringData.GetCount() != ExporterStringData_Count)
 	{
 		//Automation has not given us the number of items we asked for
 		//(this should never happen)
@@ -61,14 +63,79 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	}
 
 	//set the values:
-	wcscpy_s(stringData[0].Label, L"File Name");//label
-	wcscpy_s(stringData[0].Value, L"[PlayerName] [PlatformName] [TrimName]");//default value
+	wcscpy_s(stringData[ExporterStringData_FileName].Label, L"File Name");//label
+	wcscpy_s(stringData[ExporterStringData_FileName].ToolTip, L"The .csv file the data will be put into");
+	wcscpy_s(stringData[ExporterStringData_FileName].Value, L"[PlayerName] [PlatformName] [TrimName]");//default value
 
 	//wcscpy_s(stringData[1].Label, L"Engine Name");//label
 	//wcscpy_s(stringData[1].Value, L"");//default value, containing wildcards to be filled with information from Automation
 
-	wcscpy_s(stringData[1].Label, L"CSV Delimiter");//label
-	wcscpy_s(stringData[1].Value, L",");//default value, containing wildcards to be filled with information from Automation
+	ExportPrefs prefs;
+
+	TCHAR path[MAX_PATH];
+
+	std::wstring prefsDir;
+
+	//get the user's documents directory:
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		prefsDir = path;
+		prefsDir += L"\\AutomationGame\\ExporterPrefs\\";
+
+		std::wstring prefsFile = prefsDir + L"CSVExporter2.prefs";
+
+		FILE* file;
+		errno_t err = _wfopen_s(&file, prefsFile.c_str(), L"rb");
+
+		if (!err && file)
+		{
+			fseek(file, 0, SEEK_END);
+			size_t prefsFileSize = ftell(file);
+			fseek(file, 0, SEEK_SET);
+
+			if (prefsFileSize == sizeof(prefs))
+			{
+				uint8_t prefsFileVersion;
+				fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
+				fseek(file, 0, SEEK_SET);
+
+				if (prefsFileVersion == EXPPREFSVERSION)
+				{
+					fread_s(&prefs, sizeof(prefs), prefsFileSize, 1, file);
+				}
+			}
+
+			fclose(file);
+		}
+	}
+
+	//std::wstring delimiter = L"";
+	//delimiter += prefs.Delimiter;
+	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Label, L"CSV Delimiter"); //label
+	//wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, delimiter.c_str()); //default value, containing wildcards to be filled with information from Automation
+	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].ToolTip, L"The character to use as the delimiter for columns of data");
+	stringData[ExporterStringData_CSVDelimiter].Value[0] = prefs.Delimiter;
+	stringData[ExporterStringData_CSVDelimiter].Value[1] = L'\0';
+
+	//std::wstring luaFile = prefs.LuaFile;
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].Label, L"Lua File");
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].ToolTip, L"The name of the Lua code file in the CSVExporter 2 user data folder. A .lua extension is added automatically if one is not provided. The default file is used if left blank");
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].Value, prefs.LuaFile);
+
+	//std::wstring datasetFile = prefs.DataFile;
+	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Label, L"Dataset File");
+	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].ToolTip, L"The name of the dataset JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank");
+	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Value, prefs.DataFile);
+
+	//std::wstring translationsFile = prefs.TranslationsFile;
+	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Label, L"Translations File");
+	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].ToolTip, L"The name of the translations JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank");
+	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Value, prefs.TranslationsFile);
+
+	//std::wstring localeName = prefs.Locale;
+	wcscpy_s(stringData[ExporterStringData_Locale].Label, L"Locale");
+	wcscpy_s(stringData[ExporterStringData_Locale].ToolTip, L"The system locale to use for data and text formatting. Can be used along with a custom delimiter to export decimal point numbers with commas as delimiters. Examples: en-US, en-GB, ru-RU");
+	wcscpy_s(stringData[ExporterStringData_Locale].Value, prefs.Locale);
 
 	return AuCarExpErrorCode_Success;
 }
@@ -77,7 +144,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCount)
 {
 	//we will want to get 2 booleans from the user:
-	*retCount = 2;
+	*retCount = ExporterBoolData_Count;
 
 	return AuCarExpErrorCode_Success;
 }
@@ -85,6 +152,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCoun
 //Gets the user-supplied boolean information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBoolData>& boolData, wchar_t const* locale)
 {
+	/*
 	if (boolData.GetCount() != 2)
 	{
 		//Automation has not given us the number of items we asked for
@@ -94,10 +162,50 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 
 	//set the value:
 	wcscpy_s(boolData[0].Label, L"Export Engine Separately");//label
-	boolData[0].Value = false;//default value
+	//boolData[0].Value = false;//default value
 
 	wcscpy_s(boolData[1].Label, L"Export Results Separately");//label
-	boolData[1].Value = false;//default value
+	//boolData[1].Value = false;//default value
+
+	bool readFromFile = true;
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring prefsFilePath = path;
+		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\csvExporter.prefs";
+		FILE* prefsFile;
+		_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"rb");
+
+		if (prefsFile)
+		{
+			fseek(prefsFile, 0, SEEK_END);
+			size_t fileSize = ftell(prefsFile);
+			fseek(prefsFile, 0, SEEK_SET);
+
+			if (fileSize == sizeof(ExportPrefs))
+			{
+				ExportPrefs prefs;
+				fread_s(&prefs, sizeof(prefs), fileSize, 1, prefsFile);
+				boolData[0].Value = prefs.PrefsFlags & 0b00000001;
+				boolData[1].Value = prefs.PrefsFlags & 0b00000010;
+			}
+			else
+				readFromFile = false;
+
+			fclose(prefsFile);
+		}
+		else
+			readFromFile = false;
+	}
+	else
+		readFromFile = false;
+
+	if (!readFromFile)
+	{
+		boolData[0].Value = false;
+		boolData[1].Value = false;
+	}
+	*/
 
 	return AuCarExpErrorCode_Success;
 }
@@ -106,10 +214,10 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 AuCarExpErrorCode AuCarExportDLL::BeginExport(const AuCarExpCarData* carData, AuCarExpArray<wchar_t>& retDir, unsigned int* retFlags)
 {
 	AuExpManager::CreateInstance();
-	AuCarExpErrorCode error = AuExpManager::Instance()->Init(carData);
+	AuCarExpErrorCode error = AuExpManager::GetInstance()->Init(carData);
 
 	//tell Automation which directory the plugin will be exporting files to (so this can be displayed in a message to the user):
-	wcscpy_s(retDir.GetData(), retDir.GetCount(), AuExpManager::Instance()->GetExportDirectory());
+	wcscpy_s(retDir.GetData(), retDir.GetCount(), AuExpManager::GetInstance()->GetExportDirectory());
 
 	//set the flags to none:
 	*retFlags = AuCarExpExporterFlags_None;
@@ -121,8 +229,8 @@ AuCarExpErrorCode AuCarExportDLL::BeginExport(const AuCarExpCarData* carData, Au
 AuCarExpErrorCode AuCarExportDLL::EndExport()
 {
 	//texture information is all good now, we can save the image files:
-	AuExpManager::Instance()->SaveImages();
-	AuExpManager::Instance()->EndExport();
+	AuExpManager::GetInstance()->SaveImages();
+	AuExpManager::GetInstance()->EndExport();
 
 	return AuCarExpErrorCode_Success;
 }
@@ -131,7 +239,7 @@ AuCarExpErrorCode AuCarExportDLL::EndExport()
 AuCarExpErrorCode AuCarExportDLL::IsExportInProgress(bool* retInProgress)
 {
 	//*retInProgress = false;//set to true if there are still threads running
-	*retInProgress = AuExpManager::Instance()->IsExportInProcess();
+	*retInProgress = AuExpManager::GetInstance()->IsExportInProcess();
 
 	return AuCarExpErrorCode_Success;
 }
@@ -194,7 +302,7 @@ AuCarExpErrorCode  AuCarExportDLL::AddExhaust(const AuCarExpArray<AuCarExpMesh*>
 }
 
 //Set the driver and bonnet camera positions
-AuCarExpErrorCode  AuCarExportDLL::AddCameraPositions(const AuCarExpVector* driverCamPosition, const AuCarExpVector* bonnetCamPosition)
+AuCarExpErrorCode  AuCarExportDLL::AddCameraPositions(const AuCarExpCameraData& driverCam, const AuCarExpCameraData& bonnetCam)
 {
 	return AuCarExpErrorCode_Success;
 }
@@ -292,34 +400,41 @@ AuCarExpErrorCode AuCarExportDLL::GetPreviewTransformData(const AuCarExpVector* 
 //Export the generated preview image for the car
 AuCarExpErrorCode AuCarExportDLL::AddPreviewImage(AuCarExpTexture* image)
 {
-	AuExpManager::Instance()->AddImage(image);
+	AuExpManager::GetInstance()->AddImage(image);
 	return AuCarExpErrorCode_Success;
 }
 
 
 AuCarExpErrorCode AuCarExportDLL::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& Data)
 {
-	AuExpManager::Instance()->AddLuaFiles(Data);
+	AuExpManager::GetInstance()->AddLuaFiles(Data);
 	return AuCarExpErrorCode_Success;
 }
 
 AuCarExpErrorCode AuCarExportDLL::AddLuaFloatData(const AuCarExpArray<AuCarExpLuaFloatData>& Data)
 {
-	AuExpManager::Instance()->AddLuaFloatData(Data);
+	AuExpManager::GetInstance()->AddLuaFloatData(Data);
 	return AuCarExpErrorCode_Success;
 }
 
 AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpLuaStringData>& Data)
 {
-	AuExpManager::Instance()->AddLuaStringData(Data);
+	AuExpManager::GetInstance()->AddLuaStringData(Data);
 	return AuCarExpErrorCode_Success;
 }
 
-
-AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
+AuCarExpErrorCode AuCarExportDLL::GetLuaFileCount(unsigned int* fileCount)
 {
-	*retLength = 0;
+	*fileCount = 1;
 
+	return AuCarExpErrorCode_Success;
+}
+
+AuCarExpErrorCode AuCarExportDLL::GetLuaFileLength(unsigned int* retLength, unsigned int FileNum)
+{
+	//*retLength = 0;
+
+	/*
 	HRSRC   hRes;              // handle/ptr to res. info.
 
 	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
@@ -333,18 +448,22 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 
 	unsigned int size = SizeofResource(module, hRes);
 
-	*retLength = size + 1;//size in chars (what we need) is the byte size. We add one for a null terminator
+	*retLength = size + 1; //size in chars (what we need) is the byte size. We add one for a null terminator
+	*/
+
+	*retLength = AuExpManager::GetInstance()->GetLuaFileLength();
 
 	return AuCarExpErrorCode_Success;
 }
 
-AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffer)
+AuCarExpErrorCode AuCarExportDLL::GetLuaFile(AuCarExpArray<wchar_t>& stringBuffer, unsigned int FileNum)
 {
 	if (!stringBuffer.GetData())
 	{
 		return AuCarExpErrorCode_UnknownError;
 	}
 
+	/*
 	HGLOBAL hResourceLoaded;  // handle to loaded resource
 	HRSRC   hRes;              // handle/ptr to res. info.
 
@@ -361,6 +480,10 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 
 	hResourceLoaded = LoadResource(module, hRes);
 	char* data = (char*)LockResource(hResourceLoaded);
+	*/
+
+	size_t size = AuExpManager::GetInstance()->GetLuaFileLength();
+	std::string data = AuExpManager::GetInstance()->GetLuaFile();
 
 	if ((size + 1) <= stringBuffer.GetCount())
 	{
@@ -372,7 +495,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 		stringBuffer[size] = '\0';
 	}
 
-	UnlockResource(hResourceLoaded);
+	//UnlockResource(hResourceLoaded);
 
 	return AuCarExpErrorCode_Success;
 }

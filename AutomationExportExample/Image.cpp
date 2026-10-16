@@ -24,7 +24,7 @@ void AuExpImage::SaveImageFile(const AuCarExpTexture* texture, const wchar_t* di
 	filename += L"\\";
 
 	//filename += texture->GetName();
-	filename += AuExpManager::Instance()->GetCarName();
+	filename += AuExpManager::GetInstance()->GetCarName();
 
 	switch (texture->GetFormat())
 	{
