@@ -7,6 +7,24 @@
 #include <Shlobj.h>
 #include <fstream>
 #include <sstream>
+#include <codecvt>
+
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
+
+std::wstring to_wstring(const std::string& utf8_str) {
+	// Note: std::wstring_convert is deprecated in C++17 but remains 
+	// the standard cross-platform solution until C++23's std::print/os streams update.
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.from_bytes(utf8_str);
+}
+
+std::string to_utf8string(const std::wstring& wstr) {
+	// Note: std::wstring_convert is deprecated in C++17 but remains 
+	// the standard cross-platform solution until C++23's std::print/os streams update.
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.to_bytes(wstr);
+}
 
 size_t FindDirDelimiter(std::wstring dir, size_t start)
 {
@@ -399,6 +417,93 @@ bool AuExpManager::LoadDataFile(std::wstring filename, std::wstring path)
 
 bool AuExpManager::ParseDataJSON(std::wstring json)
 {
+	std::string utf8json = to_utf8string(json);
+	//auto jsonData = json::parse(utf8json, nullptr, false, true); // Top level
+	//if (jsonData.is_discarded())
+	//{
+	//	ShowMessageBox(L"Loaded file was invalid JSON", L"Failed to parse JSON");
+	//	return false;
+	//}
+
+	try {
+		auto jsonData = json::parse(utf8json, nullptr, true, true);
+
+		if (!jsonData.is_object()) 
+		{
+			ShowMessageBox(L"The top level of the file does not contain an object", L"Failed to parse JSON");
+			return false;
+		}
+
+		for (const auto& items : jsonData.items()) // Data, etc.
+		{
+			//auto& key = items.key();
+			auto& value = items.value();
+
+			if (!value.is_array()) // Data, etc. as array
+			{
+				return false;
+			}
+
+			for (const auto& arrayObject : value) // Object in array
+			{
+				if (!arrayObject.is_object()) // Verify object
+				{
+					return false;
+				}
+
+				for (const auto& entryPair : arrayObject.items()) // Iterate over every item in the object, old implementation only took the first one
+				{
+					auto& entryKey = entryPair.key(); // Outer object key
+					auto& entryValue = entryPair.value(); // Inner object
+					if (!entryValue.is_object()) // Verify inner object
+					{
+						return false;
+					}
+
+					std::wstring luaName = to_wstring(entryKey);
+
+					if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
+					{
+						return false;
+					}
+					auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
+					std::wstring translation = to_wstring(translationValue);
+
+					if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
+					{
+						return false;
+					}
+					auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
+					std::wstring dataTypeString = to_wstring(dataTypeValue);
+					DataType dataType = ParseDataType(dataTypeString);
+
+					bool doNotTranslate = false;
+					if (entryValue.contains("DoNotTranslate") && entryValue["DataType"].is_boolean())
+					{
+						doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
+					}
+
+					m_LuaData.emplace_back(translation, luaName, dataType);
+				}
+
+			}
+		}
+	}
+	catch (const json::parse_error& e) {
+		std::stringstream ss;
+		ss << "--- JSON Parse Failure Diagnostic ---\n"
+			<< "Error ID:  " << e.id << "\n"
+			<< "Message:   " << e.what() << "\n"
+			<< "At Byte:   " << e.byte << "\n"
+			<< "------------------------------------";
+
+		// 2. Convert the entire message block to a wstring
+		std::wstring errorString = to_wstring(ss.str());
+		ShowMessageBox(errorString, L"Failed to parse JSON");
+		return false;
+	}
+
+	/*
 	//efc::CJSONReturnStatus status(efc::CJSONReturnStatus::Code::OK);
 	//std::wstring errorMessage = L"";
 	efc::CJSONResult jresult = efc::CJSONReader::FromString(json);
@@ -410,10 +515,10 @@ bool AuExpManager::ParseDataJSON(std::wstring json)
 		return false;
 	}
 
-	const std::unordered_map<efc::CJString, efc::CJSONObject*>* dictMap = dict->GetMap();
+	const std::unordered_map<efc::CJString, efc::CJSONObject*>* dictMap = dict->GetMap(); // Top level
 
 	efc::CJSONObject* tempObj;
-	for (const auto& pair : *dictMap)
+	for (const auto& pair : *dictMap) // Data, etc.
 	{
 		tempObj = pair.second;
 		if (tempObj->GetType() != efc::CJSONType::Array)
@@ -421,13 +526,13 @@ bool AuExpManager::ParseDataJSON(std::wstring json)
 			return false;
 		}
 
-		efc::CJSONList* tempList = (efc::CJSONList*)tempObj;
+		efc::CJSONList* tempList = (efc::CJSONList*)tempObj; // Data, etc. as array
 		std::vector<efc::CJSONObject*>* tempListVector = tempList->GetList();
 
 		for (size_t i = 0; i < tempListVector->size(); i++)
 		{
-			tempObj = tempListVector->at(i);
-			if (tempObj->GetType() != efc::CJSONType::Dictionary)
+			tempObj = tempListVector->at(i); // Object in array
+			if (tempObj->GetType() != efc::CJSONType::Dictionary) // Verify object
 			{
 				return false;
 			}
@@ -435,14 +540,16 @@ bool AuExpManager::ParseDataJSON(std::wstring json)
 			efc::CJSONDict* tempDict = (efc::CJSONDict*)tempObj;
 
 			auto& innerPair = tempDict->GetMap()->begin();
-			std::wstring luaName = innerPair->first;
-			efc::CJSONDict* innerDict = (efc::CJSONDict*)innerPair->second;
-			std::wstring translation = innerDict->Get<efc::CJSONString>(L"Translation")->GetValue();
-			std::wstring typeString = innerDict->Get<efc::CJSONString>(L"DataType")->GetValue();
+			std::wstring luaName = innerPair->first; // Outer object key
+			efc::CJSONDict* innerDict = (efc::CJSONDict*)innerPair->second; // Inner object
+			std::wstring translation = innerDict->Get<efc::CJSONString>(L"Translation")->GetValue(); // Inner object search by key
+			std::wstring typeString = innerDict->Get<efc::CJSONString>(L"DataType")->GetValue(); // Inner object search by key
 			DataType dataType = ParseDataType(typeString);
 			m_LuaData.push_back(LuaDataHeader(translation, luaName, dataType));
 		}
 	}
+	*/
+
 	return true;
 }
 

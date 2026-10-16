@@ -2,6 +2,7 @@
 	// Key: Lua data key
 	// Translation: visible header text for the column
 	// DataType: enum for type of data (DataType_Float, DataType_String, DataType_ExporterVersion, DataType_CarName)
+	// If you want to comment out blocks of data - use block comments instead of inline comments , this is the limitation of the parser
 	
 	"Data": [
 		{"ExporterVersion": {"Translation": "Exporter Version", "DataType": "DataType_ExporterVersion"}},
@@ -23,7 +24,7 @@
 		{"ModelTechpoolChassis": {"Translation": "Model Chassis Techpool", "DataType": "DataType_Float"}},
 		{"TrimName": {"Translation": "Trim Name", "DataType": "DataType_String"}},
 		{"TrimYear": {"Translation": "Trim Year", "DataType": "DataType_Float"}},
-		//{"TrimQualityChassis": {"Translation": "Trim Chassis Quality", "DataType": "DataType_Float"}},
+		/*{"TrimQualityChassis": {"Translation": "Trim Chassis Quality", "DataType": "DataType_Float"}},*/
 		{"TrimQualityBody": {"Translation": "Trim Body Quality", "DataType": "DataType_Float"}},
 		{"TrimQualityAerodynamics": {"Translation": "Trim Aerodynamics Quality", "DataType": "DataType_Float"}},
 		{"TrimQualityInterior": {"Translation": "Trim Interior Quality", "DataType": "DataType_Float"}},
@@ -166,7 +167,7 @@
 		{"FamilyYear": {"Translation": "Engine Family Year", "DataType": "DataType_Float"}},
 		{"FamilyQuality": {"Translation": "Family Quality", "DataType": "DataType_Float"}},
 		{"FamilyTechpool": {"Translation": "Family Techpool", "DataType": "DataType_Float"}},
-		//{"FamilyTopEndTechpool": {"Translation": "Family Top End Techpool", "DataType": "DataType_Float"}},
+		/*{"FamilyTopEndTechpool": {"Translation": "Family Top End Techpool", "DataType": "DataType_Float"}},*/
 		{"FamilyBore": {"Translation": "Family Bore", "DataType": "DataType_Float"}},
 		{"FamilyStroke": {"Translation": "Family Stroke", "DataType": "DataType_Float"}},
 		{"FamilyDisplacement": {"Translation": "Family Displacement", "DataType": "DataType_Float"}},
@@ -229,8 +230,8 @@
 		{"FuelType": {"Translation": "Fuel Type", "DataType": "DataType_String"}},
 		{"FuelOctane": {"Translation": "Fuel Octane", "DataType": "DataType_Float"}},
 		{"OctaneOffset": {"Translation": "Octane Offset", "DataType": "DataType_Float"}},
-		//{"AFR": {"Translation": "AFR", "DataType": "DataType_Float"}},
-		//{"IgnitionTiming": {"Translation": "Ignition Timing", "DataType": "DataType_Float"}},
+		/*{"AFR": {"Translation": "AFR", "DataType": "DataType_Float"}},*/
+		/*{"IgnitionTiming": {"Translation": "Ignition Timing", "DataType": "DataType_Float"}},*/
 		{"FuelMap": {"Translation": "Fuel Map", "DataType": "DataType_Float"}},
 		{"Headers": {"Translation": "Headers", "DataType": "DataType_String"}},
 		{"HeaderSize": {"Translation": "Header Size", "DataType": "DataType_Float"}},
@@ -248,7 +249,7 @@
 		{"EnginePeakBoostRPM": {"Translation": "Peak Boost RPM", "DataType": "DataType_Float"}},
 		{"EngineIdleRPM": {"Translation": "Idle RPM", "DataType": "DataType_Float"}},
 		{"EngineMaxRPM": {"Translation": "Max RPM", "DataType": "DataType_Float"}},
-		//{"MinEconomyRPM": {"Translation": "Min Economy RPM", "DataType": "DataType_Float"}},
+		/*{"MinEconomyRPM": {"Translation": "Min Economy RPM", "DataType": "DataType_Float"}},*/
 		{"EngineWeight": {"Translation": "Engine Weight", "DataType": "DataType_Float"}},
 		{"EngineFlywheelWeight": {"Translation": "Flywheel Weight", "DataType": "DataType_Float"}},
 		{"EngineRequiredCooling": {"Translation": "Required Cooling", "DataType": "DataType_Float"}},
@@ -267,7 +268,7 @@
 		
 		{"HC": {"Translation": "WLTP Class 3 HC", "DataType": "DataType_Float"}},
 		{"HCPerKm": {"Translation": "WLTP Class 3 HC Per KM", "DataType": "DataType_Float"}},
-		//{"EngineEmissions": {"Translation": "Engine Emissions", "DataType": "DataType_Float"}},
+		/*{"EngineEmissions": {"Translation": "Engine Emissions", "DataType": "DataType_Float"}},*/
 		
 		{"EngineEfficiency": {"Translation": "Engine Efficiency", "DataType": "DataType_Float"}},
 		{"EngineNoise": {"Translation": "Engine Noise", "DataType": "DataType_Float"}},
