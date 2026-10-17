@@ -277,6 +277,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.VVLRPM = EngineInfo.ModelInfo.VVLRPM or 0
 	
 	Data.Aspiration = EngineInfo.ModelInfo.AspirationSetup.Name
+	Data.AspirationType = EngineInfo.ModelInfo.AspirationType.Name
 	Data.IntercoolerSize = EngineInfo.ModelInfo.IntercoolerSetting
 	
 	Data.AspirationItem1 = EngineInfo.ModelInfo.AspirationItemOption_1.Name
@@ -403,6 +404,9 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.PistonMaxRPM = EngineInfo.ModelInfo.Results.PartsFailureInfo.Pistons.RPM
 	Data.PistonMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Pistons.Torque
 	--Data.TurboMaxRPM = EngineInfo.ModelInfo.Results.PartsFailureInfo.Turbo.RPM	
+
+	Data.BlockThresholdPD = EngineInfo.ModelInfo.Results.BlockThresholdPD
+	Data.PistonThresholdPD = EngineInfo.ModelInfo.Results.PistonThresholdPD
 
 	Data.GameVersion = UAPI.GetGameVersion()
 
@@ -549,6 +553,8 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.EngineCostPreset13 = CalculateCost(Data.EngineEngineeringTime, Data.EngineProductionUnits, Data.EngineEngineeringCost, Data.EngineMaterialCost, Data.EngineToolingCosts,
 											10, 30, 2, 2)
 	Data.CarCostPreset13 = Data.TrimCostPreset13 + Data.EngineCostPreset13
+
+	Data.CarCost = (Data.MatCost + Data.EngineMaterialCost) + 25 * (Data.TrimManHours + Data.EngineProductionUnits) + (Data.TrimEngineeringTime * Data.TrimManHours) + (Data.EngineProductionUnits * Data.EngineEngineeringTime)
 
 	return Data
 end

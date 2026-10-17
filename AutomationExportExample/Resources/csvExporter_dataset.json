@@ -184,7 +184,7 @@
 		"VariantFuelSystemQuality": {"Translation": "Variant Fuel System Quality", "DataType": "DataType_Float"},
 		"VariantExhaustQuality": {"Translation": "Variant Exhaust Quality", "DataType": "DataType_Float"},
 		"VariantTopEndTechpool": {"Translation": "Variant Top End Techpool", "DataType": "DataType_Float"},
-		"VariantFamilyTechpool": {"Translation": "Variant Family Techpool", "DataType": "DataType_Float"},
+		/*"VariantFamilyTechpool": {"Translation": "Variant Family Techpool", "DataType": "DataType_Float"},*/
 		"VariantBottomEndTechpool": {"Translation": "Variant Bottom End Techpool", "DataType": "DataType_Float"},
 		"VariantAspirationTechpool": {"Translation": "Variant Aspiration Techpool", "DataType": "DataType_Float"},
 		"VariantFuelSystemTechpool": {"Translation": "Variant Fuel System Techpool", "DataType": "DataType_Float"},
@@ -205,19 +205,22 @@
 		"VVL": {"Translation": "VVL", "DataType": "DataType_String"},
 		"VVLCamProfile": {"Translation": "VVL Cam Profile", "DataType": "DataType_Float"},
 		"VVLRPM": {"Translation": "VVL RPM", "DataType": "DataType_Float"},
-		"Aspiration": {"Translation": "Aspiration", "DataType": "DataType_String"},
+		"Aspiration": {"Translation": "Aspiration Setup", "DataType": "DataType_String"},
+		"AspirationType": {"Translation": "Aspiration Type", "DataType": "DataType_String"},
 		"IntercoolerSize": {"Translation": "Intercooler Size", "DataType": "DataType_Float"},
 		"AspirationItem1": {"Translation": "Aspiration Item 1", "DataType": "DataType_String"},
 		"AspirationSubItem1": {"Translation": "Aspiration Sub Item 1", "DataType": "DataType_String"},
 		"AspirationItem2": {"Translation": "Aspiration Item 2", "DataType": "DataType_String"},
 		"AspirationSubItem2": {"Translation": "Aspiration Sub Item 2", "DataType": "DataType_String"},
 		"BoostControl": {"Translation": "Boost Control", "DataType": "DataType_String"},
-		"ChargerSize1": {"Translation": "Compressor Size 1", "DataType": "DataType_Float"},
-		"ChargerSize2": {"Translation": "Compressor Size 2", "DataType": "DataType_Float"},
-		"TurbineSize1": {"Translation": "Turbine Size 1", "DataType": "DataType_Float"},
-		"TurbineSize2": {"Translation": "Turbine Size 2", "DataType": "DataType_Float"},
+		"ChargerSize1": {"Translation": "Compressor/Supercharger Size 1", "DataType": "DataType_Float"},
+		"ChargerSize2": {"Translation": "Compressor/Supercharger Size 2", "DataType": "DataType_Float"},
+		"TurbineSize1": {"Translation": "Turbine Size/Supercharger Gearing 1", "DataType": "DataType_Float"},
+		"TurbineSize2": {"Translation": "Turbine Size/Supercharger Gearing 2", "DataType": "DataType_Float"},
 		"ChargerTune1": {"Translation": "Aspiration Tune 1", "DataType": "DataType_Float"},
 		"ChargerTune2": {"Translation": "Aspiration Tune 2", "DataType": "DataType_Float"},
+		"ChargerMaxBoost1": {"Translation": "Supercharger Max Boost 1", "DataType": "DataType_Float"},
+		"ChargerMaxBoost2": {"Translation": "Supercharger Max Boost 2", "DataType": "DataType_Float"},
 		"FuelSystemType": {"Translation": "Fuel System Type", "DataType": "DataType_String"},
 		"FuelSystem": {"Translation": "Fuel System", "DataType": "DataType_String"},
 		"Throttles": {"Translation": "Throttle Configuration", "DataType": "DataType_String"},
@@ -226,8 +229,8 @@
 		"IntakeSize": {"Translation": "Intake Size", "DataType": "DataType_Float"},
 		"FuelLeaded": {"Translation": "Leaded Fuel", "DataType": "DataType_String"},
 		"FuelType": {"Translation": "Fuel Type", "DataType": "DataType_String"},
-		"FuelOctane": {"Translation": "Fuel Octane", "DataType": "DataType_Float"},
-		"OctaneOffset": {"Translation": "Octane Offset", "DataType": "DataType_Float"},
+		/*"FuelOctane": {"Translation": "Fuel Octane", "DataType": "DataType_Float"},*/
+		/*"OctaneOffset": {"Translation": "Octane Offset", "DataType": "DataType_Float"},*/
 		/*"AFR": {"Translation": "AFR", "DataType": "DataType_Float"},*/
 		/*"IgnitionTiming": {"Translation": "Ignition Timing", "DataType": "DataType_Float"},*/
 		"FuelMap": {"Translation": "Fuel Map", "DataType": "DataType_Float"},
@@ -249,7 +252,7 @@
 		"EngineMaxRPM": {"Translation": "Max RPM", "DataType": "DataType_Float"},
 		/*"MinEconomyRPM": {"Translation": "Min Economy RPM", "DataType": "DataType_Float"},*/
 		"EngineWeight": {"Translation": "Engine Weight", "DataType": "DataType_Float"},
-		"EngineFlywheelWeight": {"Translation": "Flywheel Weight", "DataType": "DataType_Float"},
+		/*"EngineFlywheelWeight": {"Translation": "Flywheel Weight", "DataType": "DataType_Float"},*/
 		"EngineRequiredCooling": {"Translation": "Required Cooling", "DataType": "DataType_Float"},
 		"EnginePerformanceIndex": {"Translation": "Engine Performance Index", "DataType": "DataType_Float"},
 		"EngineResponsiveness": {"Translation": "Engine Responsiveness", "DataType": "DataType_Float"},
@@ -281,10 +284,14 @@
 		"EngineTotalCost": {"Translation": "Engine Total Cost", "DataType": "DataType_Float"},
 		"EngineServiceCost": {"Translation": "Engine Service Cost", "DataType": "DataType_Float"},
 		"CrankMaxRPM": {"Translation": "Crankshaft Max RPM", "DataType": "DataType_Float"},
-		"CrankMaxTorque": {"Translation": "Crankshaft Max Torque", "DataType": "DataType_Float"},
+		/*"CrankMaxTorque": {"Translation": "Crankshaft Max Torque", "DataType": "DataType_Float"},*/
 		"ConrodMaxRPM": {"Translation": "Conrods Max RPM", "DataType": "DataType_Float"},
-		"ConrodMaxTorque": {"Translation": "Conrods Max Torque", "DataType": "DataType_Float"},
+		/*"ConrodMaxTorque": {"Translation": "Conrods Max Torque", "DataType": "DataType_Float"},*/
 		"PistonMaxRPM": {"Translation": "Pistons Max RPM", "DataType": "DataType_Float"},
-		"PistonMaxTorque": {"Translation": "Pistons Max Torque", "DataType": "DataType_Float"}
+		/*"PistonMaxTorque": {"Translation": "Pistons Max Torque", "DataType": "DataType_Float"}*/
+		"BlockThresholdPD": {"Translation": "Block Power Density Threshold", "DataType": "DataType_Float"},
+		"PistonThresholdPD": {"Translation": "Piston Power Density Threshold", "DataType": "DataType_Float"},
+
+		"CarCost": {"Translation": "Approximate Cost", "DataType": "DataType_Float"}
 	}
 }
