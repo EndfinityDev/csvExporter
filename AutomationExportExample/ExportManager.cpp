@@ -4,9 +4,14 @@
 ************************************************** */
 
 #include "stdafx.h"
-#include <Shlobj.h>
 #include <fstream>
 #include <sstream>
+
+#include "StringConverter.h"
+#include "FileUtils.h"
+#include "MessageBoxManager.h"
+#include "JSONFileManager.h"
+
 
 size_t FindDirDelimiter(std::wstring dir, size_t start)
 {
@@ -133,6 +138,13 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	att = GetFileAttributes(customFilePath.c_str());
 	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY)) // Go straight to loading resources if UserFiles doesn't exist
 	{
+		CreateDirectory(customFilePath.c_str(), nullptr); // Create UserFiles if it does't exist
+		att = GetFileAttributes(customFilePath.c_str());
+		if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			//TODO
+		}
+
 		LoadLuaResource();
 		LoadDataResource();
 		LoadTranslationResource();
@@ -159,7 +171,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	{
 		if (!LoadLuaFile(luaFileName, customFilePath))
 		{
-			ShowMessageBox(L"Failed to load Lua file", L"Error");
+			MessageBoxManager::ShowMessageBox(L"Failed to load Lua file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
 		}
 	}
@@ -182,7 +194,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	{
 		if(!LoadDataFile(dataFileName, customFilePath))
 		{
-			ShowMessageBox(L"Failed to load dataset file", L"Error");
+			MessageBoxManager::ShowMessageBox(L"Failed to load dataset file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
 		}
 	}
@@ -204,7 +216,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	{
 		if(!LoadTranslationFile(translationsFileName, customFilePath))
 		{
-			ShowMessageBox(L"Failed to load translation file", L"Error");
+			MessageBoxManager::ShowMessageBox(L"Failed to load translation file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
 		}
 	}
@@ -214,53 +226,6 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 
 	return AuCarExpErrorCode_Success;
-}
-
-std::wstring AuExpManager::ValidateFileName(std::wstring filename, std::wstring defaultExtension)
-{
-	size_t filenameSize = filename.size();
-
-	for (size_t i = filenameSize; i > 0; i--)
-	{
-		if (filename[i - 1] != L' ')
-			break;
-		filename[i - 1] = L'\0'; // Remove trailing whitespaces by replacing them with a null terminator
-	}
-
-	std::wstring sanitizedName = L"";
-	bool startOfString = true;
-
-	for (size_t i = 0; i < filenameSize; i++)
-	{
-		wchar_t currentChar = filename[i];
-
-		if (currentChar == L' ' && startOfString)
-			continue;
-		else
-			startOfString = false;
-
-		//if (currentChar == L'\\' || currentChar == L'\'' || currentChar == L'"' || currentChar == L'/')
-		//	return false;
-
-		sanitizedName += currentChar;
-	}
-
-	bool hasExtension = false;
-	for (size_t i = 1; i < sanitizedName.size(); i++)
-	{
-		if (sanitizedName[i] == L'.')
-		{
-			hasExtension = true;
-			break;
-		}
-	}
-
-	if (!hasExtension)
-	{
-		sanitizedName += defaultExtension;
-	}
-
-	return sanitizedName;
 }
 
 bool AuExpManager::LoadLuaResource()
@@ -280,46 +245,15 @@ bool AuExpManager::LoadLuaResource()
 	//m_LuaFile.reserve(m_LuaFileLength);
 
 	hResourceLoaded = LoadResource(m_Module, hRes);
-	//const char* tempRes = (char*)LockResource(hResourceLoaded);
 	m_LuaFile = (char*)LockResource(hResourceLoaded);
 
-	//for (size_t i = 0; i < m_LuaFileLength - 1; i++)
-	//{
-	//	m_LuaFile += tempRes[i];
-	//}
-	//m_LuaFile += "\0";
-
-	//std::wstring wdata;
-	//wdata.resize(size * 2, 0);
-	//int result = MultiByteToWideChar(CP_UTF8, 0, data, strlen(data), &wdata[0], wdata.size());
-
-	//if (result <= 0)
-	//{
-	//	throw new std::exception("Failed to convert resource to wide char. File: ExportManager.cpp, line: " + __LINE__);
-	//}
-
-	/*
-	if ((size + 1) <= stringBuffer.GetCount())
-	{
-		for (unsigned int i = 0; i < size; i++)
-		{
-			stringBuffer[i] = data[i];
-		}
-
-		stringBuffer[size] = '\0';
-	}
-	*/
-
 	UnlockResource(hResourceLoaded);
-
-	//m_LuaFile = wdata;
-
 	return true;
 }
 
 bool AuExpManager::LoadLuaFile(std::wstring filename, std::wstring path)
 {
-	std::wstring sanitizedName = ValidateFileName(filename, L".lua");
+	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".lua");
 
 	std::wstring fullFilePath = path + L'\\' + sanitizedName;
 	std::ifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -370,77 +304,101 @@ bool AuExpManager::LoadDataResource()
 		throw new std::exception("Failed to convert resource to wide char. File: ExportManager.cpp, line: " + (__LINE__ - 4));
 	}
 
-	return ParseDataJSON(dataW);
+	//return ParseDataJSON(dataW);
+
+	json jsonData;
+	if (!JSONFileManager::TryParseJSONData(dataW, &jsonData))
+	{
+		return false;
+	}
+	return LoadDataJSON(jsonData);
 }
 
 bool AuExpManager::LoadDataFile(std::wstring filename, std::wstring path)
 {
-	std::wstring sanitizedName = ValidateFileName(filename, L".json");
-
-	std::wstring fullFilePath = path + L'\\' + sanitizedName;
-	std::wifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
-
-	if (!file.is_open())
-		return false;
-
-	// get the length of the file
-	//file.seekg(0, std::ifstream::end);
-	//m_LuaFileLength = file.tellg();
-	//file.seekg(0, std::ifstream::beg);
-
-	//file >> m_LuaFile;
-	std::wstringstream tempFile;
-	tempFile << file.rdbuf();
-
-	file.close();
-
-	return ParseDataJSON(tempFile.str());
-}
-
-bool AuExpManager::ParseDataJSON(std::wstring json)
-{
-	//efc::CJSONReturnStatus status(efc::CJSONReturnStatus::Code::OK);
-	//std::wstring errorMessage = L"";
-	efc::CJSONResult jresult = efc::CJSONReader::FromString(json);
-	const efc::CJSONDict* dict = jresult.Dictionary;
-
-	if (jresult.Status.GetCode() != efc::CJSONReturnStatus::Code::OK)
+	json jsonData;
+	if (!JSONFileManager::TryParseJSONFile(filename, path, &jsonData))
 	{
-		ShowMessageBox(jresult.ErrorMessage, L"Failed to parse JSON");
 		return false;
 	}
 
-	const std::unordered_map<efc::CJString, efc::CJSONObject*>* dictMap = dict->GetMap();
+	return LoadDataJSON(jsonData);
+}
 
-	efc::CJSONObject* tempObj;
-	for (const auto& pair : *dictMap)
+bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)
+{
+	if (!arrayObject.is_object()) // Verify object
 	{
-		tempObj = pair.second;
-		if (tempObj->GetType() != efc::CJSONType::Array)
+		return false;
+	}
+
+	for (const auto& entryPair : arrayObject.items()) // Iterate over every item in the object, old implementation only took the first one
+	{
+		auto& entryKey = entryPair.key(); // Outer object key
+		auto& entryValue = entryPair.value(); // Inner object
+		if (!entryValue.is_object()) // Verify inner object
 		{
 			return false;
 		}
 
-		efc::CJSONList* tempList = (efc::CJSONList*)tempObj;
-		std::vector<efc::CJSONObject*>* tempListVector = tempList->GetList();
+		std::wstring luaName = StringConverter::to_wstring(entryKey);
 
-		for (size_t i = 0; i < tempListVector->size(); i++)
+		if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
 		{
-			tempObj = tempListVector->at(i);
-			if (tempObj->GetType() != efc::CJSONType::Dictionary)
+			return false;
+		}
+		auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
+		std::wstring translation = StringConverter::to_wstring(translationValue);
+
+		if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
+		{
+			return false;
+		}
+		auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
+		std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
+		DataType dataType = ParseDataType(dataTypeString);
+
+		bool doNotTranslate = false;
+		if (entryValue.contains("DoNotTranslate") && entryValue["DoNotTranslate"].is_boolean())
+		{
+			doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
+		}
+
+		m_LuaData.emplace_back(translation, luaName, dataType, doNotTranslate);
+	}
+	return true;
+}
+
+bool AuExpManager::LoadDataJSON(const json& jsonData)
+{
+	for (const auto& items : jsonData.items()) // Data, etc.
+	{
+		//auto& key = items.key();
+		auto& value = items.value();
+
+		bool isObject = value.is_object();
+
+		if (!(value.is_array() || isObject)) // Data, etc. as array or object
+		{
+			return false;
+		}
+
+		if (isObject)
+		{
+			if (!LoadDataEntriesFromJSON(value))
 			{
 				return false;
 			}
-
-			efc::CJSONDict* tempDict = (efc::CJSONDict*)tempObj;
-
-			auto& innerPair = tempDict->GetMap()->begin();
-			std::wstring luaName = innerPair->first;
-			efc::CJSONDict* innerDict = (efc::CJSONDict*)innerPair->second;
-			std::wstring translation = innerDict->Get<efc::CJSONString>(L"Translation")->GetValue();
-			std::wstring typeString = innerDict->Get<efc::CJSONString>(L"DataType")->GetValue();
-			DataType dataType = ParseDataType(typeString);
-			m_LuaData.push_back(LuaDataHeader(translation, luaName, dataType));
+		}
+		else
+		{
+			for (const auto& arrayObject : value) // Object in array
+			{
+				if (!LoadDataEntriesFromJSON(arrayObject))
+				{
+					return false;
+				}
+			}
 		}
 	}
 	return true;
@@ -472,12 +430,28 @@ bool AuExpManager::LoadTranslationResource()
 		throw new std::exception("Failed to convert resource to wide char. File: ExportManager.cpp, line: " + (__LINE__ - 4));
 	}
 
-	return ParseTranslationJSON(dataW);
+	//return ParseTranslationJSON(dataW);
+
+	json jsonData;
+	if (!JSONFileManager::TryParseJSONData(dataW, &jsonData))
+	{
+		return false;
+	}
+	return LoadTranslationJSON(jsonData);
 }
 
 bool AuExpManager::LoadTranslationFile(std::wstring filename, std::wstring path)
 {
-	std::wstring sanitizedName = ValidateFileName(filename, L".json");
+	json jsonData;
+	if (!JSONFileManager::TryParseJSONFile(filename, path, &jsonData))
+	{
+		return false;
+	}
+
+	return LoadTranslationJSON(jsonData);
+
+	/*
+	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".json");
 
 	std::wstring fullFilePath = path + L'\\' + sanitizedName;
 	std::wifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -497,46 +471,32 @@ bool AuExpManager::LoadTranslationFile(std::wstring filename, std::wstring path)
 	file.close();
 
 	return ParseTranslationJSON(tempFile.str());
+	*/
 }
 
-bool AuExpManager::ParseTranslationJSON(std::wstring json)
+bool AuExpManager::LoadTranslationJSON(const json& jsonData)
 {
-	//efc::CJSONReturnStatus status(efc::CJSONReturnStatus::Code::OK);
-	//std::wstring errorMessage = L"";
-	efc::CJSONResult jresult = efc::CJSONReader::FromString(json);
-	const efc::CJSONDict* dict = jresult.Dictionary;
-
-	if (jresult.Status.GetCode() != efc::CJSONReturnStatus::Code::OK)
+	for (const auto& items : jsonData.items()) // Translations, etc.
 	{
-		ShowMessageBox(jresult.ErrorMessage, L"Failed to parse JSON");
-		return false;
-	}
-
-	const std::unordered_map<efc::CJString, efc::CJSONObject*>* dictMap = dict->GetMap();
-
-	efc::CJSONObject* tempObj;
-	for (const auto& pair : *dictMap)
-	{
-		tempObj = pair.second;
-		if (tempObj->GetType() != efc::CJSONType::Dictionary)
+		const auto& value = items.value();
+		if (!value.is_object())
 		{
 			return false;
 		}
 
-		efc::CJSONDict* tempDict = (efc::CJSONDict*)tempObj;
-		std::unordered_map<efc::CJString, efc::CJSONObject*>* tempMap = tempDict->GetMap();
-
-		for (const auto& pair : *tempMap)
+		for (const auto& translationPair : value.items())
 		{
-			tempObj = pair.second;
-			if (tempObj->GetType() != efc::CJSONType::String)
+			auto& key = translationPair.key();
+			auto& value = translationPair.value();
+			if (!value.is_string())
 			{
 				return false;
 			}
+			std::wstring keyWString = StringConverter::to_wstring(key);
+			auto& valueString = value.get<std::string>();
+			std::wstring valueWString = StringConverter::to_wstring(valueString);
 
-			efc::CJSONString* tempStr = (efc::CJSONString*)tempObj;
-
-			m_Translations.emplace(pair.first, tempStr->GetValue());
+			m_Translations.emplace(keyWString, valueWString);
 		}
 	}
 	return true;
@@ -550,78 +510,13 @@ void AuExpManager::EndExport()
 
 	ExportInternal();
 
-	/*
-	TCHAR path[MAX_PATH];
-	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-	{
-		std::wstring prefsFilePath = path;
-		prefsFilePath += L"\\AutomationGame\\ExporterPrefs";
-
-		DWORD att = GetFileAttributes(prefsFilePath.c_str());
-
-		if (att == INVALID_FILE_ATTRIBUTES)
-		{
-			//create directory, one level at a time:
-			size_t slashPos = FindDirDelimiter(prefsFilePath, 0);
-			size_t offset = 0;
-
-			while (slashPos != std::wstring::npos)
-			{
-				CreateDirectory(prefsFilePath.substr(offset, slashPos - offset).c_str(), nullptr);
-				slashPos = FindDirDelimiter(prefsFilePath, slashPos + 1);
-			}
-
-			//last one:
-			CreateDirectory(prefsFilePath.c_str(), nullptr);
-
-			att = GetFileAttributes(prefsFilePath.c_str());
-		}
-
-		if (att != INVALID_FILE_ATTRIBUTES && att & FILE_ATTRIBUTE_DIRECTORY)
-		{
-			//directory exists, all good to go:
-
-			std::wstring boolPrefsFilePath = prefsFilePath + L"\\csvExporter.prefs";
-
-			FILE* prefsFile;
-			_wfopen_s(&prefsFile, boolPrefsFilePath.c_str(), L"wb");
-
-			if (prefsFile)
-			{
-				ExportPrefs prefs;
-				prefs.PrefsVersion = EXPPREFSVERSION;
-				prefs.PrefsFlags = 0b00000000 | (m_CarData->GetBoolData(0)->Value << 0) | (m_CarData->GetBoolData(1)->Value << 1);
-
-				fwrite(&prefs, sizeof(prefs), 1, prefsFile);
-
-				fclose(prefsFile);
-			}
-		}
-	}
-	*/
-
 	m_IsExportInProcess = false;
 }
 
 void AuExpManager::ExportInternal()
 {
-	/*
-	m_FileName = m_CarData->GetStringData(0)->Value;
-
-	for (std::wstring::iterator i = m_FileName.begin(); i < m_FileName.end(); i++)
-	{
-		if (IllegalCharacters.find(*i) != std::wstring::npos)
-		{
-			*i = L'_';
-		}
-	}
-	
-	m_Delimiter = m_CarData->GetStringData(1)->Value;
-	*/
 	m_LuaFile = ""; // Free memory of the Lua file since we don't need it anymore
-
 	BuildSingleCSV();
-
 
 	TCHAR path[MAX_PATH];
 
@@ -729,41 +624,6 @@ void AuExpManager::BuildSingleCSV()
 	csvManager.Save();
 }
 
-/*
-void AuExpManager::FillTableData(LuaData& data)
-{
-	std::wstring ret;
-
-	for (uint32_t i = 0; i < data.Size(); i++)
-	{
-		ret = L"???";
-
-		switch (data[i].DataType)
-		{
-		case DataType_String:
-			TryGetStringData(data[i].HeaderName, ret);
-			break;
-
-		case DataType_Float:
-			TryGetFloatDataString(data[i].HeaderName, &ret);
-			break;
-
-		case DataType_ExporterVersion:
-			ret = EXPVERSIONWS;
-			break;
-
-		case DataType_CarName:
-			ret = m_CarData->GetCarName();
-			break;
-
-		default:
-			break;
-		}
-		GetTranslation(&ret);
-		data[i].SetData(ret);
-	}
-}
-*/
 
 void AuExpManager::AddImage(const AuCarExpTexture* texture)
 {
@@ -870,29 +730,6 @@ void AuExpManager::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& data)
 		file.close();
 	}
 
-
-	/*
-	FileManager fileManager;
-
-	for (int i = 0; i < data.GetCount(); i++)
-	{
-		m_LuaFDataFiles[data[i].FileName] = data[i];
-
-		AuCarLuaDataFile& File = data[i];
-
-		std::wstring FileName = File.FileName;
-		//FileName = TextUtils::SanitiseFileName(FileName);
-		//FILE* OutFile; //= m_FileManager->OpenFile(m_Directory + L"/" + FileName, L"wb");
-		FILE* OutFile = fileManager.OpenFile((FileName).c_str(), L"wb");
-		if (!OutFile)
-		{
-			return;
-		}
-
-		fwrite(File.Buffer, 1, File.BufferSize, OutFile);
-
-	}
-	*/
 }
 
 void AuExpManager::GetTranslation(std::wstring* ret)
@@ -901,9 +738,4 @@ void AuExpManager::GetTranslation(std::wstring* ret)
 		return;
 
 	*ret = m_Translations[*ret];
-}
-
-void AuExpManager::ShowMessageBox(std::wstring text, std::wstring title)
-{
-	MessageBox(NULL, text.c_str(), title.c_str(), 0);
 }

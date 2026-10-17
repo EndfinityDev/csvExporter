@@ -10,7 +10,8 @@
 #include "CSVManager.h"
 #include "EXPVERSION.h"
 
-#include "CJSONReader.h"
+#include "nlohmann/json.hpp"
+using json = nlohmann::ordered_json;
 
 enum ExporterStringData : unsigned int
 {
@@ -86,8 +87,6 @@ public:
 
 	inline std::wstring GetLocale() const { return m_Locale; }
 
-	static inline void ShowMessageBox(std::wstring text, std::wstring title);
-
 	static const std::wstring s_IllegalCharacters;
 
 private:
@@ -97,11 +96,7 @@ private:
 
 	void ExportInternal();
 
-	void FillTableData(LuaData& data);
-
 	void BuildSingleCSV();
-
-	std::wstring ValidateFileName(std::wstring filename, std::wstring defaultExtension);
 
 	bool LoadLuaFile(std::wstring filename, std::wstring path);
 	bool LoadLuaResource();
@@ -110,8 +105,10 @@ private:
 	bool LoadTranslationFile(std::wstring filename, std::wstring path);
 	bool LoadTranslationResource();
 
-	bool ParseDataJSON(std::wstring json);
-	bool ParseTranslationJSON(std::wstring json);
+	bool LoadDataJSON(const json& jsonData);
+	bool LoadDataEntriesFromJSON(const json& arrayObject);
+
+	bool LoadTranslationJSON(const json& jsonData);
 
 	static AuExpManager* s_Instance;
 
@@ -142,11 +139,6 @@ private:
 	bool m_LuaDataAdded = false;
 
 	std::wstring m_Locale = L"";
-
-	//efc::CJSONDict* m_LuaData = nullptr;
-	//efc::CJSONDict* m_TranslationJSON
-
-	//LuaData m_GeneralData;
 
 	const HMODULE m_Module;
 };
