@@ -352,12 +352,12 @@ bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)
 		DataType dataType = ParseDataType(dataTypeString);
 
 		bool doNotTranslate = false;
-		if (entryValue.contains("DoNotTranslate") && entryValue["DataType"].is_boolean())
+		if (entryValue.contains("DoNotTranslate") && entryValue["DoNotTranslate"].is_boolean())
 		{
 			doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
 		}
 
-		m_LuaData.emplace_back(translation, luaName, dataType);
+		m_LuaData.emplace_back(translation, luaName, dataType, doNotTranslate);
 	}
 	return true;
 }

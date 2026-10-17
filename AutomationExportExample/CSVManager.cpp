@@ -54,7 +54,10 @@ void CSVManager::WriteData(std::wofstream& outputFile) const
 		{
 			std::wstring string = L"???";
 			m_ExportManager->TryGetStringData(data.HeaderName, string);
-			m_ExportManager->GetTranslation(&string);
+			if (!data.DoNotTranslate)
+			{
+				m_ExportManager->GetTranslation(&string);
+			}
 			outputFile << string;
 		}
 			break;
