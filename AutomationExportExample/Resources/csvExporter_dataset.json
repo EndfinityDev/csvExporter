@@ -102,8 +102,6 @@
 		{"RearTyreWidth": {"Translation": "Rear Tyre Width", "DataType": "DataType_Float"}},
 		{"FrontOverallDiameter": {"Translation": "Front Wheel Diameter", "DataType": "DataType_Float"}},
 		{"RearOverallDiameter": {"Translation": "Rear Wheel Diameter", "DataType": "DataType_Float"}},
-		{"FrontOverallDiameter": {"Translation": "Front Wheel Diameter", "DataType": "DataType_Float"}},
-		{"RearOverallDiameter": {"Translation": "Rear Wheel Diameter", "DataType": "DataType_Float"}},
 		{"FrontBrakeType": {"Translation": "Front Brake Type", "DataType": "DataType_String"}},
 		{"RearBrakeType": {"Translation": "Rear Brake Type", "DataType": "DataType_String"}},
 		{"FrontCaliperPistons": {"Translation": "Front Caliper Pistons", "DataType": "DataType_Float"}},

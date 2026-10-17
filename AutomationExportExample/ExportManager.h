@@ -13,7 +13,7 @@
 #include "CJSONReader.h"
 
 #include "nlohmann/json.hpp"
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 enum ExporterStringData : unsigned int
 {
