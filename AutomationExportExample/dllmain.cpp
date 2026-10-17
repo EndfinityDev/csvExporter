@@ -11,7 +11,6 @@
 #include "EXPVERSION.h"
 #include <ShlObj.h>
 #include "ExportManager.h"
-#include "CJSONReader.h"
 
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins

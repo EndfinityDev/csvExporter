@@ -10,8 +10,6 @@
 #include "CSVManager.h"
 #include "EXPVERSION.h"
 
-#include "CJSONReader.h"
-
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
 
@@ -98,8 +96,6 @@ private:
 
 	void ExportInternal();
 
-	void FillTableData(LuaData& data);
-
 	void BuildSingleCSV();
 
 	bool LoadLuaFile(std::wstring filename, std::wstring path);
@@ -109,11 +105,10 @@ private:
 	bool LoadTranslationFile(std::wstring filename, std::wstring path);
 	bool LoadTranslationResource();
 
-	bool ParseDataJSON(std::wstring json);
-	bool ParseTranslationJSON(std::wstring json);
-
 	bool LoadDataJSON(const json& jsonData);
 	bool LoadDataEntriesFromJSON(const json& arrayObject);
+
+	bool LoadTranslationJSON(const json& jsonData);
 
 	static AuExpManager* s_Instance;
 
@@ -144,11 +139,6 @@ private:
 	bool m_LuaDataAdded = false;
 
 	std::wstring m_Locale = L"";
-
-	//efc::CJSONDict* m_LuaData = nullptr;
-	//efc::CJSONDict* m_TranslationJSON
-
-	//LuaData m_GeneralData;
 
 	const HMODULE m_Module;
 };
