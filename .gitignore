@@ -362,6 +362,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-
-!/third_party/openssl/
-!/third_party/openssl/**
