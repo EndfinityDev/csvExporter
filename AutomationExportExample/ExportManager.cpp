@@ -4,27 +4,14 @@
 ************************************************** */
 
 #include "stdafx.h"
-#include <Shlobj.h>
 #include <fstream>
 #include <sstream>
-#include <codecvt>
 
-#include "nlohmann/json.hpp"
-using json = nlohmann::json;
+#include "StringConverter.h"
+#include "FileUtils.h"
+#include "MessageBoxManager.h"
+#include "JSONFileManager.h"
 
-std::wstring to_wstring(const std::string& utf8_str) {
-	// Note: std::wstring_convert is deprecated in C++17 but remains 
-	// the standard cross-platform solution until C++23's std::print/os streams update.
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	return converter.from_bytes(utf8_str);
-}
-
-std::string to_utf8string(const std::wstring& wstr) {
-	// Note: std::wstring_convert is deprecated in C++17 but remains 
-	// the standard cross-platform solution until C++23's std::print/os streams update.
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	return converter.to_bytes(wstr);
-}
 
 size_t FindDirDelimiter(std::wstring dir, size_t start)
 {
@@ -177,7 +164,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	{
 		if (!LoadLuaFile(luaFileName, customFilePath))
 		{
-			ShowMessageBox(L"Failed to load Lua file", L"Error");
+			MessageBoxManager::ShowMessageBox(L"Failed to load Lua file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
 		}
 	}
@@ -200,7 +187,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	{
 		if(!LoadDataFile(dataFileName, customFilePath))
 		{
-			ShowMessageBox(L"Failed to load dataset file", L"Error");
+			MessageBoxManager::ShowMessageBox(L"Failed to load dataset file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
 		}
 	}
@@ -222,7 +209,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	{
 		if(!LoadTranslationFile(translationsFileName, customFilePath))
 		{
-			ShowMessageBox(L"Failed to load translation file", L"Error");
+			MessageBoxManager::ShowMessageBox(L"Failed to load translation file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
 		}
 	}
@@ -232,53 +219,6 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 
 	return AuCarExpErrorCode_Success;
-}
-
-std::wstring AuExpManager::ValidateFileName(std::wstring filename, std::wstring defaultExtension)
-{
-	size_t filenameSize = filename.size();
-
-	for (size_t i = filenameSize; i > 0; i--)
-	{
-		if (filename[i - 1] != L' ')
-			break;
-		filename[i - 1] = L'\0'; // Remove trailing whitespaces by replacing them with a null terminator
-	}
-
-	std::wstring sanitizedName = L"";
-	bool startOfString = true;
-
-	for (size_t i = 0; i < filenameSize; i++)
-	{
-		wchar_t currentChar = filename[i];
-
-		if (currentChar == L' ' && startOfString)
-			continue;
-		else
-			startOfString = false;
-
-		//if (currentChar == L'\\' || currentChar == L'\'' || currentChar == L'"' || currentChar == L'/')
-		//	return false;
-
-		sanitizedName += currentChar;
-	}
-
-	bool hasExtension = false;
-	for (size_t i = 1; i < sanitizedName.size(); i++)
-	{
-		if (sanitizedName[i] == L'.')
-		{
-			hasExtension = true;
-			break;
-		}
-	}
-
-	if (!hasExtension)
-	{
-		sanitizedName += defaultExtension;
-	}
-
-	return sanitizedName;
 }
 
 bool AuExpManager::LoadLuaResource()
@@ -337,7 +277,7 @@ bool AuExpManager::LoadLuaResource()
 
 bool AuExpManager::LoadLuaFile(std::wstring filename, std::wstring path)
 {
-	std::wstring sanitizedName = ValidateFileName(filename, L".lua");
+	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".lua");
 
 	std::wstring fullFilePath = path + L'\\' + sanitizedName;
 	std::ifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -388,168 +328,83 @@ bool AuExpManager::LoadDataResource()
 		throw new std::exception("Failed to convert resource to wide char. File: ExportManager.cpp, line: " + (__LINE__ - 4));
 	}
 
-	return ParseDataJSON(dataW);
+	//return ParseDataJSON(dataW);
+
+	json jsonData;
+	if (!JSONFileManager::TryParseJSONData(dataW, &jsonData))
+	{
+		return false;
+	}
+	return LoadDataJSON(jsonData);
 }
 
 bool AuExpManager::LoadDataFile(std::wstring filename, std::wstring path)
 {
-	std::wstring sanitizedName = ValidateFileName(filename, L".json");
-
-	std::wstring fullFilePath = path + L'\\' + sanitizedName;
-	std::wifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
-
-	if (!file.is_open())
+	json jsonData;
+	if (!JSONFileManager::TryParseJSONFile(filename, path, &jsonData))
+	{
 		return false;
+	}
 
-	// get the length of the file
-	//file.seekg(0, std::ifstream::end);
-	//m_LuaFileLength = file.tellg();
-	//file.seekg(0, std::ifstream::beg);
-
-	//file >> m_LuaFile;
-	std::wstringstream tempFile;
-	tempFile << file.rdbuf();
-
-	file.close();
-
-	return ParseDataJSON(tempFile.str());
+	return LoadDataJSON(jsonData);
 }
 
-bool AuExpManager::ParseDataJSON(std::wstring json)
+bool AuExpManager::LoadDataJSON(json& jsonData)
 {
-	std::string utf8json = to_utf8string(json);
-	//auto jsonData = json::parse(utf8json, nullptr, false, true); // Top level
-	//if (jsonData.is_discarded())
-	//{
-	//	ShowMessageBox(L"Loaded file was invalid JSON", L"Failed to parse JSON");
-	//	return false;
-	//}
+	for (const auto& items : jsonData.items()) // Data, etc.
+	{
+		//auto& key = items.key();
+		auto& value = items.value();
 
-	try {
-		auto jsonData = json::parse(utf8json, nullptr, true, true);
-
-		if (!jsonData.is_object()) 
+		if (!value.is_array()) // Data, etc. as array
 		{
-			ShowMessageBox(L"The top level of the file does not contain an object", L"Failed to parse JSON");
 			return false;
 		}
 
-		for (const auto& items : jsonData.items()) // Data, etc.
+		for (const auto& arrayObject : value) // Object in array
 		{
-			//auto& key = items.key();
-			auto& value = items.value();
-
-			if (!value.is_array()) // Data, etc. as array
+			if (!arrayObject.is_object()) // Verify object
 			{
 				return false;
 			}
 
-			for (const auto& arrayObject : value) // Object in array
+			for (const auto& entryPair : arrayObject.items()) // Iterate over every item in the object, old implementation only took the first one
 			{
-				if (!arrayObject.is_object()) // Verify object
+				auto& entryKey = entryPair.key(); // Outer object key
+				auto& entryValue = entryPair.value(); // Inner object
+				if (!entryValue.is_object()) // Verify inner object
 				{
 					return false;
 				}
 
-				for (const auto& entryPair : arrayObject.items()) // Iterate over every item in the object, old implementation only took the first one
+				std::wstring luaName = StringConverter::to_wstring(entryKey);
+
+				if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
 				{
-					auto& entryKey = entryPair.key(); // Outer object key
-					auto& entryValue = entryPair.value(); // Inner object
-					if (!entryValue.is_object()) // Verify inner object
-					{
-						return false;
-					}
+					return false;
+				}
+				auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
+				std::wstring translation = StringConverter::to_wstring(translationValue);
 
-					std::wstring luaName = to_wstring(entryKey);
+				if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
+				{
+					return false;
+				}
+				auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
+				std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
+				DataType dataType = ParseDataType(dataTypeString);
 
-					if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
-					{
-						return false;
-					}
-					auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
-					std::wstring translation = to_wstring(translationValue);
-
-					if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
-					{
-						return false;
-					}
-					auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
-					std::wstring dataTypeString = to_wstring(dataTypeValue);
-					DataType dataType = ParseDataType(dataTypeString);
-
-					bool doNotTranslate = false;
-					if (entryValue.contains("DoNotTranslate") && entryValue["DataType"].is_boolean())
-					{
-						doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
-					}
-
-					m_LuaData.emplace_back(translation, luaName, dataType);
+				bool doNotTranslate = false;
+				if (entryValue.contains("DoNotTranslate") && entryValue["DataType"].is_boolean())
+				{
+					doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
 				}
 
-			}
-		}
-	}
-	catch (const json::parse_error& e) {
-		std::stringstream ss;
-		ss << "--- JSON Parse Failure Diagnostic ---\n"
-			<< "Error ID:  " << e.id << "\n"
-			<< "Message:   " << e.what() << "\n"
-			<< "At Byte:   " << e.byte << "\n"
-			<< "------------------------------------";
-
-		// 2. Convert the entire message block to a wstring
-		std::wstring errorString = to_wstring(ss.str());
-		ShowMessageBox(errorString, L"Failed to parse JSON");
-		return false;
-	}
-
-	/*
-	//efc::CJSONReturnStatus status(efc::CJSONReturnStatus::Code::OK);
-	//std::wstring errorMessage = L"";
-	efc::CJSONResult jresult = efc::CJSONReader::FromString(json);
-	const efc::CJSONDict* dict = jresult.Dictionary;
-
-	if (jresult.Status.GetCode() != efc::CJSONReturnStatus::Code::OK)
-	{
-		ShowMessageBox(jresult.ErrorMessage, L"Failed to parse JSON");
-		return false;
-	}
-
-	const std::unordered_map<efc::CJString, efc::CJSONObject*>* dictMap = dict->GetMap(); // Top level
-
-	efc::CJSONObject* tempObj;
-	for (const auto& pair : *dictMap) // Data, etc.
-	{
-		tempObj = pair.second;
-		if (tempObj->GetType() != efc::CJSONType::Array)
-		{
-			return false;
-		}
-
-		efc::CJSONList* tempList = (efc::CJSONList*)tempObj; // Data, etc. as array
-		std::vector<efc::CJSONObject*>* tempListVector = tempList->GetList();
-
-		for (size_t i = 0; i < tempListVector->size(); i++)
-		{
-			tempObj = tempListVector->at(i); // Object in array
-			if (tempObj->GetType() != efc::CJSONType::Dictionary) // Verify object
-			{
-				return false;
+				m_LuaData.emplace_back(translation, luaName, dataType);
 			}
 
-			efc::CJSONDict* tempDict = (efc::CJSONDict*)tempObj;
-
-			auto& innerPair = tempDict->GetMap()->begin();
-			std::wstring luaName = innerPair->first; // Outer object key
-			efc::CJSONDict* innerDict = (efc::CJSONDict*)innerPair->second; // Inner object
-			std::wstring translation = innerDict->Get<efc::CJSONString>(L"Translation")->GetValue(); // Inner object search by key
-			std::wstring typeString = innerDict->Get<efc::CJSONString>(L"DataType")->GetValue(); // Inner object search by key
-			DataType dataType = ParseDataType(typeString);
-			m_LuaData.push_back(LuaDataHeader(translation, luaName, dataType));
 		}
 	}
-	*/
-
 	return true;
 }
 
@@ -584,7 +439,7 @@ bool AuExpManager::LoadTranslationResource()
 
 bool AuExpManager::LoadTranslationFile(std::wstring filename, std::wstring path)
 {
-	std::wstring sanitizedName = ValidateFileName(filename, L".json");
+	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".json");
 
 	std::wstring fullFilePath = path + L'\\' + sanitizedName;
 	std::wifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -606,16 +461,16 @@ bool AuExpManager::LoadTranslationFile(std::wstring filename, std::wstring path)
 	return ParseTranslationJSON(tempFile.str());
 }
 
-bool AuExpManager::ParseTranslationJSON(std::wstring json)
+bool AuExpManager::ParseTranslationJSON(std::wstring jsonString)
 {
 	//efc::CJSONReturnStatus status(efc::CJSONReturnStatus::Code::OK);
 	//std::wstring errorMessage = L"";
-	efc::CJSONResult jresult = efc::CJSONReader::FromString(json);
+	efc::CJSONResult jresult = efc::CJSONReader::FromString(jsonString);
 	const efc::CJSONDict* dict = jresult.Dictionary;
 
 	if (jresult.Status.GetCode() != efc::CJSONReturnStatus::Code::OK)
 	{
-		ShowMessageBox(jresult.ErrorMessage, L"Failed to parse JSON");
+		MessageBoxManager::ShowMessageBox(jresult.ErrorMessage, L"Failed to parse JSON");
 		return false;
 	}
 
@@ -1008,9 +863,4 @@ void AuExpManager::GetTranslation(std::wstring* ret)
 		return;
 
 	*ret = m_Translations[*ret];
-}
-
-void AuExpManager::ShowMessageBox(std::wstring text, std::wstring title)
-{
-	MessageBox(NULL, text.c_str(), title.c_str(), 0);
 }

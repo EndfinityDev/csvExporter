@@ -2,7 +2,7 @@
 	// Key: Lua data key
 	// Translation: visible header text for the column
 	// DataType: enum for type of data (DataType_Float, DataType_String, DataType_ExporterVersion, DataType_CarName)
-	// If you want to comment out blocks of data - use block comments instead of inline comments , this is the limitation of the parser
+	// If you want to comment out blocks of data - use block comments instead of inline comments, this is a limitation of the parser
 	
 	"Data": [
 		{"ExporterVersion": {"Translation": "Exporter Version", "DataType": "DataType_ExporterVersion"}},

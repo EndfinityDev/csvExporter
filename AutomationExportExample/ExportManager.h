@@ -12,6 +12,9 @@
 
 #include "CJSONReader.h"
 
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
+
 enum ExporterStringData : unsigned int
 {
 	ExporterStringData_FileName = 0,
@@ -86,8 +89,6 @@ public:
 
 	inline std::wstring GetLocale() const { return m_Locale; }
 
-	static inline void ShowMessageBox(std::wstring text, std::wstring title);
-
 	static const std::wstring s_IllegalCharacters;
 
 private:
@@ -101,8 +102,6 @@ private:
 
 	void BuildSingleCSV();
 
-	std::wstring ValidateFileName(std::wstring filename, std::wstring defaultExtension);
-
 	bool LoadLuaFile(std::wstring filename, std::wstring path);
 	bool LoadLuaResource();
 	bool LoadDataFile(std::wstring filename, std::wstring path);
@@ -112,6 +111,8 @@ private:
 
 	bool ParseDataJSON(std::wstring json);
 	bool ParseTranslationJSON(std::wstring json);
+
+	bool LoadDataJSON(json& jsonData);
 
 	static AuExpManager* s_Instance;
 
