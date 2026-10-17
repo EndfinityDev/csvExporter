@@ -349,60 +349,80 @@ bool AuExpManager::LoadDataFile(std::wstring filename, std::wstring path)
 	return LoadDataJSON(jsonData);
 }
 
-bool AuExpManager::LoadDataJSON(json& jsonData)
+bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)
+{
+	if (!arrayObject.is_object()) // Verify object
+	{
+		return false;
+	}
+
+	for (const auto& entryPair : arrayObject.items()) // Iterate over every item in the object, old implementation only took the first one
+	{
+		auto& entryKey = entryPair.key(); // Outer object key
+		auto& entryValue = entryPair.value(); // Inner object
+		if (!entryValue.is_object()) // Verify inner object
+		{
+			return false;
+		}
+
+		std::wstring luaName = StringConverter::to_wstring(entryKey);
+
+		if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
+		{
+			return false;
+		}
+		auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
+		std::wstring translation = StringConverter::to_wstring(translationValue);
+
+		if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
+		{
+			return false;
+		}
+		auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
+		std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
+		DataType dataType = ParseDataType(dataTypeString);
+
+		bool doNotTranslate = false;
+		if (entryValue.contains("DoNotTranslate") && entryValue["DataType"].is_boolean())
+		{
+			doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
+		}
+
+		m_LuaData.emplace_back(translation, luaName, dataType);
+	}
+	return true;
+}
+
+bool AuExpManager::LoadDataJSON(const json& jsonData)
 {
 	for (const auto& items : jsonData.items()) // Data, etc.
 	{
 		//auto& key = items.key();
 		auto& value = items.value();
 
-		if (!value.is_array()) // Data, etc. as array
+		bool isObject = value.is_object();
+
+		if (!(value.is_array() || isObject)) // Data, etc. as array or object
 		{
 			return false;
 		}
 
-		for (const auto& arrayObject : value) // Object in array
+		if (isObject)
 		{
-			if (!arrayObject.is_object()) // Verify object
+			if (!LoadDataEntriesFromJSON(value))
 			{
 				return false;
 			}
-
-			for (const auto& entryPair : arrayObject.items()) // Iterate over every item in the object, old implementation only took the first one
+		}
+		else
+		{
+			for (const auto& arrayObject : value) // Object in array
 			{
-				auto& entryKey = entryPair.key(); // Outer object key
-				auto& entryValue = entryPair.value(); // Inner object
-				if (!entryValue.is_object()) // Verify inner object
+				if (!LoadDataEntriesFromJSON(arrayObject))
 				{
 					return false;
 				}
-
-				std::wstring luaName = StringConverter::to_wstring(entryKey);
-
-				if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
-				{
-					return false;
-				}
-				auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
-				std::wstring translation = StringConverter::to_wstring(translationValue);
-
-				if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
-				{
-					return false;
-				}
-				auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
-				std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
-				DataType dataType = ParseDataType(dataTypeString);
-
-				bool doNotTranslate = false;
-				if (entryValue.contains("DoNotTranslate") && entryValue["DataType"].is_boolean())
-				{
-					doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
-				}
-
-				m_LuaData.emplace_back(translation, luaName, dataType);
 			}
-
 		}
 	}
 	return true;

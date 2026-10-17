@@ -112,7 +112,8 @@ private:
 	bool ParseDataJSON(std::wstring json);
 	bool ParseTranslationJSON(std::wstring json);
 
-	bool LoadDataJSON(json& jsonData);
+	bool LoadDataJSON(const json& jsonData);
+	bool LoadDataEntriesFromJSON(const json& arrayObject);
 
 	static AuExpManager* s_Instance;
 
