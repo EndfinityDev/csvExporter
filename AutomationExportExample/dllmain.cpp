@@ -5,12 +5,17 @@
 
 
 #include "stdafx.h"
+#include <ShlObj.h>
 
 #include "..\Include\AuCarExportDLL.h"
 
+#if defined(_M_X64) || defined(_M_AMD64)
+	#define ARCHITECHTURE_x64
+#endif
+
 #include "EXPVERSION.h"
-#include <ShlObj.h>
 #include "ExportManager.h"
+#include "VersionChecker.h"
 
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
@@ -37,7 +42,9 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber
 {
 	*VersionNumber = EXPVERSION;
 
-	//CheckExporterVersion();
+#ifdef ARCHITECHTURE_x64
+	VersionChecker::RunVersionCheck();
+#endif
 
 	return AuCarExpErrorCode_Success;
 }

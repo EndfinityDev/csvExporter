@@ -11,7 +11,8 @@ class JSONFileManager
 {
 public:
 	static bool TryParseJSONFile(std::wstring filename, std::wstring path, json* outData);
-	static bool TryParseJSONData(std::wstring& inJSONString, json* outData);
+
+	template <typename T = std::wstring>
+	static bool TryParseJSONData(T& inJSONString, json* outData, bool silentError = false);
 private:
 };
-
