@@ -138,6 +138,13 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	att = GetFileAttributes(customFilePath.c_str());
 	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY)) // Go straight to loading resources if UserFiles doesn't exist
 	{
+		CreateDirectory(customFilePath.c_str(), nullptr); // Create UserFiles if it does't exist
+		att = GetFileAttributes(customFilePath.c_str());
+		if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			//TODO
+		}
+
 		LoadLuaResource();
 		LoadDataResource();
 		LoadTranslationResource();
