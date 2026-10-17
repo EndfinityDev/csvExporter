@@ -1,0 +1,18 @@
+#pragma once
+
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include "httplib.h"
+
+#ifndef CSVE_VERSIONCHECK_TARGET_URL
+	#define CSVE_VERSIONCHECK_TARGET_URL ""
+#endif // !CSVE_VERSIONCHECK_TARGET_URL
+
+#ifndef CSVE_VERSIONCHECK_VERIFY_CERT
+	#define CSVE_VERSIONCHECK_VERIFY_CERT true
+#endif // !CSVE_VERSIONCHECK_VERIFY_CERT
+
+
+class HTTPManager
+{
+};
+
