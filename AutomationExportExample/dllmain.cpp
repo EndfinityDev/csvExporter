@@ -127,7 +127,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 
 	//std::wstring luaFile = prefs.LuaFile;
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Label, L"Lua File");
-	wcscpy_s(stringData[ExporterStringData_LuaFileName].ToolTip, L"The name of the Lua code file in the CSVExporter 2 user data folder. A .lua extension is added automatically if one is not provided. The default file is used if left blank");
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].ToolTip, L"The name of the Lua code file in the CSVExporter 2 user data folder. A .lua extension is added automatically if one is not provided. The default file is used if left blank. Multiple files names can be provided separated by commas, they will be loaded in the provided order");
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Value, prefs.LuaFile);
 
 	//std::wstring datasetFile = prefs.DataFile;
