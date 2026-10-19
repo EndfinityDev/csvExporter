@@ -2,16 +2,24 @@
 #include "HTTPManager.h"
 
 
-std::string HTTPManager::Get(std::string url)
+std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params)
 {
 	try
 	{
-		httplib::Client client(url);
+		httplib::Client client(urlHost);
+		httplib::Headers headers = {
+#ifdef CSVE_HTTP_API_KEY
+			{ "X-API-Key", CSVE_HTTP_API_KEY },
+#endif
+			{ "User-Agent", CSVE_HTTP_USER_AGENT }
+		};
+
+		std::string queryString = httplib::append_query_params(urlPath, params);
 
 		client.set_connection_timeout(5, 0);
 		client.set_read_timeout(5, 0);
 
-		if (auto result = client.Get(url.c_str()))
+		if (auto result = client.Get(queryString, headers))
 		{
 			if (result->status == 200)
 			{

@@ -1,9 +1,17 @@
 #pragma once
 #include <string>
 
-#ifndef CSVE_VERSIONCHECK_TARGET_URL
-#define CSVE_VERSIONCHECK_TARGET_URL ""
-#endif // !CSVE_VERSIONCHECK_TARGET_URL
+#ifndef CSVE_VERSIONCHECK_TARGET_URL_HOST
+#define CSVE_VERSIONCHECK_TARGET_URL_HOST ""
+#endif // !CSVE_VERSIONCHECK_TARGET_URL_HOST
+
+#ifndef CSVE_VERSIONCHECK_TARGET_URL_PATH
+#define CSVE_VERSIONCHECK_TARGET_URL_PATH ""
+#endif // !CSVE_VERSIONCHECK_TARGET_URL_PATH
+//
+#ifndef CSVE_VERSIONCHECK_TARGET_URL_PARAMS
+#define CSVE_VERSIONCHECK_TARGET_URL_PARAMS {}
+#endif // !CSVE_VERSIONCHECK_TARGET_URL_PATH
 
 #ifndef CSVE_VERSIONCHECK_VERIFY_CERT
 #define CSVE_VERSIONCHECK_VERIFY_CERT true
@@ -25,6 +33,6 @@ public:
 	static void RunVersionCheck();
 private:
 	static void RunVersionCheckThread();
-	static bool CheckFrequencyThreshold();
+	static bool CheckNotificationPaused();
 };
 

@@ -13,9 +13,10 @@
 	#define ARCHITECHTURE_x64
 #endif
 
-#include "EXPVERSION.h"
+#include "BuildDate.h"
 #include "ExportManager.h"
 #include "VersionChecker.h"
+
 
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
@@ -40,7 +41,8 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, 
 //This is for display in the UI only (to help when users report bugs, etc.). Automation does nothing else with this information.
 AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber)
 {
-	*VersionNumber = EXPVERSION;
+	//*VersionNumber = EXPVERSION;
+	*VersionNumber = BUILD_DATE_INT;
 
 #ifdef ARCHITECHTURE_x64
 	VersionChecker::RunVersionCheck();

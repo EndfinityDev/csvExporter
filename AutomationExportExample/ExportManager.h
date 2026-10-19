@@ -8,7 +8,7 @@
 #include "csvExporter.h"
 #include "LuaData.h"
 #include "CSVManager.h"
-#include "EXPVERSION.h"
+#include "ExportPrefsVersion.h"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;

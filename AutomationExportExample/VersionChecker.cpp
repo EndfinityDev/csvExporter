@@ -3,14 +3,14 @@
 #include <thread>
 #include <chrono>
 
+#include "BuildDate.h"
 #include "VersionChecker.h"
-#include "EXPVERSION.h"
 #include "MessageBoxManager.h"
 #include "StringConverter.h"
 
 void VersionChecker::RunVersionCheck()
 {
-	if (CSVE_VERSIONCHECK_TARGET_URL[0] != '\0') // TODO: make this a compile time check
+	if (CSVE_VERSIONCHECK_TARGET_URL_HOST[0] != '\0')
 	{
 		std::thread([]() {
 			RunVersionCheckThread();
@@ -20,14 +20,17 @@ void VersionChecker::RunVersionCheck()
 
 void VersionChecker::RunVersionCheckThread()
 {
-	std::string returnData = HTTPManager::Get(CSVE_VERSIONCHECK_TARGET_URL);
-	if (returnData.empty())
+
+	httplib::Params requestParams = { CSVE_VERSIONCHECK_TARGET_URL_PARAMS };
+
+	std::string responseData = HTTPManager::Get(CSVE_VERSIONCHECK_TARGET_URL_HOST, CSVE_VERSIONCHECK_TARGET_URL_PATH, requestParams);
+	if (responseData.empty())
 	{
 		return;
 	}
 
 	json jsonData;
-	if (JSONFileManager::TryParseJSONData<std::string>(returnData, &jsonData, true))
+	if (JSONFileManager::TryParseJSONData<std::string>(responseData, &jsonData, true))
 	{
 		if (!jsonData.contains("exporterVersion"))
 		{
@@ -40,11 +43,11 @@ void VersionChecker::RunVersionCheckThread()
 
 		if (jsonData.contains("displayVersion") && jsonData["displayVersion"].is_string())
 		{
-			auto& exporterDisplayVersionUTF8 = jsonData["displayVersion"].get<std::string>();
+			std::string& exporterDisplayVersionUTF8 = jsonData["displayVersion"].get<std::string>();
 			exporterDisplayVersion = StringConverter::to_wstring(exporterDisplayVersionUTF8);
 		}
 
-		if (exporterVersion > EXPVERSION && !CheckFrequencyThreshold())
+		if (exporterVersion > BUILD_DATE_INT && !CheckNotificationPaused())
 		{
 			std::wstringstream ss;
 			ss << "A new exporter version " << exporterDisplayVersion << " is available.";
@@ -65,13 +68,13 @@ void VersionChecker::RunVersionCheckThread()
 	}
 }
 
-bool VersionChecker::CheckFrequencyThreshold()
+bool VersionChecker::CheckNotificationPaused()
 {
 	TCHAR path[MAX_PATH];
 
 	std::wstring prefsDir;
 
-	bool result = true; // true = within pause threshold, false if the time limit has elapsed or timestamp hasn't been cached
+	bool notificationPaused = true; // true = within pause threshold, false if the time limit has elapsed or timestamp hasn't been cached
 
 	//get the user's documents directory:
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
@@ -112,27 +115,27 @@ bool VersionChecker::CheckFrequencyThreshold()
 					if (hoursDiff > CSVE_VERSIONCHECK_HOURS_LIMIT)
 					{
 						writeNewFile = true;
-						result = false;
+						notificationPaused = false;
 					}
 				}
 				else
 				{
 					fclose(file);
 					writeNewFile = true;
-					result = false;
+					notificationPaused = false;
 				}
 			}
 			else
 			{
 				fclose(file);
 				writeNewFile = true;
-				result = false;
+				notificationPaused = false;
 			}
 		}
 		else
 		{
 			writeNewFile = true;
-			result = false;
+			notificationPaused = false;
 		}
 
 		if (writeNewFile)
@@ -151,5 +154,5 @@ bool VersionChecker::CheckFrequencyThreshold()
 			}
 		}
 	}
-	return result;
+	return notificationPaused;
 }
