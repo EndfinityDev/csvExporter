@@ -12,6 +12,8 @@
     <ClCompile Include="LuaData.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="JSONFileManager.cpp" />
+    <ClCompile Include="HTTPManager.cpp" />
+    <ClCompile Include="VersionChecker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csvExporter.h" />
@@ -30,6 +32,8 @@
     <ClInclude Include="JSONFileManager.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="MessageBoxManager.h" />
+    <ClInclude Include="HTTPManager.h" />
+    <ClInclude Include="VersionChecker.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="csvExporter.rc" />

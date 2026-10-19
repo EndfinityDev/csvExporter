@@ -1,5 +1,8 @@
 #include "CSVManager.h"
 #include "stdafx.h"
+
+#include "BuildDate.h"
+
 #include <codecvt>
 
 CSVManager::CSVManager(std::wstring filepath, std::wstring delimiter) :
@@ -78,7 +81,7 @@ void CSVManager::WriteData(std::wofstream& outputFile) const
 			outputFile << m_ExportManager->GetCarName();
 			break;
 		case DataType_ExporterVersion:
-			outputFile << EXPVERSION;
+			outputFile << BUILD_DATE_INT;
 			break;
 		default:
 			// error out

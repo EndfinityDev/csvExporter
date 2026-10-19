@@ -22,14 +22,18 @@ bool JSONFileManager::TryParseJSONFile(std::wstring filename, std::wstring path,
 	return TryParseJSONData(tempFile.str(), outData);
 }
 
-bool JSONFileManager::TryParseJSONData(std::wstring& inJSONString, json* outData)
+template <typename T>
+bool JSONFileManager::TryParseJSONData(T& inJSONString, json* outData, bool silentError)
 {
 	try {
 		*outData = json::parse(inJSONString, nullptr, true, true);
 
 		if (!outData->is_object())
 		{
-			MessageBoxManager::ShowMessageBox(L"The top level of the file does not contain an object", L"Failed to parse JSON");
+			if (!silentError)
+			{
+				MessageBoxManager::ShowMessageBox(L"The top level of the file does not contain an object", L"Failed to parse JSON");
+			}
 			return false;
 		}
 
@@ -45,7 +49,14 @@ bool JSONFileManager::TryParseJSONData(std::wstring& inJSONString, json* outData
 
 		// 2. Convert the entire message block to a wstring
 		std::wstring errorString = StringConverter::to_wstring(ss.str());
-		MessageBoxManager::ShowMessageBox(errorString, L"Failed to parse JSON");
+		if (!silentError)
+		{
+			MessageBoxManager::ShowMessageBox(errorString, L"Failed to parse JSON");
+		}
 		return false;
 	}
 }
+
+
+template bool JSONFileManager::TryParseJSONData<std::string>(std::string&, json*, bool);
+template bool JSONFileManager::TryParseJSONData<std::wstring>(std::wstring&, json*, bool);
