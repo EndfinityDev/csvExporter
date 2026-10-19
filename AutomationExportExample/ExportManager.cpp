@@ -172,7 +172,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	if (hasValue)
 	{
-		if (!LoadLuaFile(luaFileName, customFilePath))
+		if (!LoadLuaFiles(luaFileName, customFilePath))
 		{
 			MessageBoxManager::ShowMessageBox(L"Failed to load Lua file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
