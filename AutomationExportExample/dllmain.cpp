@@ -433,7 +433,7 @@ AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpL
 
 AuCarExpErrorCode AuCarExportDLL::GetLuaFileCount(unsigned int* fileCount)
 {
-	*fileCount = 1;
+	*fileCount = AuExpManager::GetInstance()->GetLuaFileCount();
 
 	return AuCarExpErrorCode_Success;
 }
@@ -459,7 +459,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLuaFileLength(unsigned int* retLength, unsi
 	*retLength = size + 1; //size in chars (what we need) is the byte size. We add one for a null terminator
 	*/
 
-	*retLength = AuExpManager::GetInstance()->GetLuaFileLength();
+	*retLength = AuExpManager::GetInstance()->GetLuaFileLength(FileNum);
 
 	return AuCarExpErrorCode_Success;
 }
@@ -490,8 +490,8 @@ AuCarExpErrorCode AuCarExportDLL::GetLuaFile(AuCarExpArray<wchar_t>& stringBuffe
 	char* data = (char*)LockResource(hResourceLoaded);
 	*/
 
-	size_t size = AuExpManager::GetInstance()->GetLuaFileLength();
-	std::string data = AuExpManager::GetInstance()->GetLuaFile();
+	size_t size = AuExpManager::GetInstance()->GetLuaFileLength(FileNum);
+	std::string data = AuExpManager::GetInstance()->GetLuaFile(FileNum);
 
 	if ((size + 1) <= stringBuffer.GetCount())
 	{

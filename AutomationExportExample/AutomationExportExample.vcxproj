@@ -218,6 +218,7 @@
     <ClInclude Include="resource2.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringConverter.h" />
+    <ClInclude Include="StringUtils.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="VersionChecker.h" />
   </ItemGroup>

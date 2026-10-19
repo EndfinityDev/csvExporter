@@ -82,8 +82,9 @@ public:
 
 	const wchar_t* GetCarName() const { return m_CarData->GetCarName(); }
 
-	inline size_t GetLuaFileLength() const { return m_LuaFileLength; }
-	inline std::string GetLuaFile() const { return m_LuaFile; }
+	inline unsigned int GetLuaFileCount() const { return m_LuaFiles.size(); }
+	inline size_t GetLuaFileLength(const unsigned int fileID) const { return m_LuaFiles[fileID].length(); }
+	inline std::string GetLuaFile(const unsigned int fileID) const { return m_LuaFiles[fileID]; }
 
 	inline std::wstring GetLocale() const { return m_Locale; }
 
@@ -98,11 +99,12 @@ private:
 
 	void BuildSingleCSV();
 
-	bool LoadLuaFile(std::wstring filename, std::wstring path);
+	bool LoadLuaFiles(const std::wstring& fileNames, const std::wstring& path);
+	bool LoadLuaFile(const std::wstring& filename, const std::wstring& path);
 	bool LoadLuaResource();
-	bool LoadDataFile(std::wstring filename, std::wstring path);
+	bool LoadDataFile(const std::wstring& filename, const std::wstring& path);
 	bool LoadDataResource();
-	bool LoadTranslationFile(std::wstring filename, std::wstring path);
+	bool LoadTranslationFile(const std::wstring& filename, const std::wstring& path);
 	bool LoadTranslationResource();
 
 	bool LoadDataJSON(const json& jsonData);
@@ -133,8 +135,9 @@ private:
 	std::wstring m_EngineName = L"";
 	std::wstring m_Delimiter = L"";
 
-	std::string m_LuaFile = "";
-	size_t m_LuaFileLength = 0;
+	std::vector<std::string> m_LuaFiles;
+	//std::string m_LuaFile = "";
+	//size_t m_LuaFileLength = 0;
 
 	bool m_LuaDataAdded = false;
 
