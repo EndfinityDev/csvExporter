@@ -9,6 +9,7 @@
 
 #include "StringConverter.h"
 #include "FileUtils.h"
+#include "StringUtils.h"
 #include "MessageBoxManager.h"
 #include "JSONFileManager.h"
 
@@ -45,6 +46,8 @@ AuExpManager::AuExpManager() :
 AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 {
 	TCHAR path[MAX_PATH];
+
+	m_LuaFiles.clear();
 
 	m_CarData = carData;
 
@@ -169,7 +172,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	if (hasValue)
 	{
-		if (!LoadLuaFile(luaFileName, customFilePath))
+		if (!LoadLuaFiles(luaFileName, customFilePath))
 		{
 			MessageBoxManager::ShowMessageBox(L"Failed to load Lua file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
@@ -241,17 +244,37 @@ bool AuExpManager::LoadLuaResource()
 
 	unsigned int size = SizeofResource(m_Module, hRes);
 	size++; // Null terminator
-	m_LuaFileLength = size;
+	//m_LuaFileLength = size;
 	//m_LuaFile.reserve(m_LuaFileLength);
 
 	hResourceLoaded = LoadResource(m_Module, hRes);
-	m_LuaFile = (char*)LockResource(hResourceLoaded);
+	//m_LuaFile = (char*)LockResource(hResourceLoaded);
+	m_LuaFiles.push_back((char*)LockResource(hResourceLoaded));
 
 	UnlockResource(hResourceLoaded);
 	return true;
 }
 
-bool AuExpManager::LoadLuaFile(std::wstring filename, std::wstring path)
+bool AuExpManager::LoadLuaFiles(const std::wstring& fileNames, const std::wstring& path)
+{
+	std::vector<std::wstring> splitFileNames = StringUtils::SplitByCharW(fileNames, L',');
+	if (splitFileNames.size() == 0)
+	{
+		return false;
+	}
+
+	for (const std::wstring& fileName : splitFileNames)
+	{
+		if (!LoadLuaFile(fileName, path))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool AuExpManager::LoadLuaFile(const std::wstring& filename, const std::wstring& path)
 {
 	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".lua");
 
@@ -269,11 +292,12 @@ bool AuExpManager::LoadLuaFile(std::wstring filename, std::wstring path)
 	//file >> m_LuaFile;
 	std::stringstream tempLuaFile;
 	tempLuaFile << file.rdbuf();
-	m_LuaFile = tempLuaFile.str();
+	//m_LuaFile = tempLuaFile.str();
+	m_LuaFiles.push_back(tempLuaFile.str());
 
 	file.close();
 
-	m_LuaFileLength = m_LuaFile.size();
+	//m_LuaFileLength = m_LuaFile.size();
 
 	return true;
 }
@@ -314,7 +338,7 @@ bool AuExpManager::LoadDataResource()
 	return LoadDataJSON(jsonData);
 }
 
-bool AuExpManager::LoadDataFile(std::wstring filename, std::wstring path)
+bool AuExpManager::LoadDataFile(const std::wstring& filename, const std::wstring& path)
 {
 	json jsonData;
 	if (!JSONFileManager::TryParseJSONFile(filename, path, &jsonData))
@@ -440,7 +464,7 @@ bool AuExpManager::LoadTranslationResource()
 	return LoadTranslationJSON(jsonData);
 }
 
-bool AuExpManager::LoadTranslationFile(std::wstring filename, std::wstring path)
+bool AuExpManager::LoadTranslationFile(const std::wstring& filename, const std::wstring& path)
 {
 	json jsonData;
 	if (!JSONFileManager::TryParseJSONFile(filename, path, &jsonData))
@@ -515,7 +539,8 @@ void AuExpManager::EndExport()
 
 void AuExpManager::ExportInternal()
 {
-	m_LuaFile = ""; // Free memory of the Lua file since we don't need it anymore
+	//m_LuaFile = ""; // Free memory of the Lua file since we don't need it anymore
+	m_LuaFiles.clear();
 	BuildSingleCSV();
 
 	TCHAR path[MAX_PATH];

@@ -19,6 +19,8 @@ def main():
         archive.write(cwd + "\\AutomationExportExample\\Resources\\csvExporter_dataset.json", "AutomationGame\\CSVExporter 2\\UserFiles\\DatasetExample.json")
         archive.write(cwd + "\\AutomationExportExample\\Resources\\csvExporter_translations.json", "AutomationGame\\CSVExporter 2\\UserFiles\\TranslationsExample.json")
 
+        archive.write(cwd + "\\Example_UserFiles\\example_override.lua", "AutomationGame\\CSVExporter 2\\UserFiles\\example_override.lua")
+
         archive.close()
         
         print("Packaging complete")
