@@ -23,16 +23,19 @@ bool JSONFileManager::TryParseJSONFile(std::wstring filename, std::wstring path,
 }
 
 template <typename T>
-bool JSONFileManager::TryParseJSONData(T& inJSONString, json* outData, bool silentError)
+bool JSONFileManager::TryParseJSONData(const T& inJSONString, json* outData, const bool silentError, const JSONDataType topLevelType)
 {
 	try {
 		*outData = json::parse(inJSONString, nullptr, true, true);
 
-		if (!outData->is_object())
+		if ((topLevelType == JSONDataType::OBJECT && !outData->is_object()) || (topLevelType == JSONDataType::ARRAY && !outData->is_array()))
 		{
 			if (!silentError)
 			{
-				MessageBoxManager::ShowMessageBox(L"The top level of the file does not contain an object", L"Failed to parse JSON");
+				MessageBoxManager::ShowMessageBox(
+					topLevelType == JSONDataType::OBJECT ? L"The top level of the file does not contain an object" :
+					L"The top level of the file does not contain an array",
+					L"Failed to parse JSON");
 			}
 			return false;
 		}
@@ -58,5 +61,5 @@ bool JSONFileManager::TryParseJSONData(T& inJSONString, json* outData, bool sile
 }
 
 
-template bool JSONFileManager::TryParseJSONData<std::string>(std::string&, json*, bool);
-template bool JSONFileManager::TryParseJSONData<std::wstring>(std::wstring&, json*, bool);
+template bool JSONFileManager::TryParseJSONData<std::string>(const std::string&, json*, bool, const JSONDataType);
+template bool JSONFileManager::TryParseJSONData<std::wstring>(const std::wstring&, json*, bool, const JSONDataType);
