@@ -88,8 +88,7 @@ public:
 
 	inline std::wstring GetLocale() const { return m_Locale; }
 
-	static const std::wstring s_IllegalCharacters;
-
+	static const std::wstring APPDATA_DIR;
 private:
 
 	AuExpManager();
@@ -113,6 +112,7 @@ private:
 	bool LoadTranslationJSON(const json& jsonData);
 
 	static AuExpManager* s_Instance;
+	static const std::wstring s_IllegalCharacters;
 
 	bool m_IsExportInProcess = false;
 

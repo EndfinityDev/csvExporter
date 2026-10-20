@@ -26,8 +26,8 @@ size_t FindDirDelimiter(std::wstring dir, size_t start)
 	return slashPos;
 }
 
+const std::wstring AuExpManager::APPDATA_DIR = L"\\AutomationGame\\CSVExporter 2";
 const std::wstring AuExpManager::s_IllegalCharacters = L"\\/:?\"<>|";
-
 
 AuExpManager* AuExpManager::s_Instance = nullptr;
 
@@ -54,13 +54,13 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	m_Delimiter = carData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
 	m_Locale = carData->GetStringData(ExporterStringData_Locale)->Value;
 
-	std::wstring mainDirectory = L"\\AutomationGame\\CSVExporter 2";
+	//std::wstring mainDirectory = L"\\AutomationGame\\CSVExporter 2";
 
 	//get the user's documents directory:
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		m_ExportDirectory = path;
-		m_ExportDirectory += mainDirectory + L"\\Exports";
+		m_ExportDirectory += APPDATA_DIR + L"\\Exports";
 	}
 	else
 	{
@@ -136,7 +136,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 
 
 
-	std::wstring customFilePath = path + mainDirectory + L"\\UserFiles";
+	std::wstring customFilePath = path + APPDATA_DIR + L"\\UserFiles";
 
 	att = GetFileAttributes(customFilePath.c_str());
 	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY)) // Go straight to loading resources if UserFiles doesn't exist
