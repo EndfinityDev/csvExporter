@@ -206,6 +206,7 @@
     <ClInclude Include="DataType.h" />
     <ClInclude Include="DDSHeader.h" />
     <ClInclude Include="CSVManager.h" />
+    <ClInclude Include="DirectoryManager.h" />
     <ClInclude Include="ExportManager.h" />
     <ClInclude Include="ExportPrefsVersion.h" />
     <ClInclude Include="FileUtils.h" />

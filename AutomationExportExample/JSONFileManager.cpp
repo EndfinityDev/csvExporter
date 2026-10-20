@@ -6,7 +6,7 @@
 
 bool JSONFileManager::TryParseJSONFile(std::wstring filename, std::wstring path, json* outData)
 {
-	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".json");
+	std::wstring sanitizedName = FileUtils::SanitizeFileNameWithExtension(filename, L".json");
 
 	std::wstring fullFilePath = path + L'\\' + sanitizedName;
 	std::wifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);

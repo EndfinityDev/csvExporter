@@ -88,7 +88,8 @@ public:
 
 	inline std::wstring GetLocale() const { return m_Locale; }
 
-	static const std::wstring APPDATA_DIR;
+	static const std::wstring APPDATA_EXPORTER_DIR;
+	static const std::wstring APPDATA_EXPORTER_PREFS_DIR;
 private:
 
 	AuExpManager();
