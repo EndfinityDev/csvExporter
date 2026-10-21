@@ -69,7 +69,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 
 		bool isStringParameter = false;
 		std::string parameterType = parameter["type"].get<std::string>();
-		if (parameterType == "string")
+		if (parameterType == "string" || parameterType == "str")
 		{
 			isStringParameter = true;
 		}
@@ -167,7 +167,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 			value = parameter["defaultValue"].get<bool>();
 		}
 
-		//exportParamGroup.BoolParams.emplace_back(ExportCustomBoolParam{ label, tooltip, value, saveToPrefs });
+		exportParamGroup.BoolParams.emplace_back(ExportCustomBoolParam{ label, tooltip, value, luaName, saveToPrefs });
 		continue;
 	}
 }

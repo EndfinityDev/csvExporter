@@ -14,19 +14,7 @@
 #include "JSONFileManager.h"
 #include "DirectoryManager.h"
 #include "ExportPrefs.h"
-
-
-size_t FindDirDelimiter(std::wstring dir, size_t start)
-{
-	size_t slashPos = dir.find(L"\\", start);
-
-	if (slashPos == std::wstring::npos)
-	{
-		return dir.find(L"/", start);
-	}
-
-	return slashPos;
-}
+#include "ExportCustomParamsManager.h"
 
 const std::wstring AuExpManager::APPDATA_EXPORTER_DIR = L"\\AutomationGame\\CSVExporter 2";
 const std::wstring AuExpManager::APPDATA_EXPORTER_PREFS_DIR = L"\\AutomationGame\\ExporterPrefs\\";
@@ -90,6 +78,8 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 			return AuCarExpErrorCode_CouldNotObtainOutputPathFatal;
 		}
 	}
+
+	BuildParamsLuaFile();
 
 	std::wstring customFilePath = path + APPDATA_EXPORTER_DIR + L"\\UserFiles";
 	std::wstring exportParamsPath = customFilePath + L"\\.ExportParams";
@@ -194,6 +184,66 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 
 	return AuCarExpErrorCode_Success;
+}
+
+
+void AuExpManager::BuildParamsLuaFile()
+{
+	unsigned int stringParameterCount = m_CarData->GetStringDataCount() - ExporterStringData_Count;
+	unsigned int boolParameterCount = m_CarData->GetBoolDataCount() - ExporterBoolData_Count;
+
+	ExportCustomParamsGroup exportParams;
+
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportParamDir = path + APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
+		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+	}
+
+	if (stringParameterCount != exportParams.StringParams.size())
+	{
+		//TODO
+		return;
+	}
+
+	if (boolParameterCount != exportParams.BoolParams.size())
+	{
+		//TODO
+		return;
+	}
+
+	std::stringstream paramsLuaStream;
+	paramsLuaStream << "ExportParameters = {\n";
+	paramsLuaStream << "\tStringParameters = {\n\t\t";
+
+	for (unsigned int i = 0; i < stringParameterCount; i++)
+	{
+		std::wstring value = StringUtils::SanitizeLuaString(m_CarData->GetStringData(ExporterStringData_Count + i)->Value);
+
+		if (i != 0)
+		{
+			paramsLuaStream << ",\n\t\t";
+		}
+		paramsLuaStream << StringConverter::to_utf8string(exportParams.StringParams[i].LuaName) << " = \"" << StringConverter::to_utf8string(value) << "\"";
+	}
+	paramsLuaStream << "\n\t},";
+
+	paramsLuaStream << "\n\n\tBoolParameters = {\n\t\t";
+	for (unsigned int i = 0; i < boolParameterCount; i++)
+	{
+		bool value = m_CarData->GetBoolData(ExporterBoolData_Count + i)->Value;
+
+		if (i != 0)
+		{
+			paramsLuaStream << ",\n\t\t";
+		}
+		paramsLuaStream << StringConverter::to_utf8string(exportParams.BoolParams[i].LuaName) << " = " << (value ? "true" : "false");
+	}
+	paramsLuaStream << "\n\t}";
+	paramsLuaStream << "\n}\n\0";
+
+	m_LuaFiles.push_back(paramsLuaStream.str());
 }
 
 bool AuExpManager::LoadLuaResource()

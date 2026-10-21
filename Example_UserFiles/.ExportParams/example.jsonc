@@ -1,0 +1,30 @@
+[
+  // This is another example file with a different supported structure
+  {
+    "my_random_value": "Extra things can be added, they have no effect",
+    "type": "string",
+    "label": "No tooltip",
+    "luaName": "no_tooltip",
+    "save":  true
+  },
+  {
+    "type": "string",
+    "luaName": "my_parameter",
+    "tooltip": "No label - luaName is used instead, plus more wildcard defaults",
+    "defaultValue": "[PlayerName] [PlatformName] [TrimName]",
+    "save": false
+  },
+  {
+    "type": "none",
+    "label": "Incorrect entry",
+    "tooltip": "Incorrect entries will simply be ignored"
+  },
+  {
+    "label": "This one too!"
+  },
+  {
+    "type": "string",
+    "label": "No luaName",
+    "tooltip": "luaName is required, this will be ignored as well"
+  }
+]

@@ -141,7 +141,6 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 //Gets the number of user-supplied booleans that the plugin will be requesting
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCount)
 {
-	//we will want to get 2 booleans from the user:
 	*retCount = ExporterBoolData_Count;
 
 	TCHAR path[MAX_PATH];
@@ -149,7 +148,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCoun
 	{
 		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
 		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
-		//*retCount += exportParams.BoolParams.size();
+		*retCount += exportParams.BoolParams.size();
 	}
 
 	return AuCarExpErrorCode_Success;
@@ -167,7 +166,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 	{
 		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
 		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
-		//boolDataCount += exportParams.BoolParams.size();
+		boolDataCount += exportParams.BoolParams.size();
 	}
 
 	if (boolData.GetCount() != boolDataCount)
@@ -177,60 +176,12 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 		return AuCarExpErrorCode_UnknownError;
 	}
 
-	/*
-	if (boolData.GetCount() != 2)
+	for (int i = 0; i < exportParams.BoolParams.size(); i++)
 	{
-		//Automation has not given us the number of items we asked for
-		//(this should never happen)
-		return AuCarExpErrorCode_UnknownError;
+		wcscpy_s(boolData[ExporterBoolData_Count + i].Label, exportParams.BoolParams[i].Label.c_str());
+		wcscpy_s(boolData[ExporterBoolData_Count + i].ToolTip, exportParams.BoolParams[i].Tooltip.c_str());
+		boolData[ExporterBoolData_Count + i].Value = exportParams.BoolParams[i].Value;
 	}
-
-	//set the value:
-	wcscpy_s(boolData[0].Label, L"Export Engine Separately");//label
-	//boolData[0].Value = false;//default value
-
-	wcscpy_s(boolData[1].Label, L"Export Results Separately");//label
-	//boolData[1].Value = false;//default value
-
-	bool readFromFile = true;
-	TCHAR path[MAX_PATH];
-	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-	{
-		std::wstring prefsFilePath = path;
-		prefsFilePath += L"\\AutomationGame\\ExporterPrefs\\csvExporter.prefs";
-		FILE* prefsFile;
-		_wfopen_s(&prefsFile, prefsFilePath.c_str(), L"rb");
-
-		if (prefsFile)
-		{
-			fseek(prefsFile, 0, SEEK_END);
-			size_t fileSize = ftell(prefsFile);
-			fseek(prefsFile, 0, SEEK_SET);
-
-			if (fileSize == sizeof(ExportPrefs))
-			{
-				ExportPrefs prefs;
-				fread_s(&prefs, sizeof(prefs), fileSize, 1, prefsFile);
-				boolData[0].Value = prefs.PrefsFlags & 0b00000001;
-				boolData[1].Value = prefs.PrefsFlags & 0b00000010;
-			}
-			else
-				readFromFile = false;
-
-			fclose(prefsFile);
-		}
-		else
-			readFromFile = false;
-	}
-	else
-		readFromFile = false;
-
-	if (!readFromFile)
-	{
-		boolData[0].Value = false;
-		boolData[1].Value = false;
-	}
-	*/
 
 	return AuCarExpErrorCode_Success;
 }
@@ -457,25 +408,6 @@ AuCarExpErrorCode AuCarExportDLL::GetLuaFileCount(unsigned int* fileCount)
 
 AuCarExpErrorCode AuCarExportDLL::GetLuaFileLength(unsigned int* retLength, unsigned int FileNum)
 {
-	//*retLength = 0;
-
-	/*
-	HRSRC   hRes;              // handle/ptr to res. info.
-
-	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
-
-	hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
-
-	if (!hRes)
-	{
-		return AuCarExpErrorCode_UnknownError;
-	}
-
-	unsigned int size = SizeofResource(module, hRes);
-
-	*retLength = size + 1; //size in chars (what we need) is the byte size. We add one for a null terminator
-	*/
-
 	*retLength = AuExpManager::GetInstance()->GetLuaFileLength(FileNum);
 
 	return AuCarExpErrorCode_Success;
@@ -487,25 +419,6 @@ AuCarExpErrorCode AuCarExportDLL::GetLuaFile(AuCarExpArray<wchar_t>& stringBuffe
 	{
 		return AuCarExpErrorCode_UnknownError;
 	}
-
-	/*
-	HGLOBAL hResourceLoaded;  // handle to loaded resource
-	HRSRC   hRes;              // handle/ptr to res. info.
-
-	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
-
-	hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
-
-	if (!hRes)
-	{
-		return AuCarExpErrorCode_UnknownError;
-	}
-
-	unsigned int size = SizeofResource(module, hRes);
-
-	hResourceLoaded = LoadResource(module, hRes);
-	char* data = (char*)LockResource(hResourceLoaded);
-	*/
 
 	size_t size = AuExpManager::GetInstance()->GetLuaFileLength(FileNum);
 	std::string data = AuExpManager::GetInstance()->GetLuaFile(FileNum);

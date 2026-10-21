@@ -80,3 +80,50 @@ struct ExportCustomStringParamPrefs
         return map;
     }
 };
+
+struct ExportCustomBoolParam
+{
+    std::wstring Label = L"";
+    std::wstring Tooltip = L"";
+    bool Value = false;
+    std::wstring LuaName = L"";
+
+    bool allowSavingToPrefs = false;
+};
+
+#define CSVE_CUSTOM_PREFS_BOOL_VERSION 0
+
+struct ExportCustomBoolParamPrefs
+{
+    uint8_t Version = CSVE_CUSTOM_PREFS_BOOL_VERSION;
+    std::vector<std::pair<ExportParamString, bool>> ParamTable;
+
+    static ExportCustomBoolParamPrefs FromExportParams(const std::vector<ExportCustomBoolParam>& exportParams)
+    {
+        ExportCustomBoolParamPrefs paramPrefs;
+        for (const ExportCustomBoolParam& param : exportParams)
+        {
+            if (!param.allowSavingToPrefs)
+            {
+                continue;
+            }
+            paramPrefs.ParamTable.emplace_back(
+                ExportParamStringConverter::FromWString(param.Label),
+                param.Value
+            );
+        }
+
+        return paramPrefs;
+    }
+
+    static std::unordered_map<std::wstring, bool> ToWStringMap(const ExportCustomBoolParamPrefs& prefs)
+    {
+        std::unordered_map<std::wstring, bool> map;
+        map.reserve(prefs.ParamTable.size());
+        for (const auto& items : prefs.ParamTable)
+        {
+            map.emplace(ExportParamStringConverter::ToWString(items.first), items.second);
+        }
+        return map;
+    }
+};

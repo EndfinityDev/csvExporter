@@ -21,6 +21,9 @@ def main():
 
         archive.write(cwd + "\\Example_UserFiles\\example_override.lua", "AutomationGame\\CSVExporter 2\\UserFiles\\example_override.lua")
 
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\example.json.example")
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\example.jsonc", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\example.jsonc.example")
+
         archive.close()
         
         print("Packaging complete")

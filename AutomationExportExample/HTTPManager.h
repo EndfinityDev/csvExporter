@@ -14,6 +14,6 @@
 class HTTPManager
 {
 public:
-	static std::string Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params);
+	static std::string Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params, bool allowAnyStatus = false);
 };
 

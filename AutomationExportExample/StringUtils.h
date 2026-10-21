@@ -98,7 +98,7 @@ public:
         return true;
     }
 
-    std::wstring SanitizeLuaString(const std::wstring& input) 
+    static std::wstring SanitizeLuaString(const std::wstring& input) 
     {
         std::wostringstream ss;
 

@@ -7,6 +7,7 @@ using json = nlohmann::ordered_json;
 
 struct ExportCustomParamsGroup {
 	std::vector<ExportCustomStringParam> StringParams;
+	std::vector<ExportCustomBoolParam> BoolParams;
 };
 
 class ExportCustomParamsManager

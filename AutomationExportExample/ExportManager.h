@@ -81,6 +81,8 @@ private:
 	AuExpManager();
 	~AuExpManager() {}
 
+	void BuildParamsLuaFile();
+
 	void ExportInternal();
 
 	void BuildSingleCSV();
