@@ -17,6 +17,7 @@
 #include "ExportManager.h"
 #include "VersionChecker.h"
 #include "ExportPrefs.h"
+#include "ExportCustomParamsManager.h"
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
 AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, wchar_t const* locale)
@@ -56,13 +57,33 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCo
 	//we will want to get 3 lots of string information from the user:
 	*retCount = ExporterStringData_Count;
 
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
+		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		*retCount += exportParams.StringParams.size();
+	}
+
 	return AuCarExpErrorCode_Success;
 }
 
 //Gets the user-supplied string information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUIStringData>& stringData, wchar_t const* locale)
 {
-	if (stringData.GetCount() != ExporterStringData_Count)
+	unsigned int stringDataCount = ExporterStringData_Count;
+
+	ExportCustomParamsGroup exportParams;
+
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
+		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		stringDataCount += exportParams.StringParams.size();
+	}
+
+	if (stringData.GetCount() != stringDataCount)
 	{
 		//Automation has not given us the number of items we asked for
 		//(this should never happen)
@@ -76,48 +97,6 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 
 	//wcscpy_s(stringData[1].Label, L"Engine Name");//label
 	//wcscpy_s(stringData[1].Value, L"");//default value, containing wildcards to be filled with information from Automation
-
-
-	/*
-	ExportPrefs prefs;
-
-	TCHAR path[MAX_PATH];
-
-	std::wstring prefsDir;
-
-	//get the user's documents directory:
-	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-	{
-		prefsDir = path;
-		prefsDir += L"\\AutomationGame\\ExporterPrefs\\";
-
-		std::wstring prefsFile = prefsDir + L"CSVExporter2.prefs";
-
-		FILE* file;
-		errno_t err = _wfopen_s(&file, prefsFile.c_str(), L"rb");
-
-		if (!err && file)
-		{
-			fseek(file, 0, SEEK_END);
-			size_t prefsFileSize = ftell(file);
-			fseek(file, 0, SEEK_SET);
-
-			if (prefsFileSize == sizeof(prefs))
-			{
-				uint8_t prefsFileVersion;
-				fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
-				fseek(file, 0, SEEK_SET);
-
-				if (prefsFileVersion == EXPPREFSVERSION)
-				{
-					fread_s(&prefs, sizeof(prefs), prefsFileSize, 1, file);
-				}
-			}
-
-			fclose(file);
-		}
-	}
-	*/
 
 	ExportPrefs prefs = ExportPrefs::LoadFromFile();
 
@@ -149,6 +128,13 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	wcscpy_s(stringData[ExporterStringData_Locale].ToolTip, L"The system locale to use for data and text formatting. Can be used along with a custom delimiter to export decimal point numbers with commas as delimiters. Examples: en-US, en-GB, ru-RU");
 	wcscpy_s(stringData[ExporterStringData_Locale].Value, prefs.Locale);
 
+	for (int i = 0; i < exportParams.StringParams.size(); i++)
+	{
+		wcscpy_s(stringData[ExporterStringData_Count + i].Label, exportParams.StringParams[i].Label.c_str());
+		wcscpy_s(stringData[ExporterStringData_Count + i].ToolTip, exportParams.StringParams[i].Tooltip.c_str());
+		wcscpy_s(stringData[ExporterStringData_Count + i].Value, exportParams.StringParams[i].Value.c_str());
+	}
+
 	return AuCarExpErrorCode_Success;
 }
 
@@ -158,12 +144,39 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCoun
 	//we will want to get 2 booleans from the user:
 	*retCount = ExporterBoolData_Count;
 
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
+		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		//*retCount += exportParams.BoolParams.size();
+	}
+
 	return AuCarExpErrorCode_Success;
 }
 
 //Gets the user-supplied boolean information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBoolData>& boolData, wchar_t const* locale)
 {
+	unsigned int boolDataCount = ExporterBoolData_Count;
+
+	ExportCustomParamsGroup exportParams;
+
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
+		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		//boolDataCount += exportParams.BoolParams.size();
+	}
+
+	if (boolData.GetCount() != boolDataCount)
+	{
+		//Automation has not given us the number of items we asked for
+		//(this should never happen)
+		return AuCarExpErrorCode_UnknownError;
+	}
+
 	/*
 	if (boolData.GetCount() != 2)
 	{

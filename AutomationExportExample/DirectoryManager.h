@@ -1,6 +1,10 @@
 #pragma once
 #include "stdafx.h"
+
 #include <string>
+#include <vector>
+
+#include "StringUtils.h"
 
 class DirectoryManager
 {
@@ -51,6 +55,42 @@ public:
 		//}
 
 		return TryCreateDirectoryIfNotExists(path.c_str(), outAtt);
+	}
+
+	static std::vector<std::wstring> GetDirectoryFilesWithExt(const std::wstring& path, const std::vector<std::wstring>& extensions)
+	{
+		std::vector<std::wstring> foundFiles;
+
+		std::wstring searchQuery = path + L"\\*";
+
+		WIN32_FIND_DATAW fileData;
+		HANDLE searchHandle = FindFirstFileW(searchQuery.c_str(), &fileData);
+		if (searchHandle == INVALID_HANDLE_VALUE) 
+		{
+			//TODO
+			return foundFiles; // No files found or directory doesn't exist
+		}
+
+		do 
+		{
+			// Skip directories
+			if (!(fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) 
+			{
+				std::wstring fileName = fileData.cFileName;
+				for (const auto& ext : extensions) 
+				{
+					if (StringUtils::CheckEndsWith(fileName, ext)) 
+					{
+						foundFiles.push_back(fileName);
+						break;
+					}
+				}
+			}
+		} 
+		while (FindNextFileW(searchHandle, &fileData) != 0);
+
+		FindClose(searchHandle);
+		return foundFiles;
 	}
 
 	inline static bool CheckPathExists(const std::wstring& path)

@@ -4,7 +4,8 @@
 #include "MessageBoxManager.h"
 #include "StringConverter.h"
 
-bool JSONFileManager::TryParseJSONFile(std::wstring filename, std::wstring path, json* outData)
+bool JSONFileManager::TryParseJSONFile(std::wstring filename, std::wstring path, json* outData, 
+										const bool silentError, const JSONDataType topLevelType)
 {
 	std::wstring sanitizedName = FileUtils::SanitizeFileNameWithExtension(filename, L".json");
 
@@ -19,7 +20,7 @@ bool JSONFileManager::TryParseJSONFile(std::wstring filename, std::wstring path,
 
 	file.close();
 
-	return TryParseJSONData(tempFile.str(), outData);
+	return TryParseJSONData(tempFile.str(), outData, silentError, topLevelType);
 }
 
 template <typename T>

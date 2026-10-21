@@ -2,21 +2,22 @@
 #include <cstdint>
 #include <ShlObj.h>
 
-#include "ExportPrefsVersion.h"
 #include "ExportManager.h"
 #include "DirectoryManager.h"
 
-#define PREFS_FILE_MAX_LENGTH 25
-#define PREFS_LOCALE_MAX_LENGTH 15
+#define CSVE_EXP_PREFS_VERSION 0
+
+#define CSVE_PREFS_FILE_MAX_LENGTH 25
+#define CSVE_PREFS_LOCALE_MAX_LENGTH 15
 
 struct ExportPrefs
 {
-	uint8_t Version = EXPPREFSVERSION;
+	uint8_t Version = CSVE_EXP_PREFS_VERSION;
 	wchar_t Delimiter = L',';
-	wchar_t LuaFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t DataFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t TranslationsFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t Locale[PREFS_LOCALE_MAX_LENGTH] = L"";
+	wchar_t LuaFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
+	wchar_t DataFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
+	wchar_t TranslationsFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
+	wchar_t Locale[CSVE_PREFS_LOCALE_MAX_LENGTH] = L"";
 
 	static ExportPrefs LoadFromFile()
 	{
@@ -47,7 +48,7 @@ struct ExportPrefs
 					fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
 					fseek(file, 0, SEEK_SET);
 
-					if (prefsFileVersion == EXPPREFSVERSION)
+					if (prefsFileVersion == CSVE_EXP_PREFS_VERSION)
 					{
 						fread_s(&prefs, sizeof(prefs), prefsFileSize, 1, file);
 					}
@@ -114,7 +115,7 @@ struct ExportPrefs
 			}
 
 			std::wstring luaFile = carData->GetStringData(ExporterStringData_LuaFileName)->Value;
-			if (luaFile.size() < PREFS_FILE_MAX_LENGTH)
+			if (luaFile.size() < CSVE_PREFS_FILE_MAX_LENGTH)
 			{
 				for (size_t i = 0; i < luaFile.size(); i++)
 				{
@@ -123,7 +124,7 @@ struct ExportPrefs
 			}
 
 			std::wstring dataFile = carData->GetStringData(ExporterStringData_DataJSONFileName)->Value;
-			if (dataFile.size() < PREFS_FILE_MAX_LENGTH)
+			if (dataFile.size() < CSVE_PREFS_FILE_MAX_LENGTH)
 			{
 				for (size_t i = 0; i < dataFile.size(); i++)
 				{
@@ -132,7 +133,7 @@ struct ExportPrefs
 			}
 
 			std::wstring translationsFile = carData->GetStringData(ExporterStringData_TranslationsJSONFileName)->Value;
-			if (translationsFile.size() < PREFS_FILE_MAX_LENGTH)
+			if (translationsFile.size() < CSVE_PREFS_FILE_MAX_LENGTH)
 			{
 				for (size_t i = 0; i < translationsFile.size(); i++)
 				{
@@ -141,7 +142,7 @@ struct ExportPrefs
 			}
 
 			std::wstring localeName = locale;
-			if (localeName.size() < PREFS_LOCALE_MAX_LENGTH)
+			if (localeName.size() < CSVE_PREFS_LOCALE_MAX_LENGTH)
 			{
 				for (size_t i = 0; i < localeName.size(); i++)
 				{

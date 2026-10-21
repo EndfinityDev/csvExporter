@@ -39,10 +39,6 @@ AuExpManager::AuExpManager() :
 	m_Module(GetModuleHandle(PROJECT_FILENAME))
 {
 	s_Instance = this;
-
-	//PopulateExportDataHeader();
-
-	//BuildTranslations();
 }
 
 
@@ -415,8 +411,6 @@ bool AuExpManager::LoadTranslationResource()
 		throw new std::exception("Failed to convert resource to wide char. File: ExportManager.cpp, line: " + (__LINE__ - 4));
 	}
 
-	//return ParseTranslationJSON(dataW);
-
 	json jsonData;
 	if (!JSONFileManager::TryParseJSONData(dataW, &jsonData))
 	{
@@ -477,85 +471,9 @@ void AuExpManager::EndExport()
 
 void AuExpManager::ExportInternal()
 {
-	//m_LuaFile = ""; // Free memory of the Lua file since we don't need it anymore
 	m_LuaFiles.clear();
+
 	BuildSingleCSV();
-
-	/*
-	TCHAR path[MAX_PATH];
-
-	std::wstring prefsDir;
-
-	//get the user's documents directory:
-	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-	{
-		prefsDir = path;
-		prefsDir += APPDATA_EXPORTER_PREFS_DIR;
-
-		if (!DirectoryManager::CheckPathIsDirectory(prefsDir))
-		{
-			if (!DirectoryManager::TryCreateDirectoryRecursive(prefsDir))
-			{
-				return;
-			}
-		}
-
-		std::wstring prefsFile = prefsDir + L"CSVExporter2.prefs";
-
-		FILE* file;
-		errno_t err = _wfopen_s(&file, prefsFile.c_str(), L"wb");
-
-		if (err || !file)
-			return;
-
-		ExportPrefs prefs;
-
-		std::wstring delimiter = m_CarData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
-		if (delimiter.size() == 1)
-		{
-			prefs.Delimiter = delimiter[0];
-		}
-
-		std::wstring luaFile = m_CarData->GetStringData(ExporterStringData_LuaFileName)->Value;
-		if (luaFile.size() < PREFS_FILE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < luaFile.size(); i++)
-			{
-				prefs.LuaFile[i] = luaFile[i];
-			}
-		}
-
-		std::wstring dataFile = m_CarData->GetStringData(ExporterStringData_DataJSONFileName)->Value;
-		if (dataFile.size() < PREFS_FILE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < dataFile.size(); i++)
-			{
-				prefs.DataFile[i] = dataFile[i];
-			}
-		}
-
-		std::wstring translationsFile = m_CarData->GetStringData(ExporterStringData_TranslationsJSONFileName)->Value;
-		if (translationsFile.size() < PREFS_FILE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < translationsFile.size(); i++)
-			{
-				prefs.TranslationsFile[i] = translationsFile[i];
-			}
-		}
-
-		std::wstring localeName = m_Locale;
-		if (localeName.size() < PREFS_LOCALE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < localeName.size(); i++)
-			{
-				prefs.Locale[i] = localeName[i];
-			}
-		}
-
-		fwrite(&prefs, sizeof(prefs), 1, file);
-		fclose(file);
-	}
-	*/
 
 	ExportPrefs::TryWriteToFile(m_CarData, m_Locale);
 }
@@ -563,11 +481,6 @@ void AuExpManager::ExportInternal()
 
 void AuExpManager::BuildSingleCSV()
 {
-	//LuaData exportData;
-	//exportData.Add(m_GeneralData);
-
-	//FillTableData(exportData);
-
 	CSVManager csvManager(m_ExportDirectory + L"\\" + m_FileName + L".csv", m_Delimiter);
 
 	csvManager.BindData(&m_LuaData);

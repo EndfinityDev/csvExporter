@@ -16,7 +16,8 @@ enum class JSONDataType
 class JSONFileManager
 {
 public:
-	static bool TryParseJSONFile(std::wstring filename, std::wstring path, json* outData);
+	static bool TryParseJSONFile(std::wstring filename, std::wstring path, json* outData, 
+									const bool silentError = false, const JSONDataType topLevelType = JSONDataType::OBJECT);
 
 	template <typename T = std::wstring>
 	static bool TryParseJSONData(const T& inJSONString, json* outData, const bool silentError = false, const JSONDataType topLevelType = JSONDataType::OBJECT);

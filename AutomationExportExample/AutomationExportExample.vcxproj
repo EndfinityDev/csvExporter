@@ -203,13 +203,14 @@
   <ItemGroup>
     <ClInclude Include="BuildDate.h" />
     <ClInclude Include="csvExporter.h" />
+    <ClInclude Include="ExportCustomParams.h" />
+    <ClInclude Include="ExportCustomParamsManager.h" />
     <ClInclude Include="DataType.h" />
     <ClInclude Include="DDSHeader.h" />
     <ClInclude Include="CSVManager.h" />
     <ClInclude Include="DirectoryManager.h" />
     <ClInclude Include="ExportManager.h" />
     <ClInclude Include="ExportPrefs.h" />
-    <ClInclude Include="ExportPrefsVersion.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="HTTPManager.h" />
     <ClInclude Include="Image.h" />
@@ -226,6 +227,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="csvExporter.cpp" />
+    <ClCompile Include="ExportCustomParamsManager.cpp" />
     <ClCompile Include="DataType.cpp" />
     <ClCompile Include="DDSHeader.cpp" />
     <ClCompile Include="HTTPManager.cpp" />
