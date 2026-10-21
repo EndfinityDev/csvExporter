@@ -14,6 +14,7 @@ class ExportCustomParamsManager
 {
 public:
 	static ExportCustomParamsGroup LoadParameterJSONs(const std::wstring& path);
+	static bool TrySaveParamsGroup(const ExportCustomParamsGroup& exportParamGroup, const std::wstring& directory);
 private:
 	static void ParseParameterList(const json& array, ExportCustomParamsGroup& exportParamGroup);
 };

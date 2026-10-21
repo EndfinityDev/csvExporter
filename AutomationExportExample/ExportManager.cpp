@@ -546,7 +546,8 @@ void AuExpManager::ExportInternal()
 	BuildSingleCSV();
 
 	ExportPrefs::TryWriteToFile(m_CarData, m_Locale);
-	ExportCustomBoolParamPrefs::TryWriteToFile(ExportCustomBoolParamPrefs::FromExportParams(m_ExportCustomParamsGroup.BoolParams), APPDATA_EXPORTER_PREFS_DIR);
+	//ExportCustomBoolParamPrefs::TryWriteToFile(ExportCustomBoolParamPrefs::FromExportParams(m_ExportCustomParamsGroup.BoolParams), APPDATA_EXPORTER_PREFS_DIR);
+	ExportCustomParamsManager::TrySaveParamsGroup(m_ExportCustomParamsGroup, APPDATA_EXPORTER_PREFS_DIR);
 }
 
 

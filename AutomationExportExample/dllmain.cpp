@@ -128,11 +128,19 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	wcscpy_s(stringData[ExporterStringData_Locale].ToolTip, L"The system locale to use for data and text formatting. Can be used along with a custom delimiter to export decimal point numbers with commas as delimiters. Examples: en-US, en-GB, ru-RU");
 	wcscpy_s(stringData[ExporterStringData_Locale].Value, prefs.Locale);
 
+	std::unordered_map<std::wstring, std::wstring> exportParamSaveTable =
+		ExportCustomStringParamPrefs::ToWStringMap(ExportCustomStringParamPrefs::LoadFromFile(AuExpManager::APPDATA_EXPORTER_PREFS_DIR));
+
 	for (int i = 0; i < exportParams.StringParams.size(); i++)
 	{
 		wcscpy_s(stringData[ExporterStringData_Count + i].Label, exportParams.StringParams[i].Label.c_str());
 		wcscpy_s(stringData[ExporterStringData_Count + i].ToolTip, exportParams.StringParams[i].Tooltip.c_str());
 		wcscpy_s(stringData[ExporterStringData_Count + i].Value, exportParams.StringParams[i].Value.c_str());
+		auto iterator = exportParamSaveTable.find(exportParams.StringParams[i].LuaName);
+		if (iterator != exportParamSaveTable.end())
+		{
+			wcscpy_s(stringData[ExporterStringData_Count + i].Value, iterator->second.c_str());
+		}
 	}
 
 	return AuCarExpErrorCode_Success;

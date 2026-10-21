@@ -51,6 +51,13 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 	return exportParamGroup;
 }
 
+bool ExportCustomParamsManager::TrySaveParamsGroup(const ExportCustomParamsGroup& exportParamGroup, const std::wstring& directory)
+{
+	bool success = ExportCustomBoolParamPrefs::TryWriteToFile(ExportCustomBoolParamPrefs::FromExportParams(exportParamGroup.BoolParams), directory);
+	success = success && ExportCustomStringParamPrefs::TryWriteToFile(ExportCustomStringParamPrefs::FromExportParams(exportParamGroup.StringParams), directory);
+	return success;
+}
+
 void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCustomParamsGroup& exportParamGroup)
 {
 	for (const auto& parameter : array)
