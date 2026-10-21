@@ -13,6 +13,7 @@
 #include "MessageBoxManager.h"
 #include "JSONFileManager.h"
 #include "DirectoryManager.h"
+#include "ExportPrefs.h"
 
 
 size_t FindDirDelimiter(std::wstring dir, size_t start)
@@ -480,6 +481,7 @@ void AuExpManager::ExportInternal()
 	m_LuaFiles.clear();
 	BuildSingleCSV();
 
+	/*
 	TCHAR path[MAX_PATH];
 
 	std::wstring prefsDir;
@@ -553,6 +555,9 @@ void AuExpManager::ExportInternal()
 		fwrite(&prefs, sizeof(prefs), 1, file);
 		fclose(file);
 	}
+	*/
+
+	ExportPrefs::TryWriteToFile(m_CarData, m_Locale);
 }
 
 

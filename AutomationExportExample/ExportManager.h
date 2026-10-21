@@ -8,7 +8,6 @@
 #include "csvExporter.h"
 #include "LuaData.h"
 #include "CSVManager.h"
-#include "ExportPrefsVersion.h"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -32,19 +31,6 @@ enum ExporterBoolData : unsigned int
 
 
 	ExporterBoolData_Count
-};
-
-#define PREFS_FILE_MAX_LENGTH 25
-#define PREFS_LOCALE_MAX_LENGTH 15
-
-struct ExportPrefs
-{
-	uint8_t Version = EXPPREFSVERSION;
-	wchar_t Delimiter = L',';
-	wchar_t LuaFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t DataFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t TranslationsFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t Locale[PREFS_LOCALE_MAX_LENGTH] = L"";
 };
 
 

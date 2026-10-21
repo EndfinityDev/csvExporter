@@ -16,8 +16,7 @@
 #include "BuildDate.h"
 #include "ExportManager.h"
 #include "VersionChecker.h"
-
-
+#include "ExportPrefs.h"
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
 AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, wchar_t const* locale)
@@ -78,6 +77,8 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	//wcscpy_s(stringData[1].Label, L"Engine Name");//label
 	//wcscpy_s(stringData[1].Value, L"");//default value, containing wildcards to be filled with information from Automation
 
+
+	/*
 	ExportPrefs prefs;
 
 	TCHAR path[MAX_PATH];
@@ -116,6 +117,9 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 			fclose(file);
 		}
 	}
+	*/
+
+	ExportPrefs prefs = ExportPrefs::LoadFromFile();
 
 	//std::wstring delimiter = L"";
 	//delimiter += prefs.Delimiter;
