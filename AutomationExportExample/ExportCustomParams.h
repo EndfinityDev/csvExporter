@@ -5,6 +5,9 @@
 #include <array>
 #include <vector>
 #include <unordered_map>
+#include <ShlObj.h>
+
+#include "DirectoryManager.h"
 
 #define CSVE_CUSTOM_PREFS_STR_MAX_LENGTH 25
 
@@ -61,7 +64,7 @@ struct ExportCustomStringParamPrefs
                 continue;
             }
             paramPrefs.ParamTable.emplace_back(
-                ExportParamStringConverter::FromWString(param.Label),
+                ExportParamStringConverter::FromWString(param.LuaName),
                 ExportParamStringConverter::FromWString(param.Value)
             );
         }
@@ -108,7 +111,7 @@ struct ExportCustomBoolParamPrefs
                 continue;
             }
             paramPrefs.ParamTable.emplace_back(
-                ExportParamStringConverter::FromWString(param.Label),
+                ExportParamStringConverter::FromWString(param.LuaName),
                 param.Value
             );
         }
@@ -125,5 +128,126 @@ struct ExportCustomBoolParamPrefs
             map.emplace(ExportParamStringConverter::ToWString(items.first), items.second);
         }
         return map;
+    }
+
+    static ExportCustomBoolParamPrefs LoadFromFile(const std::wstring& directory)
+    {
+        ExportCustomBoolParamPrefs exportParamsPrefs;
+
+        TCHAR path[MAX_PATH];
+
+        //get the user's documents directory:
+        if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+        {
+            std::wstring prefsDir = path;
+            prefsDir += directory + L"CSVExporter2_CustomBools.prefs";
+
+
+            FILE* file;
+            errno_t err = _wfopen_s(&file, prefsDir.c_str(), L"rb");
+
+            if (!err && file)
+            {
+                uint8_t prefsFileVersion;
+                fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
+                
+                if (prefsFileVersion == CSVE_CUSTOM_PREFS_BOOL_VERSION)
+                {
+                    size_t customParamsCount;
+                    fread_s(&customParamsCount, sizeof(customParamsCount), sizeof(customParamsCount), 1, file);
+                    exportParamsPrefs.ParamTable.resize(customParamsCount);
+                    for (size_t i = 0; i < customParamsCount; i++)
+                    {
+                        fread_s(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), sizeof(ExportParamString), 1, file);
+                        fread_s(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), sizeof(bool), 1, file);
+                    }
+                }
+                else
+                {
+                    //TODO
+                }
+
+                fclose(file);
+            }
+            else
+            {
+                // TODO
+            }
+        }
+        else
+        {
+            //TODO
+        }
+
+        return exportParamsPrefs;
+    }
+
+    static bool TryWriteToFile(ExportCustomBoolParamPrefs& exportParamsPrefs, const std::wstring& directory)
+    {
+        TCHAR path[MAX_PATH];
+
+        //get the user's documents directory:
+        if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+        {
+            std::wstring prefsDir = path;
+            prefsDir += directory;
+
+            if (!DirectoryManager::CheckPathIsDirectory(prefsDir))
+            {
+                if (!DirectoryManager::TryCreateDirectoryRecursive(prefsDir))
+                {
+                    //TODO
+                    return false;
+                }
+            }
+            else
+            {
+                ExportCustomBoolParamPrefs oldParams = LoadFromFile(directory);
+                for (auto& oldItems : oldParams.ParamTable)
+                {
+                    bool exists = false;
+                    for (auto& newItems : exportParamsPrefs.ParamTable)
+                    {
+                        if (oldItems.first == newItems.first)
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists)
+                    {
+                        exportParamsPrefs.ParamTable.push_back(oldItems);
+                    }
+                }
+            }
+
+            std::wstring prefsFile = prefsDir + L"CSVExporter2_CustomBools.prefs";
+
+            FILE* file;
+            errno_t err = _wfopen_s(&file, prefsFile.c_str(), L"wb");
+
+            if (err || !file)
+            {
+                // TODO
+                return false;
+            }
+
+            fwrite(&exportParamsPrefs.Version, sizeof(exportParamsPrefs.Version), 1, file);
+            size_t customParamsCount = exportParamsPrefs.ParamTable.size();
+            fwrite(&customParamsCount, sizeof(customParamsCount), 1, file);
+            //fwrite(&exportParamsPrefs.ParamTable, sizeof(std::pair<ExportParamString, bool>), customParamsCount, file);
+            for (size_t i = 0; i < customParamsCount; i++)
+            {
+                fwrite(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), 1, file);
+                fwrite(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), 1, file);
+            }
+
+            fclose(file);
+
+            return true;
+        }
+
+        //TODO
+        return false;
     }
 };

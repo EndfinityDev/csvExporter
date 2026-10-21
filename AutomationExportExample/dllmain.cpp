@@ -176,11 +176,19 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 		return AuCarExpErrorCode_UnknownError;
 	}
 
+	std::unordered_map<std::wstring, bool> exportParamSaveTable =
+		ExportCustomBoolParamPrefs::ToWStringMap(ExportCustomBoolParamPrefs::LoadFromFile(AuExpManager::APPDATA_EXPORTER_PREFS_DIR));
+
 	for (int i = 0; i < exportParams.BoolParams.size(); i++)
 	{
 		wcscpy_s(boolData[ExporterBoolData_Count + i].Label, exportParams.BoolParams[i].Label.c_str());
 		wcscpy_s(boolData[ExporterBoolData_Count + i].ToolTip, exportParams.BoolParams[i].Tooltip.c_str());
 		boolData[ExporterBoolData_Count + i].Value = exportParams.BoolParams[i].Value;
+		auto iterator = exportParamSaveTable.find(exportParams.BoolParams[i].LuaName);
+		if (iterator != exportParamSaveTable.end())
+		{
+			boolData[ExporterBoolData_Count + i].Value = iterator->second;
+		}
 	}
 
 	return AuCarExpErrorCode_Success;

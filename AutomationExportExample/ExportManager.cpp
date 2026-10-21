@@ -79,6 +79,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 		}
 	}
 
+	ConfigureCustomParamData();
 	BuildParamsLuaFile();
 
 	std::wstring customFilePath = path + APPDATA_EXPORTER_DIR + L"\\UserFiles";
@@ -186,32 +187,51 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	return AuCarExpErrorCode_Success;
 }
 
-
-void AuExpManager::BuildParamsLuaFile()
+void AuExpManager::ConfigureCustomParamData()
 {
 	unsigned int stringParameterCount = m_CarData->GetStringDataCount() - ExporterStringData_Count;
 	unsigned int boolParameterCount = m_CarData->GetBoolDataCount() - ExporterBoolData_Count;
-
-	ExportCustomParamsGroup exportParams;
 
 	TCHAR path[MAX_PATH];
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring exportParamDir = path + APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
-		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		m_ExportCustomParamsGroup = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
 	}
 
-	if (stringParameterCount != exportParams.StringParams.size())
+	if (stringParameterCount != m_ExportCustomParamsGroup.StringParams.size())
 	{
 		//TODO
 		return;
 	}
 
-	if (boolParameterCount != exportParams.BoolParams.size())
+	if (boolParameterCount != m_ExportCustomParamsGroup.BoolParams.size())
 	{
 		//TODO
 		return;
 	}
+
+	for (unsigned int i = 0; i < stringParameterCount; i++)
+	{
+		//std::wstring value = StringUtils::SanitizeLuaString(m_CarData->GetStringData(ExporterStringData_Count + i)->Value);
+		std::wstring newValue = m_CarData->GetStringData(ExporterStringData_Count + i)->Value;
+		if (newValue.size() >= CSVE_CUSTOM_PREFS_STR_MAX_LENGTH)
+		{
+			continue;
+		}
+		m_ExportCustomParamsGroup.StringParams[i].Value = newValue;
+	}
+
+	for (unsigned int i = 0; i < boolParameterCount; i++)
+	{
+		m_ExportCustomParamsGroup.BoolParams[i].Value = m_CarData->GetBoolData(ExporterBoolData_Count + i)->Value;
+	}
+}
+
+void AuExpManager::BuildParamsLuaFile()
+{
+	unsigned int stringParameterCount = m_CarData->GetStringDataCount() - ExporterStringData_Count;
+	unsigned int boolParameterCount = m_CarData->GetBoolDataCount() - ExporterBoolData_Count;
 
 	std::stringstream paramsLuaStream;
 	paramsLuaStream << "ExportParameters = {\n";
@@ -225,7 +245,7 @@ void AuExpManager::BuildParamsLuaFile()
 		{
 			paramsLuaStream << ",\n\t\t";
 		}
-		paramsLuaStream << StringConverter::to_utf8string(exportParams.StringParams[i].LuaName) << " = \"" << StringConverter::to_utf8string(value) << "\"";
+		paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.StringParams[i].LuaName) << " = \"" << StringConverter::to_utf8string(value) << "\"";
 	}
 	paramsLuaStream << "\n\t},";
 
@@ -238,7 +258,7 @@ void AuExpManager::BuildParamsLuaFile()
 		{
 			paramsLuaStream << ",\n\t\t";
 		}
-		paramsLuaStream << StringConverter::to_utf8string(exportParams.BoolParams[i].LuaName) << " = " << (value ? "true" : "false");
+		paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.BoolParams[i].LuaName) << " = " << (value ? "true" : "false");
 	}
 	paramsLuaStream << "\n\t}";
 	paramsLuaStream << "\n}\n\0";
@@ -526,6 +546,7 @@ void AuExpManager::ExportInternal()
 	BuildSingleCSV();
 
 	ExportPrefs::TryWriteToFile(m_CarData, m_Locale);
+	ExportCustomBoolParamPrefs::TryWriteToFile(ExportCustomBoolParamPrefs::FromExportParams(m_ExportCustomParamsGroup.BoolParams), APPDATA_EXPORTER_PREFS_DIR);
 }
 
 

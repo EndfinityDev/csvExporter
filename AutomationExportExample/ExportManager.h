@@ -8,6 +8,7 @@
 #include "csvExporter.h"
 #include "LuaData.h"
 #include "CSVManager.h"
+#include "ExportCustomParamsManager.h"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -81,6 +82,7 @@ private:
 	AuExpManager();
 	~AuExpManager() {}
 
+	void ConfigureCustomParamData();
 	void BuildParamsLuaFile();
 
 	void ExportInternal();
@@ -106,6 +108,8 @@ private:
 	bool m_IsExportInProcess = false;
 
 	const AuCarExpCarData* m_CarData = nullptr;
+
+	ExportCustomParamsGroup m_ExportCustomParamsGroup;
 
 	std::vector<const AuCarExpTexture*> m_AllImages;
 
