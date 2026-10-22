@@ -24,6 +24,8 @@ def main():
 
         archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\example.json.example")
         archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\example.jsonc", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\example.jsonc.example")
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\web_example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\web_example.json.example")
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\web_schema_example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\web_schema_example.json.example")
 
         archive.close()
         

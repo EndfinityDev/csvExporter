@@ -1,0 +1,56 @@
+[
+  {
+    "type": "string",
+    "label": "Web Text",
+    "luaName": "web_text",
+    "save": false,
+    "defaultValue": "default", // Displayed if no response was received or it could not be parsed
+    "web": { // Define as web request
+      "type": "text", // Web request return data type. Can be "text" or "json"
+      "allowedStatuses": [ 200 ], // HTTP status codes that are considered successful, when received their result is pushed to the UI input box. Optional, defaults to [ 200 ]
+      "textOnFail": true, // If true and the HTTP status code is not in allowedStatuses - the result text will be put into the input box.
+      "url": {
+        "host": "http://localhost:5000", // Only protocol and hostname (with port if required) here, not the full path to the source
+        /*
+        "path": "/", // The URL path after the hostname without query parameters. Defaults to "/"
+        */
+        "params": [ // Query parameters go here if needed. 
+          [ "test_integer", 125 ],
+          [ "test_string", "my string" ],
+          [ "test_float", 99.125 ],
+          {"key": "note", "value": "this works too"}
+        ]
+      }
+    }
+  },
+
+  {
+    "type": "bool",
+    "label": "Web Boolean",
+    "luaName": "web_boolean",
+    "web": {
+      "type": "text",
+      "url": {
+        "host": "http://localhost:5000",
+        "params": [
+        ]
+      }
+    }
+  },
+
+  {
+    "type": "string",
+    "label": "Web Error",
+    "luaName": "web_error",
+    "textOnFail": true,
+    "web": {
+      "type": "text",
+      "allowedStatuses": [ 200, 204 ],
+      "textOnFail": true,
+      "url": {
+        "host": "http://localhost:5000",
+        "path": "/non_existent_path"
+      }
+    }
+  }
+]

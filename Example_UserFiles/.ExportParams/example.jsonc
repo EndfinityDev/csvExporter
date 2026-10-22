@@ -2,10 +2,10 @@
   // This is another example file with a different supported structure
   {
     "my_random_value": "Extra things can be added, they have no effect",
-    "type": "string",
+    "type": "str", // str is a valid type too as an alias to string
     "label": "No tooltip",
     "luaName": "no_tooltip",
-    "save":  true
+    "save": true // If true, the input will be saved and automatically restored when the export menu is opened. Defaults to false
   },
   {
     "type": "string",
@@ -26,5 +26,12 @@
     "type": "string",
     "label": "No luaName",
     "tooltip": "luaName is required, this will be ignored as well"
+  },
+  {
+    "type": "boolean", // bool and boolean are both valid
+    "tooltip": "Default True Boolean",
+    "luaName": "default_true_boolean",
+    "defaultValue": true,
+    "save": true
   }
 ]

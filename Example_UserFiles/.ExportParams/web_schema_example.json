@@ -1,0 +1,78 @@
+[
+  {
+    "type": "string",
+    "label": "Web Text w/ Schema",
+    "luaName": "web_text_schema",
+    "save": false,
+    "web": {
+      "type": "json",
+      "url": {
+        "host": "http://localhost:5000",
+        "path": "/"
+      },
+      "schema": { // A schema is required for "json" types. "schema" can be a dictionary or an array - matching the source
+        // Values are scanned for in order
+        /* "key": "type" */
+        // Possible types:
+        // Strings: string, str
+        // Integers: int, integer
+        // Floats: float
+        // Booleans: bool, boolean
+        // Any number (integers and floats): num, number
+        // Any of the above: any
+        "nonExistentKey": "any", // Non-existent keys are skipped until a match is found, type must match too
+        "existingKey1": "string", // If a matching key and data type is found, its value is returned
+        "existingKey2": "integer" // Only the first match is returned, this will be ignored even if valid
+      }
+    }
+  },
+
+  {
+    "type": "bool",
+    // For boolean values json data types other than boolean can be used
+    // Strings return true if they are not empty
+    // Numbers return true if they are not false
+    "label": "Web Bool w/ Schema",
+    "luaName": "web_bool_schema",
+    "save": false,
+    "web": {
+      "type": "json",
+      "url": {
+        "host": "http://localhost:5000",
+        "path": "/array"
+      },
+      "schema": [
+        // Nulls in the beginning define offsets from start, here we are taking the 3rd and 4th elements
+        // Null at the end says that the source array must be at least 5 items long
+        // The first valid item found is returned, in this case it is existingKey1; existingKey2 and array element 4 will be ignored even if valid
+        // The box will be checked if existingKey1 is not empty
+        null, null, { "nonExistentKey": "any", "existingKey1": "string", "existingKey2": "integer" }, "bool", null
+      ]
+    }
+  },
+
+  {
+    "type": "string",
+    "label": "Web Text Callback",
+    "luaName": "web_text_callback",
+    "web": {
+      "type": "json",
+      "url": {
+        "host": "http://localhost:5000",
+        "path": "/callback",
+        "params": [
+          { "name": "callback", "value": "my_callback" }
+        ]
+      },
+      "schema": {
+        "existingDict": {
+          "nonExistentKey": "number"
+        },
+        "nonExistentData": "any",
+        "callback_data": {
+          "callback": "string"
+        }
+      }
+    }
+  }
+]

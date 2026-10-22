@@ -157,13 +157,17 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 			//	web["url"].contains("host") && web["url"]["host"].is_string() && 
 			//	(web.contains("type") && web["type"].is_string() && 
 			//	(web["type"].get<std::string>() == "text" && isStringParameter) || (web["type"].get<std::string>() == "json")))
-			if (web.contains("url") && web["url"].is_object() &&
-				web["url"].contains("host") && web["url"]["host"].is_string() &&
-				web.contains("type") && web["type"].is_string() &&
-				((web["type"].get<std::string>() == "text" && isStringParameter) || (web["type"].get<std::string>() == "json")))
+
+			bool isURLBlockValid = web.contains("url") && web["url"].is_object();
+			isURLBlockValid = isURLBlockValid && (web["url"].contains("host") && web["url"]["host"].is_string());
+			isURLBlockValid = isURLBlockValid && (web.contains("type") && web["type"].is_string());
+			isURLBlockValid = isURLBlockValid && (((web["type"].get<std::string>() == "text") && isStringParameter) || 
+														(web["type"].get<std::string>() == "json"));
+
+			if (isURLBlockValid)
 			{
 				std::string urlHost = web["url"]["host"].get<std::string>();
-				std::string urlPath = "";
+				std::string urlPath = "/";
 				if (web["url"].contains("path") && web["url"]["path"].is_string())
 				{
 					urlPath = web["url"]["path"].get<std::string>();
@@ -196,12 +200,17 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 							}
 							else if (paramValue.is_number())
 							{
-								params.emplace(paramName, std::to_string(paramValue.get<float>()));
-								//params.emplace(paramName, paramValue.get<float>());
+								if (paramValue.is_number_float())
+								{
+									params.emplace(paramName, std::to_string(paramValue.get<float>()));
+								}
+								else
+								{
+									params.emplace(paramName, std::to_string(paramValue.get<int>()));
+								}
 							}
 							else if (paramValue.is_boolean())
 							{
-								//params.emplace(paramName, paramValue.get<bool>());
 								params.emplace(paramName, paramValue.get<bool>() ? "true" : "false");
 							}
 						}
@@ -220,17 +229,42 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 					}
 				}
 
+				bool textOnFail = false;
+				if (web.contains("textOnFail") && web["textOnFail"].is_boolean())
+				{
+					textOnFail = web["textOnFail"].get<bool>();
+				}
+
 				int status = 0;
-				std::string response = HTTPManager::Get(urlHost, urlPath, params, true, &status);
+				std::string response = HTTPManager::Get(urlHost, urlPath, params, false, true, &status);
 				if (!response.empty() && std::find(allowedStatuses.begin(), allowedStatuses.end(), status) != allowedStatuses.end())
 				{
 					if (responseType == "text")
 					{
 						webValue = response;
 					}
+					else
+					{
+						json jsonData; 
+						if (JSONFileManager::TryParseJSONData<std::string>(response, &jsonData, true, JSONDataType::ANY))
+						{
+							if (web.contains("schema") && web["schema"].is_structured())
+							{
+								webValue = JSONFileManager::GetJSONValueBySchema(jsonData, web["schema"]);
+							}
+							else
+							{
+								//TODO
+							}
+						}
+					}
 				}
 				else 
 				{
+					if (textOnFail && !response.empty())
+					{
+						webValue = response;
+					}
 					//TODO
 				}
 			}
@@ -244,9 +278,27 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		{
 			std::wstring value = L"";
 
-			if (!webValue.is_null() && webValue.is_string())
+			if (!webValue.is_null())
 			{
-				value = StringConverter::to_wstring(webValue.get<std::string>());
+				if (webValue.is_string())
+				{
+					value = StringConverter::to_wstring(webValue.get<std::string>());
+				}
+				else if (webValue.is_number())
+				{
+					if (webValue.is_number_float())
+					{
+						value = std::to_wstring(webValue.get<float>());
+					}
+					else
+					{
+						value = std::to_wstring(webValue.get<int>());
+					}
+				}
+				else if (webValue.is_boolean())
+				{
+					value = webValue.get<bool>() ? L"true" : L"false";
+				}
 			}
 			else if (parameter.contains("defaultValue"))
 			{
@@ -263,7 +315,30 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		}
 
 		bool value = false;
-		if (parameter.contains("defaultValue"))
+
+		if (!webValue.is_null())
+		{
+			if (webValue.is_string())
+			{
+				value = webValue.get<std::string>().size() > 0;
+			}
+			else if (webValue.is_number())
+			{
+				if (webValue.is_number_float())
+				{
+					value = webValue.get<float>() != 0;
+				}
+				else
+				{
+					value = webValue.get<int>() != 0;
+				}
+			}
+			else if (webValue.is_boolean())
+			{
+				value = webValue.get<bool>();
+			}
+		}
+		else if (parameter.contains("defaultValue"))
 		{
 			if (!parameter["defaultValue"].is_boolean())
 			{

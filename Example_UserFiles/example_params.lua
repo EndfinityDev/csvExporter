@@ -1,4 +1,4 @@
--- Example for using custom export parameters
+-- Example for using custom export parameters, meant to be loaded after the main file with multi-file Lua loading
 
 local original_ExportCarFiles = CExporter.ExportCarFiles
 
