@@ -8,7 +8,7 @@
 #include "csvExporter.h"
 #include "LuaData.h"
 #include "CSVManager.h"
-#include "ExportPrefsVersion.h"
+#include "ExportCustomParamsManager.h"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -32,19 +32,6 @@ enum ExporterBoolData : unsigned int
 
 
 	ExporterBoolData_Count
-};
-
-#define PREFS_FILE_MAX_LENGTH 25
-#define PREFS_LOCALE_MAX_LENGTH 15
-
-struct ExportPrefs
-{
-	uint8_t Version = EXPPREFSVERSION;
-	wchar_t Delimiter = L',';
-	wchar_t LuaFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t DataFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t TranslationsFile[PREFS_FILE_MAX_LENGTH] = L"";
-	wchar_t Locale[PREFS_LOCALE_MAX_LENGTH] = L"";
 };
 
 
@@ -88,12 +75,15 @@ public:
 
 	inline std::wstring GetLocale() const { return m_Locale; }
 
-	static const std::wstring s_IllegalCharacters;
-
+	static const std::wstring APPDATA_EXPORTER_DIR;
+	static const std::wstring APPDATA_EXPORTER_PREFS_DIR;
 private:
 
 	AuExpManager();
 	~AuExpManager() {}
+
+	void ConfigureCustomParamData();
+	void BuildParamsLuaFile();
 
 	void ExportInternal();
 
@@ -113,10 +103,13 @@ private:
 	bool LoadTranslationJSON(const json& jsonData);
 
 	static AuExpManager* s_Instance;
+	static const std::wstring s_IllegalCharacters;
 
 	bool m_IsExportInProcess = false;
 
 	const AuCarExpCarData* m_CarData = nullptr;
+
+	ExportCustomParamsGroup m_ExportCustomParamsGroup;
 
 	std::vector<const AuCarExpTexture*> m_AllImages;
 

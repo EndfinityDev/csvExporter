@@ -2,17 +2,22 @@
 #include "HTTPManager.h"
 
 
-std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params)
+std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params, bool includeAPIKey, bool allowAnyStatus, int* outStatus)
 {
 	try
 	{
 		httplib::Client client(urlHost);
 		httplib::Headers headers = {
-#ifdef CSVE_HTTP_API_KEY
-			{ "X-API-Key", CSVE_HTTP_API_KEY },
-#endif
-			{ "User-Agent", CSVE_HTTP_USER_AGENT }
+			{ "User-Agent", CSVE_HTTP_USER_AGENT },
+			{ "Connection", "close" }
 		};
+
+#ifdef CSVE_HTTP_API_KEY
+		if (includeAPIKey)
+		{
+			headers.emplace("X-API-Key", CSVE_HTTP_API_KEY);
+		}
+#endif
 
 		std::string queryString = httplib::append_query_params(urlPath, params);
 
@@ -21,7 +26,12 @@ std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPa
 
 		if (auto result = client.Get(queryString, headers))
 		{
-			if (result->status == 200)
+			if (outStatus)
+			{
+				*outStatus = result->status;
+			}
+
+			if (allowAnyStatus || result->status == 200)
 			{
 				return result->body;
 			}

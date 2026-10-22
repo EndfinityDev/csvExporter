@@ -12,22 +12,13 @@
 #include "StringUtils.h"
 #include "MessageBoxManager.h"
 #include "JSONFileManager.h"
+#include "DirectoryManager.h"
+#include "ExportPrefs.h"
+#include "ExportCustomParamsManager.h"
 
-
-size_t FindDirDelimiter(std::wstring dir, size_t start)
-{
-	size_t slashPos = dir.find(L"\\", start);
-
-	if (slashPos == std::wstring::npos)
-	{
-		return dir.find(L"/", start);
-	}
-
-	return slashPos;
-}
-
+const std::wstring AuExpManager::APPDATA_EXPORTER_DIR = L"\\AutomationGame\\CSVExporter 2";
+const std::wstring AuExpManager::APPDATA_EXPORTER_PREFS_DIR = L"\\AutomationGame\\ExporterPrefs\\";
 const std::wstring AuExpManager::s_IllegalCharacters = L"\\/:?\"<>|";
-
 
 AuExpManager* AuExpManager::s_Instance = nullptr;
 
@@ -36,10 +27,6 @@ AuExpManager::AuExpManager() :
 	m_Module(GetModuleHandle(PROJECT_FILENAME))
 {
 	s_Instance = this;
-
-	//PopulateExportDataHeader();
-
-	//BuildTranslations();
 }
 
 
@@ -54,13 +41,13 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	m_Delimiter = carData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
 	m_Locale = carData->GetStringData(ExporterStringData_Locale)->Value;
 
-	std::wstring mainDirectory = L"\\AutomationGame\\CSVExporter 2";
+	//std::wstring mainDirectory = L"\\AutomationGame\\CSVExporter 2";
 
 	//get the user's documents directory:
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		m_ExportDirectory = path;
-		m_ExportDirectory += mainDirectory + L"\\Exports";
+		m_ExportDirectory += APPDATA_EXPORTER_DIR + L"\\Exports";
 	}
 	else
 	{
@@ -69,81 +56,45 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 
 
 	m_ExportDirectory += L"\\";
-	//m_ExportDirectory += carData->GetCarName();//TODO: sanitise filename
 
 	// Sanitizing Filename
 	std::wstring exportFileName = m_CarData->GetStringData(ExporterStringData_FileName)->Value;
 
-	for (std::wstring::iterator i = exportFileName.begin(); i < exportFileName.end(); i++)
-	{
-		if (s_IllegalCharacters.find(*i) != std::wstring::npos)
-		{
-			*i = L'_';
-		}
-	}
-
-	if (exportFileName.size() > 1)
-		while (exportFileName[exportFileName.size() - 1] == L' ')
-		{
-			exportFileName.resize(exportFileName.size() - 1);
-
-			if (exportFileName.size() < 2) 
-			{
-				if (exportFileName[0] == L' ')
-					exportFileName = L"_";
-
-				break;
-			}
-		}
-	else
-		if (exportFileName[0] == L' ')
-			exportFileName = L"_";
+	FileUtils::SanitizeFileNameIllegalCharacters(&exportFileName, s_IllegalCharacters);
 
 	//m_ExportDirectory += m_CarData->GetStringData(0)->Value;
 	m_FileName = exportFileName;
 	m_ExportDirectory += exportFileName;
 
-	//ensure target directory exists:
-	DWORD att = GetFileAttributes(m_ExportDirectory.c_str());
-
-	if (att == INVALID_FILE_ATTRIBUTES)
+	if (!DirectoryManager::CheckPathIsDirectory(m_ExportDirectory))
 	{
-		//create directory, one level at a time:
-		size_t slashPos = FindDirDelimiter(m_ExportDirectory, 0);
-		size_t offset = 0;
-
-		while (slashPos != std::wstring::npos)
+		if (!DirectoryManager::TryCreateDirectoryRecursive(m_ExportDirectory))
 		{
-			CreateDirectory(m_ExportDirectory.substr(offset, slashPos - offset).c_str(), nullptr);
-			slashPos = FindDirDelimiter(m_ExportDirectory, slashPos + 1);
+			std::wstring error = L"Could not create directory: ";
+			error += m_ExportDirectory;
+
+			MessageBox(nullptr, error.c_str(), TEXT("Error creating directory"), MB_OK);
+
+			return AuCarExpErrorCode_CouldNotObtainOutputPathFatal;
 		}
-
-		//last one:
-		CreateDirectory(m_ExportDirectory.c_str(), nullptr);
-
-		att = GetFileAttributes(m_ExportDirectory.c_str());
 	}
 
-	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+	ConfigureCustomParamData();
+	BuildParamsLuaFile();
+
+	std::wstring customFilePath = path + APPDATA_EXPORTER_DIR + L"\\UserFiles";
+	std::wstring exportParamsPath = customFilePath + L"\\.ExportParams";
+
+	if(!DirectoryManager::CheckPathIsDirectory(customFilePath)) // Loading from resources if UserFiles doesn't exist
 	{
-		std::wstring error = L"Could not create directory: ";
-		error += m_ExportDirectory;
-
-		MessageBox(nullptr, error.c_str(), TEXT("Error creating directory"), MB_OK);
-
-		return AuCarExpErrorCode_CouldNotObtainOutputPathFatal;
-	}
-
-
-
-	std::wstring customFilePath = path + mainDirectory + L"\\UserFiles";
-
-	att = GetFileAttributes(customFilePath.c_str());
-	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY)) // Go straight to loading resources if UserFiles doesn't exist
-	{
-		CreateDirectory(customFilePath.c_str(), nullptr); // Create UserFiles if it does't exist
-		att = GetFileAttributes(customFilePath.c_str());
-		if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+		if (DirectoryManager::TryCreateDirectoryIfNotExists(customFilePath))
+		{
+			if (!DirectoryManager::TryCreateDirectoryIfNotExists(exportParamsPath))
+			{
+				//TODO
+			}
+		}
+		else
 		{
 			//TODO
 		}
@@ -153,6 +104,11 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 		LoadTranslationResource();
 
 		return AuCarExpErrorCode_Success;
+	}
+
+	if (!DirectoryManager::TryCreateDirectoryIfNotExists(exportParamsPath))
+	{
+		//TODO
 	}
 
 	// Try to load user files (if given)
@@ -231,6 +187,85 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	return AuCarExpErrorCode_Success;
 }
 
+void AuExpManager::ConfigureCustomParamData()
+{
+	unsigned int stringParameterCount = m_CarData->GetStringDataCount() - ExporterStringData_Count;
+	unsigned int boolParameterCount = m_CarData->GetBoolDataCount() - ExporterBoolData_Count;
+
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportParamDir = path + APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
+		m_ExportCustomParamsGroup = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir, false, false);
+	}
+
+	if (stringParameterCount != m_ExportCustomParamsGroup.StringParams.size())
+	{
+		//TODO
+		return;
+	}
+
+	if (boolParameterCount != m_ExportCustomParamsGroup.BoolParams.size())
+	{
+		//TODO
+		return;
+	}
+
+	for (unsigned int i = 0; i < stringParameterCount; i++)
+	{
+		//std::wstring value = StringUtils::SanitizeLuaString(m_CarData->GetStringData(ExporterStringData_Count + i)->Value);
+		std::wstring newValue = m_CarData->GetStringData(ExporterStringData_Count + i)->Value;
+		if (newValue.size() >= CSVE_CUSTOM_PREFS_STR_MAX_LENGTH)
+		{
+			continue;
+		}
+		m_ExportCustomParamsGroup.StringParams[i].Value = newValue;
+	}
+
+	for (unsigned int i = 0; i < boolParameterCount; i++)
+	{
+		m_ExportCustomParamsGroup.BoolParams[i].Value = m_CarData->GetBoolData(ExporterBoolData_Count + i)->Value;
+	}
+}
+
+void AuExpManager::BuildParamsLuaFile()
+{
+	unsigned int stringParameterCount = m_CarData->GetStringDataCount() - ExporterStringData_Count;
+	unsigned int boolParameterCount = m_CarData->GetBoolDataCount() - ExporterBoolData_Count;
+
+	std::stringstream paramsLuaStream;
+	paramsLuaStream << "ExportParameters = {\n";
+	paramsLuaStream << "\tStringParameters = {\n\t\t";
+
+	for (unsigned int i = 0; i < stringParameterCount; i++)
+	{
+		std::wstring value = StringUtils::SanitizeLuaString(m_CarData->GetStringData(ExporterStringData_Count + i)->Value);
+
+		if (i != 0)
+		{
+			paramsLuaStream << ",\n\t\t";
+		}
+		paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.StringParams[i].LuaName) << " = \"" << StringConverter::to_utf8string(value) << "\"";
+	}
+	paramsLuaStream << "\n\t},";
+
+	paramsLuaStream << "\n\n\tBoolParameters = {\n\t\t";
+	for (unsigned int i = 0; i < boolParameterCount; i++)
+	{
+		bool value = m_CarData->GetBoolData(ExporterBoolData_Count + i)->Value;
+
+		if (i != 0)
+		{
+			paramsLuaStream << ",\n\t\t";
+		}
+		paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.BoolParams[i].LuaName) << " = " << (value ? "true" : "false");
+	}
+	paramsLuaStream << "\n\t}";
+	paramsLuaStream << "\n}\n\0";
+
+	m_LuaFiles.push_back(paramsLuaStream.str());
+}
+
 bool AuExpManager::LoadLuaResource()
 {
 	HRSRC   hRes;              // handle/ptr to res. info.
@@ -276,7 +311,7 @@ bool AuExpManager::LoadLuaFiles(const std::wstring& fileNames, const std::wstrin
 
 bool AuExpManager::LoadLuaFile(const std::wstring& filename, const std::wstring& path)
 {
-	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".lua");
+	std::wstring sanitizedName = FileUtils::SanitizeFileNameWithExtension(filename, L".lua");
 
 	std::wstring fullFilePath = path + L'\\' + sanitizedName;
 	std::ifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -284,20 +319,12 @@ bool AuExpManager::LoadLuaFile(const std::wstring& filename, const std::wstring&
 	if (!file.is_open())
 		return false;
 
-	// get the length of the file
-	//file.seekg(0, std::ifstream::end);
-	//m_LuaFileLength = file.tellg();
-	//file.seekg(0, std::ifstream::beg);
-
-	//file >> m_LuaFile;
 	std::stringstream tempLuaFile;
 	tempLuaFile << file.rdbuf();
 	//m_LuaFile = tempLuaFile.str();
 	m_LuaFiles.push_back(tempLuaFile.str());
 
 	file.close();
-
-	//m_LuaFileLength = m_LuaFile.size();
 
 	return true;
 }
@@ -454,8 +481,6 @@ bool AuExpManager::LoadTranslationResource()
 		throw new std::exception("Failed to convert resource to wide char. File: ExportManager.cpp, line: " + (__LINE__ - 4));
 	}
 
-	//return ParseTranslationJSON(dataW);
-
 	json jsonData;
 	if (!JSONFileManager::TryParseJSONData(dataW, &jsonData))
 	{
@@ -473,29 +498,6 @@ bool AuExpManager::LoadTranslationFile(const std::wstring& filename, const std::
 	}
 
 	return LoadTranslationJSON(jsonData);
-
-	/*
-	std::wstring sanitizedName = FileUtils::ValidateFileName(filename, L".json");
-
-	std::wstring fullFilePath = path + L'\\' + sanitizedName;
-	std::wifstream file(fullFilePath.c_str(), std::ifstream::in | std::ifstream::binary);
-
-	if (!file.is_open())
-		return false;
-
-	// get the length of the file
-	//file.seekg(0, std::ifstream::end);
-	//m_LuaFileLength = file.tellg();
-	//file.seekg(0, std::ifstream::beg);
-
-	//file >> m_LuaFile;
-	std::wstringstream tempFile;
-	tempFile << file.rdbuf();
-
-	file.close();
-
-	return ParseTranslationJSON(tempFile.str());
-	*/
 }
 
 bool AuExpManager::LoadTranslationJSON(const json& jsonData)
@@ -539,110 +541,18 @@ void AuExpManager::EndExport()
 
 void AuExpManager::ExportInternal()
 {
-	//m_LuaFile = ""; // Free memory of the Lua file since we don't need it anymore
 	m_LuaFiles.clear();
+
 	BuildSingleCSV();
 
-	TCHAR path[MAX_PATH];
-
-	std::wstring prefsDir;
-
-	//get the user's documents directory:
-	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-	{
-		prefsDir = path;
-		prefsDir += L"\\AutomationGame\\ExporterPrefs\\";
-
-		DWORD att = GetFileAttributes(prefsDir.c_str());
-
-		if (att == INVALID_FILE_ATTRIBUTES)
-		{
-			//create directory, one level at a time:
-			size_t slashPos = FindDirDelimiter(prefsDir, 0);
-			size_t offset = 0;
-
-			while (slashPos != std::wstring::npos)
-			{
-				CreateDirectory(prefsDir.substr(offset, slashPos - offset).c_str(), nullptr);
-				slashPos = FindDirDelimiter(prefsDir, slashPos + 1);
-			}
-
-			//last one:
-			CreateDirectory(prefsDir.c_str(), nullptr);
-
-			att = GetFileAttributes(prefsDir.c_str());
-		}
-
-		if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
-		{
-			return;
-		}
-
-		std::wstring prefsFile = prefsDir + L"CSVExporter2.prefs";
-
-		FILE* file;
-		errno_t err = _wfopen_s(&file, prefsFile.c_str(), L"wb");
-
-		if (err || !file)
-			return;
-
-		ExportPrefs prefs;
-
-		std::wstring delimiter = m_CarData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
-		if (delimiter.size() == 1)
-		{
-			prefs.Delimiter = delimiter[0];
-		}
-
-		std::wstring luaFile = m_CarData->GetStringData(ExporterStringData_LuaFileName)->Value;
-		if (luaFile.size() < PREFS_FILE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < luaFile.size(); i++)
-			{
-				prefs.LuaFile[i] = luaFile[i];
-			}
-		}
-
-		std::wstring dataFile = m_CarData->GetStringData(ExporterStringData_DataJSONFileName)->Value;
-		if (dataFile.size() < PREFS_FILE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < dataFile.size(); i++)
-			{
-				prefs.DataFile[i] = dataFile[i];
-			}
-		}
-
-		std::wstring translationsFile = m_CarData->GetStringData(ExporterStringData_TranslationsJSONFileName)->Value;
-		if (translationsFile.size() < PREFS_FILE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < translationsFile.size(); i++)
-			{
-				prefs.TranslationsFile[i] = translationsFile[i];
-			}
-		}
-
-		std::wstring localeName = m_Locale;
-		if (localeName.size() < PREFS_LOCALE_MAX_LENGTH)
-		{
-			for (size_t i = 0; i < localeName.size(); i++)
-			{
-				prefs.Locale[i] = localeName[i];
-			}
-		}
-
-		fwrite(&prefs, sizeof(prefs), 1, file);
-		fclose(file);
-	}
+	ExportPrefs::TryWriteToFile(m_CarData, m_Locale);
+	//ExportCustomBoolParamPrefs::TryWriteToFile(ExportCustomBoolParamPrefs::FromExportParams(m_ExportCustomParamsGroup.BoolParams), APPDATA_EXPORTER_PREFS_DIR);
+	ExportCustomParamsManager::TrySaveParamsGroup(m_ExportCustomParamsGroup, APPDATA_EXPORTER_PREFS_DIR);
 }
 
 
 void AuExpManager::BuildSingleCSV()
 {
-	//LuaData exportData;
-	//exportData.Add(m_GeneralData);
-
-	//FillTableData(exportData);
-
 	CSVManager csvManager(m_ExportDirectory + L"\\" + m_FileName + L".csv", m_Delimiter);
 
 	csvManager.BindData(&m_LuaData);

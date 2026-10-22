@@ -1,0 +1,9 @@
+{
+  "strings": [
+    {"type": "string", "label": "String Test", "tooltip": "This is a string test", "luaName": "string_test", "defaultValue": "test", "save":  true},
+    {"type": "string", "label": "Your Name Is", "tooltip": "Displays the player name with a wildcard", "luaName": "your_name_is", "defaultValue": "[PlayerName]", "save": false}
+  ],
+  "other_strings": [
+    {"type": "string", "label": "Saveable Text", "luaName": "saveable_text", "tooltip": "This is empty by default but is saved post-export", "save": true}
+  ]
+}

@@ -20,6 +20,12 @@ def main():
         archive.write(cwd + "\\AutomationExportExample\\Resources\\csvExporter_translations.json", "AutomationGame\\CSVExporter 2\\UserFiles\\TranslationsExample.json")
 
         archive.write(cwd + "\\Example_UserFiles\\example_override.lua", "AutomationGame\\CSVExporter 2\\UserFiles\\example_override.lua")
+        archive.write(cwd + "\\Example_UserFiles\\example_params.lua", "AutomationGame\\CSVExporter 2\\UserFiles\\example_params.lua")
+
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\example.json.example")
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\example.jsonc", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\example.jsonc.example")
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\web_example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\web_example.json.example")
+        archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\web_schema_example.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\web_schema_example.json.example")
 
         archive.close()
         

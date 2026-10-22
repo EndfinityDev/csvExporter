@@ -20,10 +20,9 @@ void VersionChecker::RunVersionCheck()
 
 void VersionChecker::RunVersionCheckThread()
 {
-
 	httplib::Params requestParams = { CSVE_VERSIONCHECK_TARGET_URL_PARAMS };
 
-	std::string responseData = HTTPManager::Get(CSVE_VERSIONCHECK_TARGET_URL_HOST, CSVE_VERSIONCHECK_TARGET_URL_PATH, requestParams);
+	std::string responseData = HTTPManager::Get(CSVE_VERSIONCHECK_TARGET_URL_HOST, CSVE_VERSIONCHECK_TARGET_URL_PATH, requestParams, true);
 	if (responseData.empty())
 	{
 		return;

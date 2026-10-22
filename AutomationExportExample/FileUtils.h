@@ -4,7 +4,7 @@
 class FileUtils
 {
 public:
-	static std::wstring ValidateFileName(std::wstring filename, std::wstring defaultExtension)
+	static std::wstring SanitizeFileNameWithExtension(std::wstring filename, const std::wstring& defaultExtension)
 	{
 		size_t filenameSize = filename.size();
 
@@ -49,5 +49,39 @@ public:
 		}
 
 		return sanitizedName;
+	}
+
+	static void SanitizeFileNameIllegalCharacters(std::wstring* inOutFilename, const std::wstring& illegalCharacters)
+	{
+		for (std::wstring::iterator i = inOutFilename->begin(); i < inOutFilename->end(); i++)
+		{
+			if (illegalCharacters.find(*i) != std::wstring::npos)
+			{
+				*i = L'_';
+			}
+		}
+
+		if (inOutFilename->size() > 1)
+		{
+			while ((*inOutFilename)[inOutFilename->size() - 1] == L' ')
+			{
+				inOutFilename->resize(inOutFilename->size() - 1);
+
+				if (inOutFilename->size() < 2)
+				{
+					if ((*inOutFilename)[0] == L' ')
+						*inOutFilename = L"_";
+
+					break;
+				}
+			}
+		}
+		else
+		{
+			if ((*inOutFilename)[0] == L' ')
+			{
+				*inOutFilename = L"_";
+			}
+		}
 	}
 };
