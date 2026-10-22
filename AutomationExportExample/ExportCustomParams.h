@@ -44,7 +44,7 @@ struct ExportCustomStringParam
     std::wstring Value = L"";
     std::wstring LuaName = L"";
 
-    bool allowSavingToPrefs = false;
+    bool AllowSavingToPrefs = false;
 };
 
 #define CSVE_CUSTOM_PREFS_STRING_VERSION 0
@@ -59,7 +59,7 @@ struct ExportCustomStringParamPrefs
         ExportCustomStringParamPrefs paramPrefs;
         for(const ExportCustomStringParam& param : exportParams)
         {
-            if (!param.allowSavingToPrefs)
+            if (!param.AllowSavingToPrefs)
             {
                 continue;
             }
@@ -214,7 +214,7 @@ struct ExportCustomBoolParam
     bool Value = false;
     std::wstring LuaName = L"";
 
-    bool allowSavingToPrefs = false;
+    bool AllowSavingToPrefs = false;
 };
 
 #define CSVE_CUSTOM_PREFS_BOOL_VERSION 0
@@ -229,7 +229,7 @@ struct ExportCustomBoolParamPrefs
         ExportCustomBoolParamPrefs paramPrefs;
         for (const ExportCustomBoolParam& param : exportParams)
         {
-            if (!param.allowSavingToPrefs)
+            if (!param.AllowSavingToPrefs)
             {
                 continue;
             }

@@ -196,7 +196,7 @@ void AuExpManager::ConfigureCustomParamData()
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring exportParamDir = path + APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
-		m_ExportCustomParamsGroup = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		m_ExportCustomParamsGroup = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir, false, false);
 	}
 
 	if (stringParameterCount != m_ExportCustomParamsGroup.StringParams.size())

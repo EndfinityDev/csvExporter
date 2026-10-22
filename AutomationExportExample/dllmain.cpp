@@ -61,7 +61,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCo
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
-		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir, false, false);
 		*retCount += exportParams.StringParams.size();
 	}
 
@@ -79,7 +79,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
-		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir, true, false);
 		stringDataCount += exportParams.StringParams.size();
 	}
 
@@ -136,6 +136,10 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 		wcscpy_s(stringData[ExporterStringData_Count + i].Label, exportParams.StringParams[i].Label.c_str());
 		wcscpy_s(stringData[ExporterStringData_Count + i].ToolTip, exportParams.StringParams[i].Tooltip.c_str());
 		wcscpy_s(stringData[ExporterStringData_Count + i].Value, exportParams.StringParams[i].Value.c_str());
+		if (!exportParams.StringParams[i].AllowSavingToPrefs)
+		{
+			continue;
+		}
 		auto iterator = exportParamSaveTable.find(exportParams.StringParams[i].LuaName);
 		if (iterator != exportParamSaveTable.end())
 		{
@@ -155,7 +159,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCoun
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
-		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		ExportCustomParamsGroup exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir, false, false);
 		*retCount += exportParams.BoolParams.size();
 	}
 
@@ -173,7 +177,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		std::wstring exportParamDir = path + AuExpManager::APPDATA_EXPORTER_DIR + L"\\UserFiles\\.ExportParams";
-		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir);
+		exportParams = ExportCustomParamsManager::LoadParameterJSONs(exportParamDir, false, true);
 		boolDataCount += exportParams.BoolParams.size();
 	}
 
@@ -192,6 +196,10 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 		wcscpy_s(boolData[ExporterBoolData_Count + i].Label, exportParams.BoolParams[i].Label.c_str());
 		wcscpy_s(boolData[ExporterBoolData_Count + i].ToolTip, exportParams.BoolParams[i].Tooltip.c_str());
 		boolData[ExporterBoolData_Count + i].Value = exportParams.BoolParams[i].Value;
+		if (!exportParams.BoolParams[i].AllowSavingToPrefs)
+		{
+			continue;
+		}
 		auto iterator = exportParamSaveTable.find(exportParams.BoolParams[i].LuaName);
 		if (iterator != exportParamSaveTable.end())
 		{

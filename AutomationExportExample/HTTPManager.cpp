@@ -2,7 +2,7 @@
 #include "HTTPManager.h"
 
 
-std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params, bool allowAnyStatus)
+std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPath, const httplib::Params& params, bool allowAnyStatus, int* outStatus)
 {
 	try
 	{
@@ -21,6 +21,11 @@ std::string HTTPManager::Get(const std::string& urlHost, const std::string urlPa
 
 		if (auto result = client.Get(queryString, headers))
 		{
+			if (outStatus)
+			{
+				*outStatus = result->status;
+			}
+
 			if (allowAnyStatus || result->status == 200)
 			{
 				return result->body;
