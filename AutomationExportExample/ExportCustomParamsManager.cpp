@@ -139,7 +139,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 				//TODO
 				continue;
 			}
-			saveToPrefs = parameter["save"].get<bool>();
+			saveToPrefs = parameter["save"].get<bool>() && (luaName.size() < CSVE_CUSTOM_PREFS_STR_MAX_LENGTH);
 		}
 		
 		if (label.empty())
