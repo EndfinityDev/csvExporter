@@ -1,0 +1,5 @@
+{
+	"Prepended_Data": {
+		"ChassisType": {"Translation": "Prepended Chassis Type", "DataType": "DataType_String"}
+	}
+}

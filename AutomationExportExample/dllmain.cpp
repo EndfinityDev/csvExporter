@@ -109,17 +109,17 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 
 	//std::wstring luaFile = prefs.LuaFile;
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Label, L"Lua File");
-	wcscpy_s(stringData[ExporterStringData_LuaFileName].ToolTip, L"The name of the Lua code file in the CSVExporter 2 user data folder. A .lua extension is added automatically if one is not provided. The default file is used if left blank. Multiple files names can be provided separated by commas, they will be loaded in the provided order");
+	wcscpy_s(stringData[ExporterStringData_LuaFileName].ToolTip, L"The name of the Lua code file in the CSVExporter 2 user data folder. A .lua extension is added automatically if one is not provided. The default file is used if left blank. Multiple files names can be provided separated by commas, they will be loaded in the provided order. \"*\" can be used to inject the default file into the order");
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Value, prefs.LuaFile);
 
 	//std::wstring datasetFile = prefs.DataFile;
 	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Label, L"Dataset File");
-	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].ToolTip, L"The name of the dataset JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank");
+	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].ToolTip, L"The name of the dataset JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank. The default file is used if left blank. Multiple files names can be provided separated by commas, they will be loaded in the provided order. \"*\" can be used to inject the default file into the order");
 	wcscpy_s(stringData[ExporterStringData_DataJSONFileName].Value, prefs.DataFile);
 
 	//std::wstring translationsFile = prefs.TranslationsFile;
 	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Label, L"Translations File");
-	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].ToolTip, L"The name of the translations JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank");
+	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].ToolTip, L"The name of the translations JSON file in the CSVExporter 2 user data folder. A .json extension is added automatically if one is not provided. The default file is used if left blank. The default file is used if left blank. Multiple files names can be provided separated by commas, they will be loaded in the provided order. \"*\" can be used to inject the default file into the order");
 	wcscpy_s(stringData[ExporterStringData_TranslationsJSONFileName].Value, prefs.TranslationsFile);
 
 	//std::wstring localeName = prefs.Locale;

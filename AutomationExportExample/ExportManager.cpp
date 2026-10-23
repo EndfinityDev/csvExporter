@@ -152,7 +152,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	if (hasValue)
 	{
-		if(!LoadDataFile(dataFileName, customFilePath))
+		if(!LoadDataFiles(dataFileName, customFilePath))
 		{
 			MessageBoxManager::ShowMessageBox(L"Failed to load dataset file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
@@ -174,7 +174,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	if (hasValue)
 	{
-		if(!LoadTranslationFile(translationsFileName, customFilePath))
+		if(!LoadTranslationFiles(translationsFileName, customFilePath))
 		{
 			MessageBoxManager::ShowMessageBox(L"Failed to load translation file", L"Error");
 			return AuCarExpErrorCode_UnknownError;
@@ -301,6 +301,11 @@ bool AuExpManager::LoadLuaFiles(const std::wstring& fileNames, const std::wstrin
 
 	for (const std::wstring& fileName : splitFileNames)
 	{
+		if (fileName == L"*")
+		{
+			LoadLuaResource();
+			continue;
+		}
 		if (!LoadLuaFile(fileName, path))
 		{
 			return false;
@@ -364,6 +369,30 @@ bool AuExpManager::LoadDataResource()
 		return false;
 	}
 	return LoadDataJSON(jsonData);
+}
+
+bool AuExpManager::LoadDataFiles(const std::wstring& fileNames, const std::wstring& path)
+{
+	std::vector<std::wstring> splitFileNames = StringUtils::SplitByCharW(fileNames, L',');
+	if (splitFileNames.size() == 0)
+	{
+		return false;
+	}
+
+	for (const std::wstring& fileName : splitFileNames)
+	{
+		if (fileName == L"*")
+		{
+			LoadDataResource();
+			continue;
+		}
+		if (!LoadDataFile(fileName, path))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool AuExpManager::LoadDataFile(const std::wstring& filename, const std::wstring& path)
@@ -488,6 +517,30 @@ bool AuExpManager::LoadTranslationResource()
 		return false;
 	}
 	return LoadTranslationJSON(jsonData);
+}
+
+bool AuExpManager::LoadTranslationFiles(const std::wstring& fileNames, const std::wstring& path)
+{
+	std::vector<std::wstring> splitFileNames = StringUtils::SplitByCharW(fileNames, L',');
+	if (splitFileNames.size() == 0)
+	{
+		return false;
+	}
+
+	for (const std::wstring& fileName : splitFileNames)
+	{
+		if (fileName == L"*")
+		{
+			LoadTranslationResource();
+			continue;
+		}
+		if (!LoadTranslationFile(fileName, path))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool AuExpManager::LoadTranslationFile(const std::wstring& filename, const std::wstring& path)
@@ -658,10 +711,30 @@ void AuExpManager::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& data)
 {
 	size_t fileCount = data.GetCount();
 
+	std::locale locale(std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>));
+	if (!m_Locale.empty())
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+		std::string localeNameA = converter.to_bytes(m_Locale);
+		try
+		{
+			std::locale baseLocale(localeNameA);
+			//std::locale localeWithUTF16(baseLocale, new std::codecvt_utf8_utf16<wchar_t>);
+			locale = std::locale(baseLocale, new std::codecvt_utf8_utf16<wchar_t>);
+			//outputFile.imbue(localeWithUTF16);
+		}
+		catch (const std::runtime_error&)
+		{
+			//outputFile.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>));
+			//locale = std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>);
+			//TODO
+		}
+	}
 
 	for (size_t i = 0; i < fileCount; i++)
 	{
-		std::ofstream file(m_ExportDirectory + L"\\" + data[i].FileName);
+		std::ofstream file(m_ExportDirectory + L"\\" + data[i].FileName, std::ios::app | std::ios::binary);
+		file.imbue(locale);
 		file.write(data[i].Buffer, data[i].BufferSize);
 		file.close();
 	}

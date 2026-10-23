@@ -92,8 +92,10 @@ private:
 	bool LoadLuaFiles(const std::wstring& fileNames, const std::wstring& path);
 	bool LoadLuaFile(const std::wstring& filename, const std::wstring& path);
 	bool LoadLuaResource();
+	bool LoadDataFiles(const std::wstring& filename, const std::wstring& path);
 	bool LoadDataFile(const std::wstring& filename, const std::wstring& path);
 	bool LoadDataResource();
+	bool LoadTranslationFiles(const std::wstring& filename, const std::wstring& path);
 	bool LoadTranslationFile(const std::wstring& filename, const std::wstring& path);
 	bool LoadTranslationResource();
 
