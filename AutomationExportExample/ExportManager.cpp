@@ -279,13 +279,13 @@ bool AuExpManager::LoadLuaResource()
 	}
 
 	unsigned int size = SizeofResource(m_Module, hRes);
-	size++; // Null terminator
+	//size++; // Null terminator
 	//m_LuaFileLength = size;
 	//m_LuaFile.reserve(m_LuaFileLength);
 
 	hResourceLoaded = LoadResource(m_Module, hRes);
 	//m_LuaFile = (char*)LockResource(hResourceLoaded);
-	m_LuaFiles.push_back((char*)LockResource(hResourceLoaded));
+	m_LuaFiles.emplace_back((char*)LockResource(hResourceLoaded), size);
 
 	UnlockResource(hResourceLoaded);
 	return true;
@@ -348,7 +348,7 @@ bool AuExpManager::LoadDataResource()
 	char* dataA = (char*)LockResource(hResourceLoaded);
 
 	std::wstring dataW;
-	dataW.resize(size * 2, 0);
+	dataW.resize(size * sizeof(wchar_t), 0);
 	int result = MultiByteToWideChar(CP_UTF8, 0, dataA, strlen(dataA), &dataW[0], dataW.size());
 
 	if (result <= 0)
@@ -474,7 +474,7 @@ bool AuExpManager::LoadTranslationResource()
 	char* dataA = (char*)LockResource(hResourceLoaded);
 
 	std::wstring dataW;
-	dataW.resize(size * 2, 0);
+	dataW.resize(size * sizeof(wchar_t), 0);
 	int result = MultiByteToWideChar(CP_UTF8, 0, dataA, strlen(dataA), &dataW[0], dataW.size());
 
 	if (result <= 0)
