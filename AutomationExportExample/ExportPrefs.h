@@ -30,6 +30,7 @@ struct ExportPrefs_V0
 struct ExportPrefs
 {
 	uint8_t Version = CSVE_EXP_PREFS_VERSION;
+	bool RequireSameHeader = false;
 	wchar_t Delimiter[CSVE_PREFS_DELIMITER_MAX_LENGTH] = L",";
 	wchar_t LuaFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
 	wchar_t DataFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
@@ -130,6 +131,8 @@ struct ExportPrefs
 			}
 
 			ExportPrefs prefs;
+
+			prefs.RequireSameHeader = carData->GetBoolData(ExporterBoolData_RequireSameHeader)->Value;
 
 			const std::wstring& delimiter = carData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
 			if (delimiter.size() < CSVE_PREFS_DELIMITER_MAX_LENGTH)

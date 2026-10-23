@@ -40,6 +40,7 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 
 	m_Delimiter = carData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
 	m_Locale = carData->GetStringData(ExporterStringData_Locale)->Value;
+	m_RequireSameCSVHeader = carData->GetBoolData(ExporterBoolData_RequireSameHeader)->Value;
 
 	//std::wstring mainDirectory = L"\\AutomationGame\\CSVExporter 2";
 
@@ -553,10 +554,10 @@ void AuExpManager::ExportInternal()
 
 void AuExpManager::BuildSingleCSV()
 {
-	CSVManager csvManager(m_ExportDirectory + L"\\" + m_FileName + L".csv", m_Delimiter);
+	CSVManager csvManager(m_ExportDirectory + L"\\" + m_FileName + L".csv", m_Delimiter, m_RequireSameCSVHeader);
 
-	csvManager.BindData(&m_LuaData);
-	csvManager.Save();
+	//csvManager.BindData(&m_LuaData);
+	csvManager.Save(m_LuaData);
 }
 
 

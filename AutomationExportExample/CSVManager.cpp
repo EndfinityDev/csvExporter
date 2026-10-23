@@ -1,13 +1,15 @@
 #include "CSVManager.h"
+
 #include "stdafx.h"
-
-#include "BuildDate.h"
-
 #include <codecvt>
 
-CSVManager::CSVManager(std::wstring filepath, std::wstring delimiter) :
+#include "BuildDate.h"
+#include "MessageBoxManager.h"
+
+CSVManager::CSVManager(std::wstring filepath, std::wstring delimiter, bool requireSameHeader) :
 	m_FilePath(filepath),
 	m_Delimiter(delimiter),
+	m_RequireSameHeader(requireSameHeader),
 	m_ExportManager(AuExpManager::GetInstance())
 {
 }
@@ -26,31 +28,33 @@ void CSVManager::AddData(const LuaData& data)
 }
 */
 
-std::wstring CSVManager::BuildCSVHeaderString() const
+std::wstring CSVManager::BuildCSVHeaderString(std::vector<LuaDataHeader>& luaDataHeaders, const std::locale& locale) const
 {
 	std::wstringstream stringStream;
-	size_t dataCount = m_Data->size();
+	stringStream.imbue(locale);
+
+	size_t dataCount = luaDataHeaders.size();
 	for (size_t i = 0; i < dataCount; i++)
 	{
 		if (i > 0)
 			stringStream << m_Delimiter;
 
-		stringStream << m_Data->at(i).HeaderTitle;
+		stringStream << luaDataHeaders[i].HeaderTitle;
 	}
 	return stringStream.str();
 }
 
-void CSVManager::WriteData(std::wofstream& outputFile) const
+void CSVManager::WriteData(std::wofstream& outputFile, std::vector<LuaDataHeader>& luaDataHeaders) const
 {
 	outputFile << L"\n";
 	//std::wstringstream stringStream;
-	size_t dataCount = m_Data->size();
+	size_t dataCount = luaDataHeaders.size();
 	for (size_t i = 0; i < dataCount; i++)
 	{
 		if (i > 0)
 			outputFile << m_Delimiter;
 
-		const LuaDataHeader& data =  m_Data->at(i);
+		const LuaDataHeader& data = luaDataHeaders[i];
 		switch (data.DataType)
 		{
 		case DataType_String:
@@ -90,51 +94,49 @@ void CSVManager::WriteData(std::wofstream& outputFile) const
 	}
 }
 
-void CSVManager::Save() const
+void CSVManager::Save(std::vector<LuaDataHeader>& luaDataHeaders) const
 {
-	std::wstring headerString = BuildCSVHeaderString();
+	std::wstring localeName = m_ExportManager->GetLocale();
+	std::locale locale(std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>));
+	if (!localeName.empty())
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+		std::string localeNameA = converter.to_bytes(localeName);
+		try 
+		{
+			std::locale baseLocale(localeNameA);
+			//std::locale localeWithUTF16(baseLocale, new std::codecvt_utf8_utf16<wchar_t>);
+			locale = std::locale(baseLocale, new std::codecvt_utf8_utf16<wchar_t>);
+			//outputFile.imbue(localeWithUTF16);
+		}
+		catch (const std::runtime_error&) 
+		{
+			//outputFile.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>));
+			//locale = std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>);
+			//TODO
+		}
+	}
 
 	DWORD att = GetFileAttributes(m_FilePath.c_str());
 	if (att != INVALID_FILE_ATTRIBUTES && att != FILE_ATTRIBUTE_DIRECTORY)
 	{
 		// check headers
-		std::wifstream readFileStream(m_FilePath.c_str());
-		wchar_t currentChar;
-		size_t currentIndex = 0;
-		bool sameHeader = true;
-		while (readFileStream >> currentChar)
+		if (m_RequireSameHeader)
 		{
-			if (currentChar == L'\n' || currentChar == L'\r')
-				break;
-
-			if (currentChar != headerString[currentIndex])
+			std::wstring headerString = BuildCSVHeaderString(luaDataHeaders, locale);
+			bool isSameHeader = CheckSameHeader(headerString, locale);
+			if (!isSameHeader)
 			{
-				sameHeader = false;
-				break;
+				// error out
+				MessageBoxManager::ShowMessageBox(L"The exported CSV header does not match the existing file header", L"Failed to write CSV");
+				return;
 			}
-
-			currentIndex++;
 		}
 
-		readFileStream.close();
+		std::wofstream outputFile(m_FilePath, std::ios::app | std::ios::binary);
+		outputFile.imbue(locale);
 
-		if (!sameHeader)
-		{
-			// error out
-		}
-
-		std::wofstream outputFile(m_FilePath, std::ios::app);
-		
-		std::wstring localeName = m_ExportManager->GetLocale();
-		if (!localeName.empty())
-		{
-			std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-			std::string localeNameA = converter.to_bytes(localeName);
-			std::locale locale(localeNameA);
-			outputFile.imbue(locale);
-		}
-
-		WriteData(outputFile);
+		WriteData(outputFile, luaDataHeaders);
 		outputFile.close();
 		
 	}
@@ -145,107 +147,54 @@ void CSVManager::Save() const
 	else
 	{
 		//make new file safely
-		std::wofstream outputFile(m_FilePath);
+		std::wstring headerString = BuildCSVHeaderString(luaDataHeaders, locale);
+		std::wofstream outputFile(m_FilePath, std::ios::out | std::ios::binary);
+		outputFile.imbue(locale);
 		WriteHeader(outputFile, headerString);
-		WriteData(outputFile);
+		WriteData(outputFile, luaDataHeaders);
 		outputFile.close();
 	}
 }
 
-/*
-void CSVManager::SaveOld() const
+bool CSVManager::CheckSameHeader(const std::wstring& headerString, const std::locale& locale) const
 {
-	if (m_Data.size() == 0 || m_Data[0].Size() == 0)
-		throw "No data to write was found";
+	std::wifstream readFileStream(m_FilePath.c_str(), std::ios::in | std::ios::binary);
+	readFileStream.imbue(locale);
 
-	FileManager fileManager = FileManager();
+	bool isSameHeader = false;
 
-	FILE* file;
-
-	if (TryCompareFileHeaders(fileManager)) 
-	{
-		file = fileManager.OpenFile(m_FilePath.c_str(), L"ab");
-	}
-	else
-	{
-		file = fileManager.OpenFile(m_FilePath.c_str(), L"wb");
-
-		if (!file)
-		{
-			MessageBox(NULL, m_FilePath.c_str(), TEXT("Failed to open file"), 0);
-			return;
+	std::wstring firstLine;
+	if (std::getline(readFileStream, firstLine)) {
+		if (!firstLine.empty() && firstLine.back() == L'\r') {
+			firstLine.pop_back();
 		}
 
-		// Populating the header
-		for (uint32_t i = 0; i < m_Data[0].Size(); i++)
-		{
-			if (i != 0)
-				fwprintf_s(file, m_Delimiter.c_str());
-			fwprintf_s(file, m_Data[0][i].HeaderTitle.c_str());
+		const wchar_t UTF8Bom = L'\xFEFF';
+		if (!firstLine.empty() && firstLine[0] == UTF8Bom) {
+			firstLine.erase(0, 1);
 		}
-
-		fwprintf_s(file, L"\n");
+		isSameHeader = firstLine == headerString;
 	}
 
-	// Populating the data
-	for (uint32_t i = 0; i < m_Data.size(); i++) // Rows
+	/*
+	wchar_t currentChar;
+	size_t currentIndex = 0;
+	bool sameHeader = true;
+	while (readFileStream >> currentChar)
 	{
-		for (uint32_t j = 0; j < m_Data[i].Size(); j++) // Columns
-		{
-			if (j != 0)
-				fwprintf_s(file, m_Delimiter.c_str());
+		if (currentChar == L'\n' || currentChar == L'\r')
+			break;
 
-			fwprintf_s(file, m_Data[i][j].Data.c_str());
+		if (currentChar != headerString[currentIndex])
+		{
+			sameHeader = false;
+			break;
 		}
-		fwprintf_s(file, L"\n");
+
+		currentIndex++;
 	}
+	*/
+
+	readFileStream.close();
+	return isSameHeader;
 }
-*/
-
-/*
-bool CSVManager::VerifyHeaders(const LuaData& data)
-{
-	if (m_Data.size() == 0)
-		return true;
-
-	LuaData& tempData = m_Data[0];
-	uint32_t size = tempData.Size();
-
-	if (size != data.Size())
-		return false;
-
-	for (uint32_t i = 0; i < size; i++)
-	{
-		if (tempData[i].HeaderName != data[i].HeaderName)
-			return false;
-	}
-
-	return true;
-}
-*/
-
-//bool CSVManager::TryCompareFileHeaders(FileManager fileManager) const
-//{
-//	if (fileManager.CheckFileExists(m_FilePath.c_str()))
-//	{
-//		return true;
-//		/*
-//		std::wstring header = L"";
-//		header += m_Data[0][0].HeaderTitle;
-//
-//		for (uint32_t i = 1; i < m_Data[0].Size(); i++)
-//		{
-//			header += m_Delimeter;
-//			header += m_Data[0][i].HeaderTitle;
-//		}
-//		header += L"\n";
-//
-//		std::wstring fileHeader = fileManager.ReadFileHeader(m_FilePath.c_str());
-//
-//		if (fileHeader == header)
-//			return true;
-//		*/
-//	}
-//
-//	return false;
-//}

@@ -29,7 +29,7 @@ enum ExporterStringData : unsigned int
 
 enum ExporterBoolData : unsigned int
 {
-
+	ExporterBoolData_RequireSameHeader,
 
 	ExporterBoolData_Count
 };
@@ -126,6 +126,7 @@ private:
 
 	std::wstring m_FileName = L"";
 	std::wstring m_Delimiter = L"";
+	bool m_RequireSameCSVHeader = false;
 
 	std::vector<std::string> m_LuaFiles;
 	//std::string m_LuaFile = "";

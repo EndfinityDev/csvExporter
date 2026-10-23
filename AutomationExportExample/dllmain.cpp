@@ -170,6 +170,14 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 {
 	unsigned int boolDataCount = ExporterBoolData_Count;
 
+	ExportPrefs prefs = ExportPrefs::LoadFromFile();
+
+	wcscpy_s(boolData[ExporterBoolData_RequireSameHeader].Label, L"Require Same Header"); //label
+	//wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, delimiter.c_str()); //default value, containing wildcards to be filled with information from Automation
+	wcscpy_s(boolData[ExporterBoolData_RequireSameHeader].ToolTip, L"If checked, when writing to an existing file with a mismatched header the exporter will throw an error. Otherwise it will write rows even if they don't match the header");
+	boolData[ExporterBoolData_RequireSameHeader].Value = prefs.RequireSameHeader;
+
+
 	ExportCustomParamsGroup exportParams;
 
 	TCHAR path[MAX_PATH];
