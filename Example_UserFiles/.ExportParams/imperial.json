@@ -1,0 +1,10 @@
+[
+  {
+    "type": "bool",
+    "label": "Convert To Imperial",
+    "tooltip": "When checked, values are converted from metric to imperial. In the default Lua file, turbocharger/supercharger sizes are not converted as those parameters are also used for supercharger gearing. RON is not converted to AKI",
+    "luaName": "ConvertToImperial",
+    "defaultValue": false,
+    "save": true
+  }
+]

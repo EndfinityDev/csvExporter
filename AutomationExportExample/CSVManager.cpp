@@ -73,7 +73,7 @@ void CSVManager::WriteData(std::wofstream& outputFile, std::vector<LuaDataHeader
 			float num;
 			if (m_ExportManager->TryGetFloatData(data.HeaderName, &num))
 			{
-				outputFile << num;
+				outputFile << std::to_wstring(num);
 			}
 			else
 			{

@@ -3,6 +3,26 @@
 -- Copyright (c) 2021 -- Camshaft Software PTY LTD
 ---------------------------------------------------
 
+local convertToImperial = false
+if ExportParameters.BoolParameters then
+	if ExportParameters.BoolParameters.ConvertToImperial ~= nil then
+		convertToImperial = ExportParameters.BoolParameters.ConvertToImperial
+	end
+end
+
+local Conversions = {
+	Centimeters = convertToImperial and 2.54 or 1,
+	Millimeters = convertToImperial and 25.4 or 1,
+	Meters = convertToImperial and 3.281 or 1,
+	KMH = convertToImperial and 1.609 or 1,
+	KGMM = convertToImperial and 55.997 or 1,
+	Kilograms = convertToImperial and 2.205 or 1,
+	Liters = convertToImperial and 61.024 or 1,
+	Kilowatt = convertToImperial and 1.341 or 1,
+	Bar = convertToImperial and 14.504 or 1,
+	NM = convertToImperial and 0.7376 or 1
+}
+
 function DoExport(CarCalculator, CarFile)
 	UAPI.Log("DoExport: ")
 
@@ -37,6 +57,7 @@ end
 
 
 function CExporter.ExportCarData(CarCalculator)
+
 	local CarInfo = CarCalculator.CarInfo
 	local EngineInfo = CarInfo.TrimInfo.EngineInfo
 	local GearboxInfo = CarInfo.TrimInfo.Gearbox
@@ -87,7 +108,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.TrimQualityAssists = CarInfo.TrimInfo.QualitySettings.DriverAssists
 	Data.TrimQualityDrivetrain = CarInfo.TrimInfo.QualitySettings.DriveTrain
 	
-	Data.BodyWheelbase = CarInfo.TrimInfo.Body.WheelBase
+	Data.BodyWheelbase = CarInfo.TrimInfo.Body.WheelBase / Conversions.Centimeters
 	Data.BodyType = CarInfo.TrimInfo.Body.BodyType
 	Data.BodyDoors = CarInfo.TrimInfo.Body.Doors
 	--Data.BodyHardtop = CarInfo.TrimInfo.Body.ConvertableHard
@@ -113,7 +134,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.DriveType = GearboxInfo.DriveType.Name
 	Data.GearboxType = GearboxInfo.Type.Name
 	Data.DiffType = GearboxInfo.Differential.Name
-	Data.SpeedLimit = GearboxInfo.SpeedLimiter
+	Data.SpeedLimit = GearboxInfo.SpeedLimiter / Conversions.KMH
 	
 	Data.ActiveCooling = CarInfo.TrimInfo.ActiveCooling.Name
 	Data.ActiveWing = CarInfo.TrimInfo.ActiveWing.Name
@@ -134,28 +155,28 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.Dampers = CarInfo.TrimInfo.Dampers.Name
 	Data.Springs = CarInfo.TrimInfo.Springs.Name
 	
-	Data.RideHeight = CarInfo.TrimInfo.SuspensionDetails.RideHeight
+	Data.RideHeight = CarInfo.TrimInfo.SuspensionDetails.RideHeight / Conversions.Centimeters
 	Data.RearCamber = CarInfo.TrimInfo.SuspensionDetails.Rear.Camber
 	Data.FrontCamber = CarInfo.TrimInfo.SuspensionDetails.Front.Camber
 	Data.RearToe = CarInfo.TrimInfo.SuspensionDetails.Rear.Toe
 	Data.FrontToe = CarInfo.TrimInfo.SuspensionDetails.Front.Toe
-	Data.RearARBStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.ARBStiffness
-	Data.FrontARBStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.ARBStiffness
-	Data.RearDamperStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.DamperStiffness
-	Data.FrontDamperStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.DamperStiffness
-	Data.RearSpringStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.SpringStiffness
-	Data.FrontSpringStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.SpringStiffness
+	Data.RearARBStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.ARBStiffness * Conversions.KGMM
+	Data.FrontARBStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.ARBStiffness * Conversions.KGMM
+	Data.RearDamperStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.DamperStiffness * Conversions.KGMM
+	Data.FrontDamperStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.DamperStiffness * Conversions.KGMM
+	Data.RearSpringStiffness = CarInfo.TrimInfo.SuspensionDetails.Rear.SpringStiffness * Conversions.KGMM
+	Data.FrontSpringStiffness = CarInfo.TrimInfo.SuspensionDetails.Front.SpringStiffness * Conversions.KGMM
 	
 	Data.FrontRimSize = CarInfo.TrimInfo.TyreDetails.Front.Rim
 	Data.RearRimSize = CarInfo.TrimInfo.TyreDetails.Rear.Rim
-	Data.FrontWheelOffset = CarInfo.TrimInfo.TyreDetails.Front.Offset
-	Data.RearWheelOffset = CarInfo.TrimInfo.TyreDetails.Rear.Offset
+	Data.FrontWheelOffset = CarInfo.TrimInfo.TyreDetails.Front.Offset / Conversions.Millimeters
+	Data.RearWheelOffset = CarInfo.TrimInfo.TyreDetails.Rear.Offset / Conversions.Millimeters
 	Data.FrontTyreProfile = CarInfo.TrimInfo.TyreDetails.Front.Profile
 	Data.RearTyreProfile = CarInfo.TrimInfo.TyreDetails.Rear.Profile
 	Data.FrontTyreWidth = CarInfo.TrimInfo.TyreDetails.Front.Width
 	Data.RearTyreWidth = CarInfo.TrimInfo.TyreDetails.Rear.Width
-	Data.FrontOverallDiameter = CarInfo.TrimInfo.TyreDetails.Front.OverallDiameter
-	Data.RearOverallDiameter = CarInfo.TrimInfo.TyreDetails.Rear.OverallDiameter
+	Data.FrontOverallDiameter = CarInfo.TrimInfo.TyreDetails.Front.OverallDiameter / Conversions.Millimeters
+	Data.RearOverallDiameter = CarInfo.TrimInfo.TyreDetails.Rear.OverallDiameter / Conversions.Millimeters
 	
 	Data.RimMaterial = CarInfo.TrimInfo.RimMaterial.Name
 	Data.TyreType = CarInfo.TrimInfo.TyreType.Name
@@ -165,8 +186,8 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.RearBrakeType = CarInfo.TrimInfo.Brakes.Rear.Discs.Name
 	Data.FrontCaliperPistons = CarInfo.TrimInfo.Brakes.Front.Calipers.PistonCount
 	Data.RearCaliperPistons = CarInfo.TrimInfo.Brakes.Rear.Calipers.PistonCount
-	Data.FrontBrakeDiameter = CarInfo.TrimInfo.Brakes.Front.Diameter
-	Data.RearBrakeDiameter = CarInfo.TrimInfo.Brakes.Rear.Diameter
+	Data.FrontBrakeDiameter = CarInfo.TrimInfo.Brakes.Front.Diameter / Conversions.Millimeters
+	Data.RearBrakeDiameter = CarInfo.TrimInfo.Brakes.Rear.Diameter / Conversions.Millimeters
 	Data.FrontBrakePadType = CarInfo.TrimInfo.Brakes.Front.PadType
 	Data.RearBrakePadType = CarInfo.TrimInfo.Brakes.Rear.PadType
 	
@@ -176,8 +197,8 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.WeightOptimizationTune = CarInfo.TrimInfo.WeightOptimizationFraction
 	Data.WeightDistributionTune = CarInfo.TrimInfo.WeightDistributionFraction
 	
-	Data.CarWeight = Results.Weight
-	Data.TowWeight = Results.TowWeight
+	Data.CarWeight = Results.Weight * Conversions.Kilograms
+	Data.TowWeight = Results.TowWeight * Conversions.Kilograms
 	
 	Data.SportinessRating 	= Results.SportinessValue
 	Data.DrivabilityRating 	= Results.DrivabilityValue
@@ -193,8 +214,8 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.SafetyRating 		= Results.SafetyValue
 	Data.ComfortRating 		= Results.ComfortValue
 	
-	Data.PassengerVolume = Results.PassengerVolume
-	Data.CargoVolume = Results.CargoVolume
+	Data.PassengerVolume = Results.PassengerVolume * Conversions.Liters
+	Data.CargoVolume = Results.CargoVolume * Conversions.Liters
 	
 	Data.TrimEngineeringTime = Results.EngineeringTime
 	Data.TrimManHours = Results.ManHours
@@ -208,26 +229,26 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.MatCost = Results.MaterialCost
 	Data.TrimEngCosts = Results.EngineeringCosts
 	
-	Data.BrakingDistance = Results.BrakingDistance
+	Data.BrakingDistance = Results.BrakingDistance * Conversions.Meters
 	Data.MaxBodyRoll = Results.MaxRollAngle
 	Data.Cornering = Results.Cornering
 	
-	Data.RearDownforce = Results.RearDownForce
-	Data.FrontDownforce = Results.FrontDownForce
+	Data.RearDownforce = Results.RearDownForce * Conversions.Kilograms
+	Data.FrontDownforce = Results.FrontDownForce * Conversions.Kilograms
 	
 	Data.TyreSpeedIndex = Results.TyreSpeedIndex
 	Data.TyreSpeedRating = Results.TyreSpeedRating
 	
-	Data.TopSpeed = Results.TopSpeed
+	Data.TopSpeed = Results.TopSpeed / Conversions.KMH
 	Data.TopSpeedGear = Results.TopSpeedGear
-	Data.TopSpeedEnginePower = Results.TopSpeedEnginePower
+	Data.TopSpeedEnginePower = Results.TopSpeedEnginePower * Conversions.Kilowatt
 	Data.TopSpeedEngineRPM = Results.TopSpeedEngineRPM
 	
 	Data.KilometerTime = Results.KilometerTime
-	Data.KilometerSpeed = Results.KilometerSpeed
+	Data.KilometerSpeed = Results.KilometerSpeed / Conversions.KMH
 	Data.EightyToHundredAndTwentyTime = Results.EightyToHundredAndTwentyTime
 	Data.QuarterMileTime = Results.QuarterMileTime
-	Data.QuarterMileSpeed = Results.QuarterMileSpeed
+	Data.QuarterMileSpeed = Results.QuarterMileSpeed / Conversions.KMH
 	Data.SixtyTime = Results.SixtyTime
 	Data.TwoHundredTime = Results.TwoHundredTime
 	Data.HundredTime = Results.HundredTime
@@ -238,9 +259,9 @@ function CExporter.ExportCarData(CarCalculator)
 
 	Data.FamilyYear = EngineInfo.PlatformInfo.Time.Date.Year
 	Data.FamilyName = EngineInfo.PlatformInfo.Name
-	Data.FamilyBore = EngineInfo.PlatformInfo.Bore
-	Data.FamilyStroke = EngineInfo.PlatformInfo.Stroke
-	Data.FamilyDisplacement = EngineInfo.PlatformInfo.Capacity
+	Data.FamilyBore = EngineInfo.PlatformInfo.Bore / Conversions.Millimeters
+	Data.FamilyStroke = EngineInfo.PlatformInfo.Stroke / Conversions.Millimeters
+	Data.FamilyDisplacement = EngineInfo.PlatformInfo.Capacity * Conversions.Liters
 
 	Data.BlockType = EngineInfo.PlatformInfo.BlockType.Name
 	Data.Cylinders = EngineInfo.PlatformInfo.BlockConfig.Cylinders
@@ -257,9 +278,9 @@ function CExporter.ExportCarData(CarCalculator)
 	
 	Data.VariantYear = EngineInfo.ModelInfo.Time.Date.Year
 	Data.VariantName = EngineInfo.ModelInfo.Name
-	Data.VariantBore = EngineInfo.ModelInfo.Bore
-	Data.VariantStroke = EngineInfo.ModelInfo.Stroke
-	Data.VariantDisplacement = EngineInfo.ModelInfo.Capacity
+	Data.VariantBore = EngineInfo.ModelInfo.Bore / Conversions.Millimeters
+	Data.VariantStroke = EngineInfo.ModelInfo.Stroke / Conversions.Millimeters
+	Data.VariantDisplacement = EngineInfo.ModelInfo.Capacity * Conversions.Liters
 	
 	Data.BalanceShaft = EngineInfo.ModelInfo.BalanceShaft.Name
 	Data.BalancingMass = EngineInfo.ModelInfo.BalancingMassSetting
@@ -286,14 +307,15 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.AspirationSubItem2 = EngineInfo.ModelInfo.AspirationItemSubOption_2.Name
 	
 	Data.BoostControl = EngineInfo.ModelInfo.AspirationBoostControl.Name
+	-- This can be gearing so we leave it at MM
 	Data.ChargerSize1 = EngineInfo.ModelInfo.ChargerSize_1
 	Data.ChargerSize2 = EngineInfo.ModelInfo.ChargerSize_2
 	Data.TurbineSize1 = EngineInfo.ModelInfo.TurbineSize_1
 	Data.TurbineSize2 = EngineInfo.ModelInfo.TurbineSize_2
 	Data.ChargerTune1 = EngineInfo.ModelInfo.ChargerTune_1
 	Data.ChargerTune2 = EngineInfo.ModelInfo.ChargerTune_2
-	Data.ChargerMaxBoost1 = EngineInfo.ModelInfo.ChargerMaxBoost_1
-	Data.ChargerMaxBoost2 = EngineInfo.ModelInfo.ChargerMaxBoost_2
+	Data.ChargerMaxBoost1 = EngineInfo.ModelInfo.ChargerMaxBoost_1 * Conversions.Bar
+	Data.ChargerMaxBoost2 = EngineInfo.ModelInfo.ChargerMaxBoost_2 * Conversions.Bar
 	
 	Data.FuelSystemType = EngineInfo.ModelInfo.FuelSystemType.Name
 	Data.FuelSystem = EngineInfo.ModelInfo.FuelSystem.Name
@@ -303,7 +325,7 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.IntakeSize = EngineInfo.ModelInfo.IntakeSize or 0
 	
 	Data.FuelLeaded = EngineInfo.ModelInfo.Fuel.FuelLeaded == true and "TRUE" or "FALSE"
-	Data.FuelOctane = EngineInfo.ModelInfo.Fuel.ListedOctane
+	Data.FuelOctane = EngineInfo.ModelInfo.Fuel.ListedOctane -- No direct mathematical conversion
 	Data.OctaneOffset = EngineInfo.ModelInfo.Fuel.TuneOctaneOffset
 	Data.FuelType = EngineInfo.ModelInfo.Fuel.Type
 	
@@ -336,19 +358,19 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.VariantExhaustTechpool = EngineInfo.ModelInfo.TechPool.Exhaust
 	
 
-	Data.EnginePower = EngineInfo.ModelInfo.Results.PeakPower
+	Data.EnginePower = EngineInfo.ModelInfo.Results.PeakPower * Conversions.Kilowatt
 	Data.EnginePowerRPM = EngineInfo.ModelInfo.Results.PeakPowerRPM
-	Data.EngineTorque = EngineInfo.ModelInfo.Results.PeakTorque
+	Data.EngineTorque = EngineInfo.ModelInfo.Results.PeakTorque * Conversions.NM
 	Data.EngineTorqueRPM = EngineInfo.ModelInfo.Results.PeakTorqueRPM
 	Data.EngineMaxRPM = EngineInfo.ModelInfo.Results.MaxRPM
 	Data.EngineIdleRPM = EngineInfo.ModelInfo.Results.Idle
-	Data.EnginePeakBoost = EngineInfo.ModelInfo.Results.PeakBoost
+	Data.EnginePeakBoost = EngineInfo.ModelInfo.Results.PeakBoost * Conversions.Bar
 	Data.EnginePeakBoostRPM = EngineInfo.ModelInfo.Results.PeakBoostRPM
 	
 	--Data.MinEconomyRPM = EngineInfo.ModelInfo.Results.MinEconRPM
 	
-	Data.EngineWeight = EngineInfo.ModelInfo.Results.Weight
-	Data.EngineFlywheelWeight = EngineInfo.ModelInfo.Results.FlyWheelWeight
+	Data.EngineWeight = EngineInfo.ModelInfo.Results.Weight * Conversions.Kilograms
+	-- Data.EngineFlywheelWeight = EngineInfo.ModelInfo.Results.FlyWheelWeight * Conversions.Kilograms
 	Data.EngineRequiredCooling = EngineInfo.ModelInfo.Results.CoolingRequired
 	Data.EnginePerformanceIndex = EngineInfo.ModelInfo.Results.PerformanceIndex
 	Data.EngineResponsiveness = EngineInfo.ModelInfo.Results.Responsiveness
@@ -398,15 +420,15 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.EngineServiceCost = EngineInfo.ModelInfo.Results.ServiceCost
 	
 	Data.CrankMaxRPM = EngineInfo.ModelInfo.Results.PartsFailureInfo.Crank.RPM
-	Data.CrankMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Crank.Torque
+	--Data.CrankMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Crank.Torque * Conversions.NM
 	Data.ConrodMaxRPM = EngineInfo.ModelInfo.Results.PartsFailureInfo.Conrods.RPM
-	Data.ConrodMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Conrods.Torque
+	--Data.ConrodMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Conrods.Torque * Conversions.NM
 	Data.PistonMaxRPM = EngineInfo.ModelInfo.Results.PartsFailureInfo.Pistons.RPM
-	Data.PistonMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Pistons.Torque
+	--Data.PistonMaxTorque = EngineInfo.ModelInfo.Results.PartsFailureInfo.Pistons.Torque * Conversions.NM
 	--Data.TurboMaxRPM = EngineInfo.ModelInfo.Results.PartsFailureInfo.Turbo.RPM	
 
-	Data.BlockThresholdPD = EngineInfo.ModelInfo.Results.BlockThresholdPD
-	Data.PistonThresholdPD = EngineInfo.ModelInfo.Results.PistonThresholdPD
+	Data.BlockThresholdPD = EngineInfo.ModelInfo.Results.BlockThresholdPD * Conversions.Kilowatt
+	Data.PistonThresholdPD = EngineInfo.ModelInfo.Results.PistonThresholdPD * Conversions.Kilowatt
 
 	Data.GameVersion = UAPI.GetGameVersion()
 
