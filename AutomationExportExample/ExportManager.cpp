@@ -216,10 +216,10 @@ void AuExpManager::ConfigureCustomParamData()
 	{
 		//std::wstring value = StringUtils::SanitizeLuaString(m_CarData->GetStringData(ExporterStringData_Count + i)->Value);
 		std::wstring newValue = m_CarData->GetStringData(ExporterStringData_Count + i)->Value;
-		if (newValue.size() >= CSVE_CUSTOM_PREFS_STR_MAX_LENGTH)
-		{
-			continue;
-		}
+		//if (newValue.size() >= CSVE_CUSTOM_PREFS_STR_MAX_LENGTH)
+		//{
+		//	continue;
+		//}
 		m_ExportCustomParamsGroup.StringParams[i].Value = newValue;
 	}
 
