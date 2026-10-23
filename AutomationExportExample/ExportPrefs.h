@@ -5,15 +5,32 @@
 #include "ExportManager.h"
 #include "DirectoryManager.h"
 
-#define CSVE_EXP_PREFS_VERSION 0
+#define CSVE_EXP_PREFS_VERSION 1
 
-#define CSVE_PREFS_FILE_MAX_LENGTH 25
-#define CSVE_PREFS_LOCALE_MAX_LENGTH 15
+// One character can take up multiple "character slots"
+#define CSVE_PREFS_FILE_MAX_LENGTH 255 // 254 character slots + null terminator
+#define CSVE_PREFS_LOCALE_MAX_LENGTH 15 // 14 character slots + null terminator
+#define CSVE_PREFS_DELIMITER_MAX_LENGTH 12 // 11 character slots + null terminator
+
+//Legacy V0
+#define CSVE_EXP_PREFS_VERSION_V0 0
+#define CSVE_PREFS_FILE_MAX_LENGTH_V0 25 // 24 character slots + null terminator
+#define CSVE_PREFS_LOCALE_MAX_LENGTH_V0 15 // 14 character slots + null terminator
+
+struct ExportPrefs_V0
+{
+	uint8_t Version = CSVE_EXP_PREFS_VERSION_V0;
+	wchar_t Delimiter = L',';
+	wchar_t LuaFile[CSVE_PREFS_FILE_MAX_LENGTH_V0] = L"";
+	wchar_t DataFile[CSVE_PREFS_FILE_MAX_LENGTH_V0] = L"";
+	wchar_t TranslationsFile[CSVE_PREFS_FILE_MAX_LENGTH_V0] = L"";
+	wchar_t Locale[CSVE_PREFS_LOCALE_MAX_LENGTH_V0] = L"";
+};
 
 struct ExportPrefs
 {
 	uint8_t Version = CSVE_EXP_PREFS_VERSION;
-	wchar_t Delimiter = L',';
+	wchar_t Delimiter[CSVE_PREFS_DELIMITER_MAX_LENGTH] = L",";
 	wchar_t LuaFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
 	wchar_t DataFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
 	wchar_t TranslationsFile[CSVE_PREFS_FILE_MAX_LENGTH] = L"";
@@ -42,15 +59,21 @@ struct ExportPrefs
 				size_t prefsFileSize = ftell(file);
 				fseek(file, 0, SEEK_SET);
 
-				if (prefsFileSize == sizeof(prefs))
+				if (prefsFileSize > 0)
 				{
 					uint8_t prefsFileVersion;
 					fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
 					fseek(file, 0, SEEK_SET);
 
-					if (prefsFileVersion == CSVE_EXP_PREFS_VERSION)
+					if (prefsFileVersion == CSVE_EXP_PREFS_VERSION && prefsFileSize == sizeof(prefs))
 					{
 						fread_s(&prefs, sizeof(prefs), prefsFileSize, 1, file);
+					}
+					else if (prefsFileVersion == CSVE_EXP_PREFS_VERSION_V0 && prefsFileSize == sizeof(ExportPrefs_V0))
+					{
+						ExportPrefs_V0 legacyPrefs;
+						fread_s(&legacyPrefs, sizeof(legacyPrefs), prefsFileSize, 1, file);
+						prefs = FromLegacy_V0(legacyPrefs);
 					}
 					else
 					{
@@ -108,46 +131,33 @@ struct ExportPrefs
 
 			ExportPrefs prefs;
 
-			std::wstring delimiter = carData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
-			if (delimiter.size() == 1)
+			const std::wstring& delimiter = carData->GetStringData(ExporterStringData_CSVDelimiter)->Value;
+			if (delimiter.size() < CSVE_PREFS_DELIMITER_MAX_LENGTH)
 			{
-				prefs.Delimiter = delimiter[0];
+				wcscpy_s(prefs.Delimiter, delimiter.c_str());
 			}
 
-			std::wstring luaFile = carData->GetStringData(ExporterStringData_LuaFileName)->Value;
+			const std::wstring& luaFile = carData->GetStringData(ExporterStringData_LuaFileName)->Value;
 			if (luaFile.size() < CSVE_PREFS_FILE_MAX_LENGTH)
 			{
-				for (size_t i = 0; i < luaFile.size(); i++)
-				{
-					prefs.LuaFile[i] = luaFile[i];
-				}
+				wcscpy_s(prefs.LuaFile, luaFile.c_str());
 			}
 
-			std::wstring dataFile = carData->GetStringData(ExporterStringData_DataJSONFileName)->Value;
+			const std::wstring& dataFile = carData->GetStringData(ExporterStringData_DataJSONFileName)->Value;
 			if (dataFile.size() < CSVE_PREFS_FILE_MAX_LENGTH)
 			{
-				for (size_t i = 0; i < dataFile.size(); i++)
-				{
-					prefs.DataFile[i] = dataFile[i];
-				}
+				wcscpy_s(prefs.DataFile, dataFile.c_str());
 			}
 
-			std::wstring translationsFile = carData->GetStringData(ExporterStringData_TranslationsJSONFileName)->Value;
+			const std::wstring& translationsFile = carData->GetStringData(ExporterStringData_TranslationsJSONFileName)->Value;
 			if (translationsFile.size() < CSVE_PREFS_FILE_MAX_LENGTH)
 			{
-				for (size_t i = 0; i < translationsFile.size(); i++)
-				{
-					prefs.TranslationsFile[i] = translationsFile[i];
-				}
+				wcscpy_s(prefs.TranslationsFile, translationsFile.c_str());
 			}
 
-			std::wstring localeName = locale;
-			if (localeName.size() < CSVE_PREFS_LOCALE_MAX_LENGTH)
+			if (locale.size() < CSVE_PREFS_LOCALE_MAX_LENGTH)
 			{
-				for (size_t i = 0; i < localeName.size(); i++)
-				{
-					prefs.Locale[i] = localeName[i];
-				}
+				wcscpy_s(prefs.Locale, locale.c_str());
 			}
 
 			fwrite(&prefs, sizeof(prefs), 1, file);
@@ -158,5 +168,19 @@ struct ExportPrefs
 
 		//TODO
 		return false;
+	}
+
+	static ExportPrefs FromLegacy_V0(const ExportPrefs_V0& legacyPrefs)
+	{
+		ExportPrefs prefs;
+		prefs.Delimiter[0] = legacyPrefs.Delimiter;
+		prefs.Delimiter[1] = L'\0';
+		//wcscpy_s(stringData[ExporterStringData_Count + i].Value, iterator->second.c_str());
+		wcscpy_s(prefs.LuaFile, legacyPrefs.LuaFile);
+		wcscpy_s(prefs.DataFile, legacyPrefs.DataFile);
+		wcscpy_s(prefs.TranslationsFile, legacyPrefs.TranslationsFile);
+		wcscpy_s(prefs.Locale, legacyPrefs.Locale);
+
+		return prefs;
 	}
 };

@@ -568,7 +568,7 @@ void AuExpManager::AddImage(const AuCarExpTexture* texture)
 	}
 
 	//only add unique textures
-	for (unsigned int i = 0; i < m_AllImages.size(); i++)
+	for (size_t i = 0; i < m_AllImages.size(); i++)
 	{
 		if (m_AllImages[i] == texture)
 		{
@@ -581,7 +581,7 @@ void AuExpManager::AddImage(const AuCarExpTexture* texture)
 
 void AuExpManager::SaveImages()
 {
-	for (unsigned int i = 0; i < m_AllImages.size(); i++)
+	for (size_t i = 0; i < m_AllImages.size(); i++)
 	{
 		AuExpImage::SaveImageFile(m_AllImages[i], m_ExportDirectory.c_str());
 	}
@@ -597,7 +597,7 @@ void AuExpManager::AddLuaFloatData(const AuCarExpArray<AuCarExpLuaFloatData>& Da
 	if (Data.GetCount() > 0)
 		m_LuaDataAdded = true;
 
-	for (int i = 0; i < Data.GetCount(); i++)
+	for (size_t i = 0; i < Data.GetCount(); i++)
 	{
 		m_LuaFloatData[Data[i].ValueName] = Data[i].Value;
 	}
@@ -608,7 +608,7 @@ void AuExpManager::AddLuaStringData(const AuCarExpArray<AuCarExpLuaStringData>& 
 	if (Data.GetCount() > 0)
 		m_LuaDataAdded = true;
 
-	for (int i = 0; i < Data.GetCount(); i++)
+	for (size_t i = 0; i < Data.GetCount(); i++)
 	{
 		m_LuaStringData[Data[i].ValueName] = Data[i].Buffer;
 	}

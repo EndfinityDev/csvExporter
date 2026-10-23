@@ -125,7 +125,6 @@ private:
 	std::map<std::wstring, std::wstring> m_Translations;
 
 	std::wstring m_FileName = L"";
-	std::wstring m_EngineName = L"";
 	std::wstring m_Delimiter = L"";
 
 	std::vector<std::string> m_LuaFiles;

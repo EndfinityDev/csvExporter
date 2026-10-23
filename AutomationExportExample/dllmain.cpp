@@ -104,9 +104,8 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	//delimiter += prefs.Delimiter;
 	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Label, L"CSV Delimiter"); //label
 	//wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, delimiter.c_str()); //default value, containing wildcards to be filled with information from Automation
-	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].ToolTip, L"The character to use as the delimiter for columns of data");
-	stringData[ExporterStringData_CSVDelimiter].Value[0] = prefs.Delimiter;
-	stringData[ExporterStringData_CSVDelimiter].Value[1] = L'\0';
+	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].ToolTip, L"The character(s) to use as the delimiter for columns of data");
+	wcscpy_s(stringData[ExporterStringData_CSVDelimiter].Value, prefs.Delimiter);
 
 	//std::wstring luaFile = prefs.LuaFile;
 	wcscpy_s(stringData[ExporterStringData_LuaFileName].Label, L"Lua File");
