@@ -103,7 +103,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 			continue;
 		}
 		luaName = StringConverter::to_wstring(parameter["luaName"].get<std::string>());
-		if (luaName.empty())
+		if (luaName.empty() || (luaName.size() >= CSVE_CUSTOM_PREFS_STR_MAX_LENGTH))
 		{
 			//TODO
 			continue;
@@ -139,7 +139,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 				//TODO
 				continue;
 			}
-			saveToPrefs = parameter["save"].get<bool>() && (luaName.size() < CSVE_CUSTOM_PREFS_STR_MAX_LENGTH);
+			saveToPrefs = parameter["save"].get<bool>();
 		}
 		
 		if (label.empty())
