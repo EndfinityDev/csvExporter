@@ -217,12 +217,12 @@ struct ExportCustomBoolParam
     bool AllowSavingToPrefs = false;
 };
 
-#define CSVE_CUSTOM_PREFS_BOOL_VERSION 0
+#define CSVE_CUSTOM_PREFS_BOOL_VERSION 1
 
 struct ExportCustomBoolParamPrefs
 {
     uint8_t Version = CSVE_CUSTOM_PREFS_BOOL_VERSION;
-    std::vector<std::pair<ExportParamString, bool>> ParamTable;
+    std::vector<std::pair<std::wstring, bool>> ParamTable;
 
     static ExportCustomBoolParamPrefs FromExportParams(const std::vector<ExportCustomBoolParam>& exportParams)
     {
@@ -234,7 +234,8 @@ struct ExportCustomBoolParamPrefs
                 continue;
             }
             paramPrefs.ParamTable.emplace_back(
-                ExportParamStringConverter::FromWString(param.LuaName),
+                //ExportParamStringConverter::FromWString(param.LuaName),
+                param.LuaName,
                 param.Value
             );
         }
@@ -248,7 +249,8 @@ struct ExportCustomBoolParamPrefs
         map.reserve(prefs.ParamTable.size());
         for (const auto& items : prefs.ParamTable)
         {
-            map.emplace(ExportParamStringConverter::ToWString(items.first), items.second);
+            //map.emplace(ExportParamStringConverter::ToWString(items.first), items.second);
+            map.emplace(items.first, items.second);
         }
         return map;
     }
@@ -272,17 +274,63 @@ struct ExportCustomBoolParamPrefs
             if (!err && file)
             {
                 uint8_t prefsFileVersion;
-                fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
-                
-                if (prefsFileVersion == CSVE_CUSTOM_PREFS_BOOL_VERSION)
+                size_t readStatus = fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
+                if (!readStatus)
                 {
-                    size_t customParamsCount;
-                    fread_s(&customParamsCount, sizeof(customParamsCount), sizeof(customParamsCount), 1, file);
-                    exportParamsPrefs.ParamTable.resize(customParamsCount);
-                    for (size_t i = 0; i < customParamsCount; i++)
+                    //TODO
+                    //return exportParamsPrefs;
+                }                
+                else if (prefsFileVersion == CSVE_CUSTOM_PREFS_BOOL_VERSION)
+                {
+                    //size_t customParamsCount;
+                    //size_t readStatus = fread_s(&customParamsCount, sizeof(customParamsCount), sizeof(customParamsCount), 1, file);
+                    //if (!readStatus)
+                    //{
+                    //    //TODO
+                    //    return exportParamsPrefs;
+                    //}
+                    //
+                    //exportParamsPrefs.ParamTable.resize(customParamsCount);
+                    //for (size_t i = 0; i < customParamsCount; i++)
+                    //{
+                    //    fread_s(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), sizeof(ExportParamString), 1, file);
+                    //    fread_s(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), sizeof(bool), 1, file);
+                    //}
+
+                    while (true)
                     {
-                        fread_s(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), sizeof(ExportParamString), 1, file);
-                        fread_s(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), sizeof(bool), 1, file);
+                        std::wstring key;
+                        size_t keySize;
+                        readStatus = fread_s(&keySize, sizeof(keySize), sizeof(keySize), 1, file);
+                        if (!readStatus)
+                        {
+                            break;
+                        }
+                        if (!keySize)
+                        {
+                            //TODO
+                            key = L"";
+                        }
+                        else
+                        {
+                            key.resize(keySize);
+                            readStatus = fread_s(&key[0], key.size() * sizeof(wchar_t), sizeof(wchar_t), keySize, file);
+                        }
+
+                        if (readStatus != keySize)
+                        {
+                            //TODO
+                            break;
+                        }
+
+                        bool value;
+                        readStatus = fread_s(&value, sizeof(value), sizeof(value), 1, file);
+                        if (!readStatus)
+                        {
+                            //TODO
+                            break;
+                        }
+                        exportParamsPrefs.ParamTable.emplace_back(key, value);
                     }
                 }
                 else
@@ -356,12 +404,21 @@ struct ExportCustomBoolParamPrefs
             }
 
             fwrite(&exportParamsPrefs.Version, sizeof(exportParamsPrefs.Version), 1, file);
+
             size_t customParamsCount = exportParamsPrefs.ParamTable.size();
-            fwrite(&customParamsCount, sizeof(customParamsCount), 1, file);
+            //fwrite(&customParamsCount, sizeof(customParamsCount), 1, file);
             //fwrite(&exportParamsPrefs.ParamTable, sizeof(std::pair<ExportParamString, bool>), customParamsCount, file);
+            //for (size_t i = 0; i < customParamsCount; i++)
+            //{
+            //    fwrite(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), 1, file);
+            //    fwrite(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), 1, file);
+            //}
+
             for (size_t i = 0; i < customParamsCount; i++)
             {
-                fwrite(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), 1, file);
+                size_t keySize = exportParamsPrefs.ParamTable[i].first.size();
+                fwrite(&keySize, sizeof(keySize), 1, file);
+                fwrite(exportParamsPrefs.ParamTable[i].first.c_str(), sizeof(wchar_t), keySize, file);
                 fwrite(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), 1, file);
             }
 
