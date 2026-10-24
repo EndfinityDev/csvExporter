@@ -102,6 +102,7 @@ private:
 	bool LoadTranslationResource();
 
 	bool LoadDataJSON(const json& jsonData);
+	bool LoadDataEntryFromJSON(const std::string& entryKey, const json& entryValue);
 	bool LoadDataEntriesFromJSON(const json& arrayObject);
 
 	bool LoadTranslationJSON(const json& jsonData);

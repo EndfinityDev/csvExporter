@@ -100,9 +100,18 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 			Logger::GetLogger()->Log(L"Failed to create UserFiles directory: " + customFilePath);
 		}
 
-		LoadLuaResource();
-		LoadDataResource();
-		LoadTranslationResource();
+		if (!LoadLuaResource())
+		{
+			return AuCarExpErrorCode_UnknownError;
+		}
+		if (!LoadDataResource())
+		{
+			return AuCarExpErrorCode_UnknownError;
+		}
+		if (!LoadTranslationResource())
+		{
+			return AuCarExpErrorCode_UnknownError;
+		}
 
 		return AuCarExpErrorCode_Success;
 	}
@@ -137,7 +146,10 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	else
 	{
-		LoadLuaResource();
+		if (!LoadLuaResource())
+		{
+			return AuCarExpErrorCode_UnknownError;
+		}
 	}
 
 	hasValue = false;
@@ -159,7 +171,10 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	else
 	{
-		LoadDataResource();
+		if (!LoadDataResource())
+		{
+			return AuCarExpErrorCode_UnknownError;
+		}
 	}
 
 	hasValue = false;
@@ -181,7 +196,10 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	else
 	{
-		LoadTranslationResource();
+		if (!LoadTranslationResource())
+		{
+			return AuCarExpErrorCode_UnknownError;
+		}
 	}
 
 	return AuCarExpErrorCode_Success;
@@ -330,7 +348,10 @@ bool AuExpManager::LoadLuaFiles(const std::wstring& fileNames, const std::wstrin
 		}
 		if (trimmedFileName == L"*")
 		{
-			LoadLuaResource();
+			if (!LoadLuaResource())
+			{
+				return false;
+			}
 			continue;
 		}
 		if (!LoadLuaFile(trimmedFileName, path))
@@ -415,7 +436,10 @@ bool AuExpManager::LoadDataFiles(const std::wstring& fileNames, const std::wstri
 		}
 		if (trimmedFileName == L"*")
 		{
-			LoadDataResource();
+			if (!LoadDataResource())
+			{
+				return false;
+			}
 			continue;
 		}
 		if (!LoadDataFile(trimmedFileName, path))
@@ -438,6 +462,44 @@ bool AuExpManager::LoadDataFile(const std::wstring& filename, const std::wstring
 	return LoadDataJSON(jsonData);
 }
 
+bool AuExpManager::LoadDataEntryFromJSON(const std::string& entryKey, const json& entryValue)
+{
+	if (!entryValue.is_object()) // Verify inner object
+	{
+		return false;
+	}
+
+	std::wstring luaName = StringConverter::to_wstring(entryKey);
+
+	if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
+	{
+		return false;
+	}
+	auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
+	std::wstring translation = StringConverter::to_wstring(translationValue);
+
+	if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
+	{
+		return false;
+	}
+	auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
+	std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
+	CSVDataType dataType = ParseDataType(dataTypeString);
+	if (dataType == CSVDataType::UNKNOWN)
+	{
+		Logger::GetLogger()->Log(L"[ExportManager] Encountered unknown CSV data type: " + dataTypeString);
+		return false;
+	}
+
+	bool doNotTranslate = false;
+	if (entryValue.contains("DoNotTranslate") && entryValue["DoNotTranslate"].is_boolean())
+	{
+		doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
+	}
+
+	m_LuaData.emplace_back(translation, luaName, dataType, doNotTranslate);
+}
+
 bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)
 {
 	if (!arrayObject.is_object()) // Verify object
@@ -449,40 +511,10 @@ bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)
 	{
 		auto& entryKey = entryPair.key(); // Outer object key
 		auto& entryValue = entryPair.value(); // Inner object
-		if (!entryValue.is_object()) // Verify inner object
+		if(!LoadDataEntryFromJSON(entryKey, entryValue))
 		{
 			return false;
 		}
-
-		std::wstring luaName = StringConverter::to_wstring(entryKey);
-
-		if (!(entryValue.contains("Translation") && entryValue["Translation"].is_string()))
-		{
-			return false;
-		}
-		auto& translationValue = entryValue["Translation"].get<std::string>(); // Inner object search by key
-		std::wstring translation = StringConverter::to_wstring(translationValue);
-
-		if (!(entryValue.contains("DataType") && entryValue["DataType"].is_string()))
-		{
-			return false;
-		}
-		auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
-		std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
-		CSVDataType dataType = ParseDataType(dataTypeString);
-		if (dataType == CSVDataType::UNKNOWN)
-		{
-			Logger::GetLogger()->Log(L"[ExportManager] Encountered unknown CSV data type: " + dataTypeString);
-			return false;
-		}
-
-		bool doNotTranslate = false;
-		if (entryValue.contains("DoNotTranslate") && entryValue["DoNotTranslate"].is_boolean())
-		{
-			doNotTranslate = entryValue["DoNotTranslate"].get<bool>();
-		}
-
-		m_LuaData.emplace_back(translation, luaName, dataType, doNotTranslate);
 	}
 	return true;
 }
@@ -496,13 +528,21 @@ bool AuExpManager::LoadDataJSON(const json& jsonData)
 
 		bool isObject = value.is_object();
 
-		if (!(value.is_array() || isObject)) // Data, etc. as array or object
+		if (!value.is_structured()) // Data, etc. as array or object
 		{
 			return false;
 		}
 
 		if (isObject)
 		{
+			if (value.contains("Translation") && value.contains("DataType"))
+			{
+				if (!LoadDataEntryFromJSON(items.key(), value))
+				{
+					return false;
+				}
+				continue;
+			}
 			if (!LoadDataEntriesFromJSON(value))
 			{
 				return false;
@@ -573,7 +613,10 @@ bool AuExpManager::LoadTranslationFiles(const std::wstring& fileNames, const std
 		}
 		if (trimmedFileName == L"*")
 		{
-			LoadTranslationResource();
+			if (!LoadTranslationResource())
+			{
+				return false;
+			}
 			continue;
 		}
 		if (!LoadTranslationFile(trimmedFileName, path))
