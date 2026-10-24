@@ -748,7 +748,7 @@ void AuExpManager::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& data)
 
 	for (size_t i = 0; i < fileCount; i++)
 	{
-		std::ofstream file(m_ExportDirectory + L"\\" + data[i].FileName, std::ios::app | std::ios::binary);
+		std::ofstream file(m_ExportDirectory + L"\\" + data[i].FileName, std::ios::trunc | std::ios::binary);
 		file.imbue(locale);
 		file.write(data[i].Buffer, data[i].BufferSize);
 		file.close();
