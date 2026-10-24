@@ -246,7 +246,30 @@ void AuExpManager::BuildParamsLuaFile()
 		{
 			paramsLuaStream << ",\n\t\t";
 		}
-		paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.StringParams[i].LuaName) << " = \"" << StringConverter::to_utf8string(value) << "\"";
+
+		std::string escaped_lua_string = "";
+		for (size_t j = 0; j < value.length(); ++j)
+		{
+			wchar_t c = value[j];
+			if (c >= 0xD800 && c <= 0xDBFF && j + 1 < value.length()) { // High Surrogate
+				wchar_t l = value[++j]; // Low Surrogate
+				unsigned int cp = 0x10000 + ((c - 0xD800) << 10) + (l - 0xDC00);
+				char buf[32];
+				sprintf_s(buf, "\\u{%X}", cp);
+				escaped_lua_string += buf;
+			}
+			else if (c > 127) { // Standard non-ASCII (Unicode BMP)
+				char buf[32];
+				sprintf_s(buf, "\\u{%X}", c);
+				escaped_lua_string += buf;
+			}
+			else { // Standard safe ASCII character
+				escaped_lua_string += (char)c;
+			}
+		}
+
+		paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.StringParams[i].LuaName) << " = \"" << escaped_lua_string << "\"";
+		//paramsLuaStream << StringConverter::to_utf8string(m_ExportCustomParamsGroup.StringParams[i].LuaName) << " = \"" << StringConverter::to_utf8string(value) << "\"";
 	}
 	paramsLuaStream << "\n\t},";
 
