@@ -301,12 +301,17 @@ bool AuExpManager::LoadLuaFiles(const std::wstring& fileNames, const std::wstrin
 
 	for (const std::wstring& fileName : splitFileNames)
 	{
-		if (fileName == L"*")
+		std::wstring trimmedFileName = StringUtils::Trim(fileName);
+		if (trimmedFileName.empty())
+		{
+			continue;
+		}
+		if (trimmedFileName == L"*")
 		{
 			LoadLuaResource();
 			continue;
 		}
-		if (!LoadLuaFile(fileName, path))
+		if (!LoadLuaFile(trimmedFileName, path))
 		{
 			return false;
 		}
@@ -381,12 +386,17 @@ bool AuExpManager::LoadDataFiles(const std::wstring& fileNames, const std::wstri
 
 	for (const std::wstring& fileName : splitFileNames)
 	{
-		if (fileName == L"*")
+		std::wstring trimmedFileName = StringUtils::Trim(fileName);
+		if (trimmedFileName.empty())
+		{
+			continue;
+		}
+		if (trimmedFileName == L"*")
 		{
 			LoadDataResource();
 			continue;
 		}
-		if (!LoadDataFile(fileName, path))
+		if (!LoadDataFile(trimmedFileName, path))
 		{
 			return false;
 		}
@@ -529,12 +539,17 @@ bool AuExpManager::LoadTranslationFiles(const std::wstring& fileNames, const std
 
 	for (const std::wstring& fileName : splitFileNames)
 	{
-		if (fileName == L"*")
+		std::wstring trimmedFileName = StringUtils::Trim(fileName);
+		if (trimmedFileName.empty())
+		{
+			continue;
+		}
+		if (trimmedFileName == L"*")
 		{
 			LoadTranslationResource();
 			continue;
 		}
-		if (!LoadTranslationFile(fileName, path))
+		if (!LoadTranslationFile(trimmedFileName, path))
 		{
 			return false;
 		}

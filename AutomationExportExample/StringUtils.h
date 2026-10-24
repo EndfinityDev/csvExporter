@@ -127,4 +127,18 @@ public:
 
         return ss.str();
     }
+
+    static std::wstring Trim(const std::wstring& str) {
+        const std::wstring whitespace = L" \t\n\v\f\r";
+
+        const auto start = str.find_first_not_of(whitespace);
+        if (start == std::wstring::npos) {
+            return L""; // Camera or string is all whitespace
+        }
+
+        const auto end = str.find_last_not_of(whitespace);
+        const auto range = end - start + 1;
+
+        return str.substr(start, range);
+    }
 };
