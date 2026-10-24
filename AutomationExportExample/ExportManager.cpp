@@ -596,6 +596,18 @@ bool AuExpManager::LoadTranslationJSON(const json& jsonData)
 	for (const auto& items : jsonData.items()) // Translations, etc.
 	{
 		const auto& value = items.value();
+
+		if (value.is_string())
+		{
+			auto& key = items.key();
+			std::wstring keyWString = StringConverter::to_wstring(key);
+			auto& valueString = value.get<std::string>();
+			std::wstring valueWString = StringConverter::to_wstring(valueString);
+
+			m_Translations.emplace(keyWString, valueWString);
+			continue;
+		}
+
 		if (!value.is_object())
 		{
 			return false;
