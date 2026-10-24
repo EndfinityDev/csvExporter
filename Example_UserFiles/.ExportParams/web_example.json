@@ -29,7 +29,7 @@
     "label": "Web Boolean",
     "luaName": "web_boolean",
     "web": {
-      "type": "text",
+      "type": "text", // Boolean parameters do not support text results, this parameter will not make a web request
       "url": {
         "host": "http://localhost:5000",
         "params": [

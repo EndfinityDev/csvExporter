@@ -4,7 +4,6 @@
 #include "JSONFileManager.h"
 #include "DirectoryManager.h"
 #include "StringConverter.h"
-#include "HTTPManager.h"
 
 
 ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std::wstring& path, bool allowWebString, bool allowWebBool)
@@ -14,6 +13,8 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 	if (DirectoryManager::CheckPathIsDirectory(path))
 	{
 		std::vector<std::wstring> jsonFiles = DirectoryManager::GetDirectoryFilesWithExt(path, { L".json", L".jsonc"});
+
+		std::vector<std::future<ExportCustomParamsWebResult>> webRequests;
 
 		for (std::wstring& fileName : jsonFiles)
 		{
@@ -30,12 +31,12 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 							continue;
 						}
 
-						ParseParameterList(items.value(), exportParamGroup, allowWebString, allowWebBool);
+						ParseParameterList(items.value(), exportParamGroup, webRequests, allowWebString, allowWebBool);
 					}
 				}
 				else if (jsonData.is_array())
 				{
-					ParseParameterList(jsonData, exportParamGroup, allowWebString, allowWebBool);
+					ParseParameterList(jsonData, exportParamGroup, webRequests, allowWebString, allowWebBool);
 				}
 				else
 				{
@@ -45,6 +46,102 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 			else
 			{
 				//TODO
+			}
+		}
+
+		// Web request data
+		for (auto& webRequest : webRequests)
+		{
+			ExportCustomParamsWebResult webResult = webRequest.get();
+			json webValue = webResult.WebValue;
+
+			if (webResult.DataType == ExportParamsDataType::STRING)
+			{
+				std::wstring value = L"";
+
+				if (!webValue.is_null())
+				{
+					if (webValue.is_string())
+					{
+						value = StringConverter::to_wstring(webValue.get<std::string>());
+					}
+					else if (webValue.is_number())
+					{
+						if (webValue.is_number_float())
+						{
+							value = std::to_wstring(webValue.get<float>());
+						}
+						else
+						{
+							value = std::to_wstring(webValue.get<int>());
+						}
+					}
+					else if (webValue.is_boolean())
+					{
+						value = webValue.get<bool>() ? L"true" : L"false";
+					}
+					else
+					{
+						//TODO
+						continue;
+					}
+
+					//exportParamGroup.StringParams.emplace_back(ExportCustomStringParam{ label, tooltip, value, luaName, saveToPrefs });
+					for (auto& param : exportParamGroup.StringParams)
+					{
+						if (param.LuaName != webResult.LuaName)
+						{
+							continue;
+						}
+						param.Value = value;
+					}
+				}
+			}
+			else if (webResult.DataType == ExportParamsDataType::BOOL)
+			{
+				bool value = false;
+
+				if (!webValue.is_null())
+				{
+					if (webValue.is_string())
+					{
+						value = webValue.get<std::string>().size() > 0;
+					}
+					else if (webValue.is_number())
+					{
+						if (webValue.is_number_float())
+						{
+							value = webValue.get<float>() != 0;
+						}
+						else
+						{
+							value = webValue.get<int>() != 0;
+						}
+					}
+					else if (webValue.is_boolean())
+					{
+						value = webValue.get<bool>();
+					}
+					else
+					{
+						//TODO
+						continue;
+					}
+
+					//exportParamGroup.BoolParams.emplace_back(ExportCustomBoolParam{ label, tooltip, value, luaName, saveToPrefs });
+					for (auto& param : exportParamGroup.BoolParams)
+					{
+						if (param.LuaName != webResult.LuaName)
+						{
+							continue;
+						}
+						param.Value = value;
+					}
+				}
+			}
+			else
+			{
+				// TODO
 			}
 		}
 	}
@@ -59,7 +156,8 @@ bool ExportCustomParamsManager::TrySaveParamsGroup(const ExportCustomParamsGroup
 	return success;
 }
 
-void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCustomParamsGroup& exportParamGroup, bool allowWebString, bool allowWebBool)
+void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCustomParamsGroup& exportParamGroup,
+													std::vector<std::future<ExportCustomParamsWebResult>>& webRequests, bool allowWebString, bool allowWebBool)
 {
 	for (const auto& parameter : array)
 	{
@@ -147,7 +245,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 			label = luaName;
 		}
 
-		json webValue;
+		//json webValue;
 
 		if (((isStringParameter && allowWebString) || (!isStringParameter && allowWebBool)) &&
 				parameter.contains("web") && parameter["web"].is_object())
@@ -173,7 +271,18 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 					urlPath = web["url"]["path"].get<std::string>();
 				}
 
-				std::string responseType = web["type"].get<std::string>();
+				std::string responseTypeString = web["type"].get<std::string>();
+				ExportParamsWebResponseType responseType = ExportParamsWebResponseType::UNKNOWN;
+				auto& iterator = ExportParamsWebResponseTypeMap.find(responseTypeString);
+				if (iterator != ExportParamsWebResponseTypeMap.end())
+				{
+					responseType = iterator->second;
+				}
+
+				if (responseType == ExportParamsWebResponseType::UNKNOWN)
+				{
+					continue;
+				}
 
 				httplib::Params params;
 				if (web["url"].contains("params") && web["url"]["params"].is_array())
@@ -235,11 +344,30 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 					textOnFail = web["textOnFail"].get<bool>();
 				}
 
+				//ExportCustomParamsWebResult webResult = GetParameterValueFromWeb({ luaName,
+				//																	urlHost, urlPath, params,
+				//																	isStringParameter ? ExportParamsDataType::STRING : ExportParamsDataType::BOOL,
+				//																	responseType, web.contains("schema") ? web["schema"] : json(),
+				//																	allowedStatuses, textOnFail });
+				//webValue = webResult.WebValue;
+
+
+				WebValueRequestParams webRequestParams = { luaName,
+											urlHost, urlPath, params,
+											isStringParameter ? ExportParamsDataType::STRING : ExportParamsDataType::BOOL,
+											responseType, web.contains("schema") ? web["schema"] : json(),
+											allowedStatuses, textOnFail };
+
+				webRequests.push_back(std::async(std::launch::async, [webRequestParams]() {
+						return GetParameterValueFromWeb(webRequestParams);
+					}));
+
+				/*
 				int status = 0;
 				std::string response = HTTPManager::Get(urlHost, urlPath, params, false, true, &status);
 				if (!response.empty() && std::find(allowedStatuses.begin(), allowedStatuses.end(), status) != allowedStatuses.end())
 				{
-					if (responseType == "text")
+					if (responseType == ExportParamsWebResponseType::TEXT)
 					{
 						webValue = response;
 					}
@@ -267,6 +395,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 					}
 					//TODO
 				}
+				*/
 			}
 			else
 			{
@@ -278,6 +407,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		{
 			std::wstring value = L"";
 
+			/*
 			if (!webValue.is_null())
 			{
 				if (webValue.is_string())
@@ -300,7 +430,10 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 					value = webValue.get<bool>() ? L"true" : L"false";
 				}
 			}
-			else if (parameter.contains("defaultValue"))
+			else 
+			*/	
+
+			if (parameter.contains("defaultValue"))
 			{
 				if (!parameter["defaultValue"].is_string())
 				{
@@ -316,6 +449,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 
 		bool value = false;
 
+		/*
 		if (!webValue.is_null())
 		{
 			if (webValue.is_string())
@@ -338,7 +472,9 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 				value = webValue.get<bool>();
 			}
 		}
-		else if (parameter.contains("defaultValue"))
+		else 
+		*/
+		if (parameter.contains("defaultValue"))
 		{
 			if (!parameter["defaultValue"].is_boolean())
 			{
@@ -351,4 +487,46 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		exportParamGroup.BoolParams.emplace_back(ExportCustomBoolParam{ label, tooltip, value, luaName, saveToPrefs });
 		continue;
 	}
+}
+
+ExportCustomParamsWebResult ExportCustomParamsManager::GetParameterValueFromWeb(const WebValueRequestParams webRequestParams)
+{
+	json webValue;
+
+	int status = 0;
+	std::string response = HTTPManager::Get(webRequestParams.Host, webRequestParams.Path, webRequestParams.Params, false, true, &status);
+	if (!response.empty() && 
+		std::find(webRequestParams.AllowedStatuses.begin(), webRequestParams.AllowedStatuses.end(), status) != webRequestParams.AllowedStatuses.end())
+	{
+		if (webRequestParams.ResponseType == ExportParamsWebResponseType::TEXT)
+		{
+			webValue = response;
+		}
+		else
+		{
+			json jsonData;
+			if (JSONFileManager::TryParseJSONData<std::string>(response, &jsonData, true, JSONDataType::ANY))
+			{
+				//if (web.contains("schema") && web["schema"].is_structured())
+				if (!webRequestParams.Schema.is_null() && webRequestParams.Schema.is_structured())
+				{
+					webValue = JSONFileManager::GetJSONValueBySchema(jsonData, webRequestParams.Schema);
+				}
+				else
+				{
+					//TODO
+				}
+			}
+		}
+	}
+	else
+	{
+		if (webRequestParams.TextOnFail && !response.empty())
+		{
+			webValue = response;
+		}
+		//TODO
+	}
+
+	return { webRequestParams.DataType, webRequestParams.LuaName, webValue };
 }
