@@ -6,11 +6,11 @@
 struct LuaDataHeader
 {
 
-	LuaDataHeader(std::wstring title, std::wstring name, DataType type, bool doNotTranslate = false) 
+	LuaDataHeader(std::wstring title, std::wstring name, CSVDataType type, bool doNotTranslate = false) 
 	{
 		HeaderTitle = title;
 		HeaderName = name;
-		DataType = type;
+		CSVDataType = type;
 		DoNotTranslate = doNotTranslate;
 	}
 
@@ -18,7 +18,7 @@ struct LuaDataHeader
 
 	std::wstring HeaderTitle;
 	std::wstring HeaderName;
-	DataType DataType;
+	CSVDataType CSVDataType;
 	bool DoNotTranslate;
 
 	//std::wstring Data;

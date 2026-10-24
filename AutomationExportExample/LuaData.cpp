@@ -19,7 +19,7 @@ void LuaData::Add(const LuaData& data)
 	}
 }
 
-void LuaData::Add(std::wstring title, std::wstring name, DataType type)
+void LuaData::Add(std::wstring title, std::wstring name, CSVDataType type)
 {
 	Add(LuaDataHeader(title, name, type));
 }

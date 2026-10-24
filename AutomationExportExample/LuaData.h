@@ -12,7 +12,7 @@ public:
 
 	void Add(const LuaDataHeader& data);
 	void Add(const LuaData& data);
-	void Add(std::wstring title, std::wstring name, DataType type);
+	void Add(std::wstring title, std::wstring name, CSVDataType type);
 
 	LuaData Add(LuaData data, const LuaDataHeader& header) const;
 	LuaData Add(LuaData a, const LuaData& b) const;

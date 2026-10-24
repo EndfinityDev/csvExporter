@@ -469,7 +469,12 @@ bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)
 		}
 		auto& dataTypeValue = entryValue["DataType"].get<std::string>(); // Inner object search by key
 		std::wstring dataTypeString = StringConverter::to_wstring(dataTypeValue);
-		DataType dataType = ParseDataType(dataTypeString);
+		CSVDataType dataType = ParseDataType(dataTypeString);
+		if (dataType == CSVDataType::UNKNOWN)
+		{
+			Logger::GetLogger()->Log(L"[ExportManager] Encountered unknown CSV data type: " + dataTypeString);
+			return false;
+		}
 
 		bool doNotTranslate = false;
 		if (entryValue.contains("DoNotTranslate") && entryValue["DoNotTranslate"].is_boolean())

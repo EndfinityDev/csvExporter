@@ -55,9 +55,9 @@ void CSVManager::WriteData(std::wofstream& outputFile, std::vector<LuaDataHeader
 			outputFile << m_Delimiter;
 
 		const LuaDataHeader& data = luaDataHeaders[i];
-		switch (data.DataType)
+		switch (data.CSVDataType)
 		{
-		case DataType_String:
+		case CSVDataType::STRING:
 		{
 			std::wstring string = L"???";
 			m_ExportManager->TryGetStringData(data.HeaderName, string);
@@ -68,7 +68,7 @@ void CSVManager::WriteData(std::wofstream& outputFile, std::vector<LuaDataHeader
 			outputFile << string;
 		}
 			break;
-		case DataType_Float:
+		case CSVDataType::FLOAT:
 		{
 			float num;
 			if (m_ExportManager->TryGetFloatData(data.HeaderName, &num))
@@ -81,13 +81,14 @@ void CSVManager::WriteData(std::wofstream& outputFile, std::vector<LuaDataHeader
 			}
 		}
 			break;
-		case DataType_CarName:
+		case CSVDataType::CAR_NAME:
 			outputFile << m_ExportManager->GetCarName();
 			break;
-		case DataType_ExporterVersion:
+		case CSVDataType::EXPORTER_VERSION:
 			outputFile << BUILD_DATE_INT;
 			break;
 		default:
+			Logger::GetLogger()->Log(L"[CSVManager] Encountered unknown CSV data type");
 			// error out
 			break;
 		}

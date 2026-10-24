@@ -1,14 +1,26 @@
 #pragma once
 #include <string>
+#include <map>
 
-enum DataType : uint8_t
+enum class CSVDataType : uint8_t
 {
-	DataType_String					= 0,
-	DataType_Float					= 1,
-	DataType_ExporterVersion		= 2,
-	DataType_CarName				= 3,
+	UNKNOWN,
 
-	DataType_Unknown				= 4
+	STRING,
+	FLOAT,
+	EXPORTER_VERSION,
+	CAR_NAME
 };
 
-DataType ParseDataType(std::wstring inString);
+static const std::map<std::wstring, CSVDataType> CSVDataTypeMap = {
+	{ L"DataType_String", CSVDataType::STRING },
+	{ L"DataType_Float", CSVDataType::FLOAT },
+	{ L"DataType_ExporterVersion", CSVDataType::EXPORTER_VERSION },
+	{ L"DataType_CarName", CSVDataType::CAR_NAME },
+	{ L"string", CSVDataType::STRING },
+	{ L"float", CSVDataType::FLOAT },
+	{ L"exporter_version", CSVDataType::EXPORTER_VERSION },
+	{ L"car_name", CSVDataType::CAR_NAME },
+};
+
+CSVDataType ParseDataType(std::wstring inString);
