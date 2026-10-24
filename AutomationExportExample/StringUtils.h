@@ -63,7 +63,7 @@ public:
 
     static bool ValidateLuaVariable(const std::wstring& input)
     {
-        if (input.empty()) 
+        if (input.empty())
         {
             return false;
         }
@@ -75,21 +75,30 @@ public:
             L"then", L"true", L"until", L"while"
         };
 
-        if (keywords.count(input)) 
+        if (keywords.count(input))
         {
             return false;
         }
 
+        // Lua identifiers can ONLY start with an ASCII letter or underscore
         wchar_t first = input[0];
-        if (!std::iswalpha(first) && first != L'_') 
+        bool isValidFirst = (first >= L'a' && first <= L'z') ||
+            (first >= L'A' && first <= L'Z') ||
+            first == L'_';
+        if (!isValidFirst)
         {
             return false;
         }
 
-        for (size_t i = 1; i < input.length(); ++i) 
+        // Subsequent characters can ONLY be ASCII letters, digits, or underscores
+        for (size_t i = 1; i < input.length(); ++i)
         {
             wchar_t c = input[i];
-            if (!std::iswalnum(c) && c != L'_') 
+            bool isValidChar = (c >= L'a' && c <= L'z') ||
+                (c >= L'A' && c <= L'Z') ||
+                (c >= L'0' && c <= L'9') ||
+                c == L'_';
+            if (!isValidChar)
             {
                 return false;
             }
