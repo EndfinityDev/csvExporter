@@ -10,7 +10,7 @@ if ExportParameters.BoolParameters then
 	end
 end
 
-local Conversions = {
+Conversions = {
 	Centimeters = convertToImperial and 2.54 or 1,
 	Millimeters = convertToImperial and 25.4 or 1,
 	Meters = convertToImperial and 3.281 or 1,
