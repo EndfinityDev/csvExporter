@@ -1,4 +1,5 @@
 {
+  // Internal Automation name - readable name
   "ActiveAero_Cooling_Name": "Active Cooling",
   "ActiveAero_None_Name": "None",
   "ActiveAero_Wing_Name": "Active Wing",
