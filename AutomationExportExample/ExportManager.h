@@ -9,6 +9,7 @@
 #include "LuaData.h"
 #include "CSVManager.h"
 #include "ExportCustomParamsManager.h"
+#include "Logger.h"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -42,6 +43,7 @@ public:
 	static AuExpManager* GetInstance() { return s_Instance; }
 	static void CreateInstance() { if (!s_Instance) s_Instance = new AuExpManager(); }
 	static void DestroyInstance() { delete s_Instance; s_Instance = nullptr; }
+	static const wchar_t* GetExportDirectory();
 
 
 	AuCarExpErrorCode Init(const AuCarExpCarData* carData);
@@ -56,7 +58,7 @@ public:
 
 	void SaveMesh(const AuCarExpMesh* mesh, const wchar_t* name);
 
-	const wchar_t* GetExportDirectory() const { return m_ExportDirectory.c_str(); }
+	const wchar_t* GetCarExportDirectory() const { return m_ExportDirectory.c_str(); }
 
 	void GetTranslation(std::wstring* ret);
 

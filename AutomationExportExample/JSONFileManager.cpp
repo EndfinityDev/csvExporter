@@ -38,6 +38,10 @@ bool JSONFileManager::TryParseJSONData(const T& inJSONString, json* outData, con
 					L"The top level of the file does not contain an array",
 					L"Failed to parse JSON");
 			}
+			Logger::GetLogger()->Log(L"[JSONFileManager] Failed to parse JSON");
+			Logger::GetLogger()->Log(
+				topLevelType == JSONDataType::OBJECT ? L"The top level of the file does not contain an object" :
+				L"The top level of the file does not contain an array");
 			return false;
 		}
 
@@ -51,8 +55,9 @@ bool JSONFileManager::TryParseJSONData(const T& inJSONString, json* outData, con
 			<< "At Byte:   " << e.byte << "\n"
 			<< "------------------------------------";
 
-		// 2. Convert the entire message block to a wstring
 		std::wstring errorString = StringConverter::to_wstring(ss.str());
+		Logger::GetLogger()->Log(L"[JSONFileManager] Failed to parse JSON");
+		Logger::GetLogger()->Log(errorString);
 		if (!silentError)
 		{
 			MessageBoxManager::ShowMessageBox(errorString, L"Failed to parse JSON");
@@ -132,7 +137,7 @@ json JSONFileManager::TraverseJSONDictBySchema(const json& dataDict, const json&
 			}
 			else
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[JSONFileManager] Schema target value is not a string. Key: " + StringConverter::to_wstring(schemaKey));
 			}
 		}
 	}
@@ -203,7 +208,7 @@ json JSONFileManager::TraverseJSONListBySchema(const json& dataList, const json&
 		}
 		else
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[JSONFileManager] Schema target array value is not a string");
 		}
 	}
 	return json();

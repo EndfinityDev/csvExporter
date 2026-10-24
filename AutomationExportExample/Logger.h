@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <string>
 #include <ShlObj.h>
+#include <mutex>
 
 #ifdef _WIN32
 #include <io.h>
@@ -20,7 +21,34 @@ static const std::wstring LOGGER_PATH = L"\\AutomationGame\\CSVExporter 2\\Logs"
 
 class Logger {
 public:
-    Logger(const std::wstring& filename, bool truncateFile = false) 
+    static void CreateLogger(const std::wstring& filename, bool truncateFile = false) { s_Logger = new Logger(filename, truncateFile); }
+
+    void Log(const std::wstring& message) {
+        if (!m_File || m_FD < 0)
+        {
+            return;
+        }
+
+        std::lock_guard<std::mutex> lock(m_Mutex);
+
+        std::fputws(message.c_str(), m_File);
+        std::fputws(L"\n", m_File);
+
+        //commit(m_FD);
+    }
+
+    static Logger* GetLogger() { return s_Logger; }
+    static void FreeLogger() 
+    {
+        if (s_Logger)
+        {
+            delete s_Logger;
+            s_Logger = nullptr;
+        }
+    }
+
+private:
+    Logger(const std::wstring& filename, bool truncateFile = false)
     {
         TCHAR path[MAX_PATH];
         std::wstring filePath;
@@ -48,10 +76,10 @@ public:
 
         filePath += L"\\" + filename;
 
-        const wchar_t* fileMode = truncateFile ? L"w, cccs=UTF-8" : L"a, cccs=UTF-8";
+        const wchar_t* fileMode = truncateFile ? L"w, ccs=UTF-8" : L"a, ccs=UTF-8";
 
-        m_File = _wfopen(filePath.c_str(), fileMode);
-        if (m_File) {
+        errno_t err = _wfopen_s(&m_File, filePath.c_str(), fileMode);
+        if (!err && m_File) {
             std::setvbuf(m_File, nullptr, _IONBF, 0);
             m_FD = fileno(m_File);
         }
@@ -63,19 +91,8 @@ public:
         }
     }
 
-    void log(const std::wstring& message) {
-        if (!m_File || m_FD < 0)
-        {
-            return;
-        }
-
-        std::fputws(message.c_str(), m_File);
-        std::fputws(L"\n", m_File);
-
-        //commit(m_FD);
-    }
-
-private:
+    static Logger* s_Logger;
     std::FILE* m_File = nullptr;
     int m_FD = -1;
+    std::mutex m_Mutex;
 };

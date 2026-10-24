@@ -27,7 +27,7 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 					{
 						if (!items.value().is_array())
 						{
-							//TODO
+							Logger::GetLogger()->Log(L"[ExportCustomParamsManager] A non-array item encountered when expecting an array: " + fileName);
 							continue;
 						}
 
@@ -40,12 +40,12 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 				}
 				else
 				{
-					//TODO
+					Logger::GetLogger()->Log(L"[ExportCustomParamsManager] File has an unidentified structure: " + fileName);
 				}
 			}
 			else
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: " + fileName);
 			}
 		}
 
@@ -82,7 +82,8 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 					}
 					else
 					{
-						//TODO
+						Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Unsupported data type received from web request. luaName: " + 
+													webResult.LuaName + L" Received type: (" + StringConverter::to_wstring(webValue.type_name()) + L")");
 						continue;
 					}
 
@@ -124,7 +125,8 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 					}
 					else
 					{
-						//TODO
+						Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Unsupported data type received from web request. luaName: " +
+							webResult.LuaName + L" Received type: (" + StringConverter::to_wstring(webValue.type_name()) + L")");
 						continue;
 					}
 
@@ -141,7 +143,7 @@ ExportCustomParamsGroup ExportCustomParamsManager::LoadParameterJSONs(const std:
 			}
 			else
 			{
-				// TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Web result has an invalid type. luaName: " + webResult.LuaName);
 			}
 		}
 	}
@@ -163,13 +165,13 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 	{
 		if (!parameter.is_object())
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition is not an object" );
 			continue;
 		}
 
 		if (!parameter.contains("type"))
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition does not set a type");
 			continue;
 		}
 
@@ -181,7 +183,8 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		}
 		else if (parameterType != "bool" && parameterType != "boolean")
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition has an invalid type: " +
+										StringConverter::to_wstring(parameterType));
 			continue;
 		}
 
@@ -192,23 +195,23 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 
 		if (!parameter.contains("luaName"))
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition does not set a luaName");
 			continue;
 		}
 		if (!parameter["luaName"].is_string())
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition luaName is of invalid data type");
 			continue;
 		}
 		luaName = StringConverter::to_wstring(parameter["luaName"].get<std::string>());
 		if (luaName.empty() /* || (luaName.size() >= CSVE_CUSTOM_PREFS_STR_MAX_LENGTH) */)
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition has empty luaName");
 			continue;
 		}
 		if (!StringUtils::ValidateLuaVariable(luaName))
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition has invalid luaName: " + luaName);
 			continue;
 		}
 
@@ -216,7 +219,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		{
 			if (!parameter["label"].is_string())
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition label is of invalid type. luaName: " + luaName);
 				continue;
 			}
 			label = StringConverter::to_wstring(parameter["label"].get<std::string>());
@@ -225,7 +228,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		{
 			if (!parameter["tooltip"].is_string())
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition tooltip is of invalid type. luaName: " + luaName);
 				continue;
 			}
 			tooltip = StringConverter::to_wstring(parameter["tooltip"].get<std::string>());
@@ -234,7 +237,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		{
 			if (!parameter["save"].is_boolean())
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition save is of invalid type. luaName: " + luaName);
 				continue;
 			}
 			saveToPrefs = parameter["save"].get<bool>();
@@ -334,7 +337,7 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 						std::vector<int> allowedStatuses = web["allowedStatuses"].get<std::vector<int>>();
 					}
 					catch (const nlohmann::json::type_error& e) {
-						//TODO
+						Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: " + StringConverter::to_wstring(e.what()));
 					}
 				}
 
@@ -343,14 +346,6 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 				{
 					textOnFail = web["textOnFail"].get<bool>();
 				}
-
-				//ExportCustomParamsWebResult webResult = GetParameterValueFromWeb({ luaName,
-				//																	urlHost, urlPath, params,
-				//																	isStringParameter ? ExportParamsDataType::STRING : ExportParamsDataType::BOOL,
-				//																	responseType, web.contains("schema") ? web["schema"] : json(),
-				//																	allowedStatuses, textOnFail });
-				//webValue = webResult.WebValue;
-
 
 				WebValueRequestParams webRequestParams = { luaName,
 											urlHost, urlPath, params,
@@ -361,45 +356,10 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 				webRequests.push_back(std::async(std::launch::async, [webRequestParams]() {
 						return GetParameterValueFromWeb(webRequestParams);
 					}));
-
-				/*
-				int status = 0;
-				std::string response = HTTPManager::Get(urlHost, urlPath, params, false, true, &status);
-				if (!response.empty() && std::find(allowedStatuses.begin(), allowedStatuses.end(), status) != allowedStatuses.end())
-				{
-					if (responseType == ExportParamsWebResponseType::TEXT)
-					{
-						webValue = response;
-					}
-					else
-					{
-						json jsonData; 
-						if (JSONFileManager::TryParseJSONData<std::string>(response, &jsonData, true, JSONDataType::ANY))
-						{
-							if (web.contains("schema") && web["schema"].is_structured())
-							{
-								webValue = JSONFileManager::GetJSONValueBySchema(jsonData, web["schema"]);
-							}
-							else
-							{
-								//TODO
-							}
-						}
-					}
-				}
-				else 
-				{
-					if (textOnFail && !response.empty())
-					{
-						webValue = response;
-					}
-					//TODO
-				}
-				*/
 			}
 			else
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Error parsing JSON file web configuration: URL block is invalid. luaName: " + luaName);
 			}
 		}
 
@@ -407,37 +367,11 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		{
 			std::wstring value = L"";
 
-			/*
-			if (!webValue.is_null())
-			{
-				if (webValue.is_string())
-				{
-					value = StringConverter::to_wstring(webValue.get<std::string>());
-				}
-				else if (webValue.is_number())
-				{
-					if (webValue.is_number_float())
-					{
-						value = std::to_wstring(webValue.get<float>());
-					}
-					else
-					{
-						value = std::to_wstring(webValue.get<int>());
-					}
-				}
-				else if (webValue.is_boolean())
-				{
-					value = webValue.get<bool>() ? L"true" : L"false";
-				}
-			}
-			else 
-			*/	
-
 			if (parameter.contains("defaultValue"))
 			{
 				if (!parameter["defaultValue"].is_string())
 				{
-					//TODO
+					Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition defaultValue is of invalid type. luaName: " + luaName);
 					continue;
 				}
 				value = StringConverter::to_wstring(parameter["defaultValue"].get<std::string>());
@@ -448,37 +382,11 @@ void ExportCustomParamsManager::ParseParameterList(const json& array, ExportCust
 		}
 
 		bool value = false;
-
-		/*
-		if (!webValue.is_null())
-		{
-			if (webValue.is_string())
-			{
-				value = webValue.get<std::string>().size() > 0;
-			}
-			else if (webValue.is_number())
-			{
-				if (webValue.is_number_float())
-				{
-					value = webValue.get<float>() != 0;
-				}
-				else
-				{
-					value = webValue.get<int>() != 0;
-				}
-			}
-			else if (webValue.is_boolean())
-			{
-				value = webValue.get<bool>();
-			}
-		}
-		else 
-		*/
 		if (parameter.contains("defaultValue"))
 		{
 			if (!parameter["defaultValue"].is_boolean())
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file: Parameter definition defaultValue is of invalid type. luaName: " + luaName);
 				continue;
 			}
 			value = parameter["defaultValue"].get<bool>();
@@ -514,7 +422,7 @@ ExportCustomParamsWebResult ExportCustomParamsManager::GetParameterValueFromWeb(
 				}
 				else
 				{
-					//TODO
+					Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Failed to parse JSON file web configuration: Schema is not a structured item. luaName: " + webRequestParams.LuaName);
 				}
 			}
 		}
@@ -525,7 +433,8 @@ ExportCustomParamsWebResult ExportCustomParamsManager::GetParameterValueFromWeb(
 		{
 			webValue = response;
 		}
-		//TODO
+		Logger::GetLogger()->Log(L"[ExportCustomParamsManager] Web request failed. luaName: " + webRequestParams.LuaName + L"\n\t" +
+									(response.empty() ? L"Empty response" : StringConverter::to_wstring(response)));
 	}
 
 	return { webRequestParams.DataType, webRequestParams.LuaName, webValue };

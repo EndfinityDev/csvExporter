@@ -113,7 +113,7 @@ void CSVManager::Save(std::vector<LuaDataHeader>& luaDataHeaders) const
 		{
 			//outputFile.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>));
 			//locale = std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>);
-			//TODO
+			Logger::GetLogger()->Log(L"[CSVManager] Failed to set CSV file locale. Using default");
 		}
 	}
 

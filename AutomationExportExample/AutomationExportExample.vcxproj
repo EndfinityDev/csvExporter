@@ -234,6 +234,7 @@
     <ClCompile Include="HTTPManager.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="JSONFileManager.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LuaDataHeader.cpp" />
     <ClCompile Include="CSVManager.cpp" />
     <ClCompile Include="dllmain.cpp">
