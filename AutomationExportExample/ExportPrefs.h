@@ -78,23 +78,23 @@ struct ExportPrefs
 					}
 					else
 					{
-						//TODO
+						Logger::GetLogger()->Log(L"[ExportPrefs] Encountered unsupported prefs file version");
 					}
 				}
 				else
 				{
-					//TODO
+					Logger::GetLogger()->Log(L"[ExportPrefs] Encountered empty prefs file");
 				}
 				fclose(file);
 			}
 			else
 			{
-				// TODO
+				Logger::GetLogger()->Log(L"[ExportPrefs] Failed to open prefs file for reading");
 			}
 		}
 		else
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportPrefs] Failed to get application data directory");
 		}
 
 		return prefs;
@@ -114,7 +114,7 @@ struct ExportPrefs
 			{
 				if (!DirectoryManager::TryCreateDirectoryRecursive(prefsDir))
 				{
-					//TODO
+					Logger::GetLogger()->Log(L"[ExportPrefs] Failed to create prefs file directory");
 					return false;
 				}
 			}
@@ -126,7 +126,7 @@ struct ExportPrefs
 
 			if (err || !file)
 			{
-				// TODO
+				Logger::GetLogger()->Log(L"[ExportPrefs] Failed to open prefs file for writing");
 				return false;
 			}
 
@@ -169,7 +169,7 @@ struct ExportPrefs
 			return true;
 		}
 
-		//TODO
+		Logger::GetLogger()->Log(L"[ExportPrefs] Failed to get application data directory");
 		return false;
 	}
 

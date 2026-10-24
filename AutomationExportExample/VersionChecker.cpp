@@ -20,19 +20,28 @@ void VersionChecker::RunVersionCheck()
 
 void VersionChecker::RunVersionCheckThread()
 {
+	Logger::CreateLogger(L"CSVExporter-VersionCheck.log", true);
+	Logger::GetLogger()->Log(L"RunVersionCheckThread");
+
 	httplib::Params requestParams = { CSVE_VERSIONCHECK_TARGET_URL_PARAMS };
 
 	std::string responseData = HTTPManager::Get(CSVE_VERSIONCHECK_TARGET_URL_HOST, CSVE_VERSIONCHECK_TARGET_URL_PATH, requestParams, true);
 	if (responseData.empty())
 	{
+		Logger::GetLogger()->Log(L"[VersionChecker] Failed to reach endpoint to retrieve version data");
+		Logger::FreeLogger();
 		return;
 	}
+	Logger::GetLogger()->Log(L"[VersionChecker]");
+	Logger::GetLogger()->Log(StringConverter::to_wstring(responseData));
 
 	json jsonData;
 	if (JSONFileManager::TryParseJSONData<std::string>(responseData, &jsonData, true))
 	{
 		if (!jsonData.contains("exporterVersion"))
 		{
+			Logger::GetLogger()->Log(L"[VersionChecker] Failed to retrieve version data from server response");
+			Logger::FreeLogger();
 			return;
 		}
 
@@ -59,12 +68,8 @@ void VersionChecker::RunVersionCheckThread()
 #endif
 
 		}
-		return;
 	}
-	else
-	{
-		return;
-	}
+	Logger::FreeLogger();
 }
 
 bool VersionChecker::CheckNotificationPaused()

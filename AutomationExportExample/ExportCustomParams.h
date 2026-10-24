@@ -8,34 +8,7 @@
 #include <ShlObj.h>
 
 #include "DirectoryManager.h"
-
-//#define CSVE_CUSTOM_PREFS_STR_MAX_LENGTH 25
-
-//using ExportParamString = std::array<wchar_t, CSVE_CUSTOM_PREFS_STR_MAX_LENGTH>;
-
-//class ExportParamStringConverter
-//{
-//public:
-//    static ExportParamString FromWString(const wchar_t* inString) {
-//        ExportParamString paramString = {}; // Zero-initializes the entire buffer (\0)
-//
-//        if (inString != nullptr) {
-//            // arr.size() extracts the capacity dynamically at compile time
-//            wcsncpy_s(paramString.data(), paramString.size(), inString, _TRUNCATE);
-//        }
-//
-//        return paramString;
-//    }
-//
-//    static ExportParamString FromWString(const std::wstring& inString) {
-//        return FromWString(inString.c_str());
-//    }
-//
-//    static std::wstring ToWString(const ExportParamString& paramString)
-//    {
-//        return std::wstring(paramString.data());
-//    }
-//};
+#include "Logger.h"
 
 struct ExportCustomStringParam
 {
@@ -64,8 +37,6 @@ struct ExportCustomStringParamPrefs
                 continue;
             }
             paramPrefs.ParamTable.emplace_back(
-                //ExportParamStringConverter::FromWString(param.LuaName),
-                //ExportParamStringConverter::FromWString(param.Value)
                 param.LuaName,
                 param.Value
             );
@@ -80,7 +51,6 @@ struct ExportCustomStringParamPrefs
         map.reserve(prefs.ParamTable.size());
         for (const auto& items : prefs.ParamTable)
         {
-            //map.emplace(ExportParamStringConverter::ToWString(items.first), ExportParamStringConverter::ToWString(items.second));
             map.emplace(items.first, items.second);
         }
         return map;
@@ -108,20 +78,11 @@ struct ExportCustomStringParamPrefs
                 size_t readStatus = fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
                 if (!readStatus)
                 {
-                    //TODO
+                    Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export string parameter prefs file");
                     //return exportParamsPrefs;
                 }
                 else if (prefsFileVersion == CSVE_CUSTOM_PREFS_STRING_VERSION)
                 {
-                    //size_t customParamsCount;
-                    //fread_s(&customParamsCount, sizeof(customParamsCount), sizeof(customParamsCount), 1, file);
-                    //exportParamsPrefs.ParamTable.resize(customParamsCount);
-                    //for (size_t i = 0; i < customParamsCount; i++)
-                    //{
-                    //    fread_s(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), sizeof(ExportParamString), 1, file);
-                    //    fread_s(&exportParamsPrefs.ParamTable[i].second, sizeof(ExportParamString), sizeof(ExportParamString), 1, file);
-                    //}
-
                     while (true)
                     {
                         std::wstring key;
@@ -133,7 +94,7 @@ struct ExportCustomStringParamPrefs
                         }
                         if (!keySize)
                         {
-                            //TODO
+                            Logger::GetLogger()->Log(L"[ExportCustomParams] Encountered a zero-length key in string custom prefs file");
                             key = L"";
                         }
                         else
@@ -142,7 +103,7 @@ struct ExportCustomStringParamPrefs
                             readStatus = fread_s(&key[0], key.size() * sizeof(wchar_t), sizeof(wchar_t), keySize, file);
                             if (readStatus != keySize)
                             {
-                                //TODO
+                                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export string parameter key from prefs file");
                                 break;
                             }
                         }
@@ -152,7 +113,7 @@ struct ExportCustomStringParamPrefs
                         readStatus = fread_s(&valueSize, sizeof(valueSize), sizeof(valueSize), 1, file);
                         if (!readStatus)
                         {
-                            //TODO
+                            Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export string parameter value size from prefs file");
                             break;
                         }
                         if (!valueSize)
@@ -165,7 +126,7 @@ struct ExportCustomStringParamPrefs
                             readStatus = fread_s(&value[0], value.size() * sizeof(wchar_t), sizeof(wchar_t), valueSize, file);
                             if (readStatus != valueSize)
                             {
-                                //TODO
+                                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export string parameter value from prefs file");
                                 break;
                             }
                         }
@@ -175,19 +136,19 @@ struct ExportCustomStringParamPrefs
                 }
                 else
                 {
-                    //TODO
+                    Logger::GetLogger()->Log(L"[ExportCustomParams] Encountered a mismatch in custom export string parameter prefs file version");
                 }
 
                 fclose(file);
             }
             else
             {
-                // TODO
+                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to open custom export string parameter prefs file");
             }
         }
         else
         {
-            //TODO
+            Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to locate application data directory while reading custom export string parameter prefs file");
         }
 
         return exportParamsPrefs;
@@ -207,7 +168,7 @@ struct ExportCustomStringParamPrefs
             {
                 if (!DirectoryManager::TryCreateDirectoryRecursive(prefsDir))
                 {
-                    //TODO
+                    Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to create export prefs directory");
                     return false;
                 }
             }
@@ -241,19 +202,12 @@ struct ExportCustomStringParamPrefs
 
             if (err || !file)
             {
-                // TODO
+                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to open custom export string parameter prefs file for writing");
                 return false;
             }
 
             fwrite(&exportParamsPrefs.Version, sizeof(exportParamsPrefs.Version), 1, file);
             size_t customParamsCount = exportParamsPrefs.ParamTable.size();
-            //fwrite(&customParamsCount, sizeof(customParamsCount), 1, file);
-            //fwrite(&exportParamsPrefs.ParamTable, sizeof(std::pair<ExportParamString, bool>), customParamsCount, file);
-            //for (size_t i = 0; i < customParamsCount; i++)
-            //{
-            //    fwrite(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), 1, file);
-            //    fwrite(&exportParamsPrefs.ParamTable[i].second, sizeof(ExportParamString), 1, file);
-            //}
 
             for (size_t i = 0; i < customParamsCount; i++)
             {
@@ -271,7 +225,7 @@ struct ExportCustomStringParamPrefs
             return true;
         }
 
-        //TODO
+        Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to find application data directory");
         return false;
     }
 };
@@ -346,25 +300,11 @@ struct ExportCustomBoolParamPrefs
                 size_t readStatus = fread_s(&prefsFileVersion, sizeof(prefsFileVersion), sizeof(prefsFileVersion), 1, file);
                 if (!readStatus)
                 {
-                    //TODO
+                    Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export boolean parameter prefs file");
                     //return exportParamsPrefs;
                 }                
                 else if (prefsFileVersion == CSVE_CUSTOM_PREFS_BOOL_VERSION)
                 {
-                    //size_t customParamsCount;
-                    //size_t readStatus = fread_s(&customParamsCount, sizeof(customParamsCount), sizeof(customParamsCount), 1, file);
-                    //if (!readStatus)
-                    //{
-                    //    //TODO
-                    //    return exportParamsPrefs;
-                    //}
-                    //
-                    //exportParamsPrefs.ParamTable.resize(customParamsCount);
-                    //for (size_t i = 0; i < customParamsCount; i++)
-                    //{
-                    //    fread_s(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), sizeof(ExportParamString), 1, file);
-                    //    fread_s(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), sizeof(bool), 1, file);
-                    //}
 
                     while (true)
                     {
@@ -377,7 +317,7 @@ struct ExportCustomBoolParamPrefs
                         }
                         if (!keySize)
                         {
-                            //TODO
+                            Logger::GetLogger()->Log(L"[ExportCustomParams] Encountered a zero-length key in boolean custom prefs file");
                             key = L"";
                         }
                         else
@@ -386,7 +326,7 @@ struct ExportCustomBoolParamPrefs
                             readStatus = fread_s(&key[0], key.size() * sizeof(wchar_t), sizeof(wchar_t), keySize, file);
                             if (readStatus != keySize)
                             {
-                                //TODO
+                                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export boolean parameter key from prefs file");
                                 break;
                             }
                         }
@@ -395,7 +335,7 @@ struct ExportCustomBoolParamPrefs
                         readStatus = fread_s(&value, sizeof(value), sizeof(value), 1, file);
                         if (!readStatus)
                         {
-                            //TODO
+                            Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to read custom export boolean parameter value from prefs file");
                             break;
                         }
                         exportParamsPrefs.ParamTable.emplace_back(key, value);
@@ -403,19 +343,19 @@ struct ExportCustomBoolParamPrefs
                 }
                 else
                 {
-                    //TODO
+                    Logger::GetLogger()->Log(L"[ExportCustomParams] Encountered a mismatch in custom export boolean parameter prefs file version");
                 }
 
                 fclose(file);
             }
             else
             {
-                // TODO
+                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to open custom export boolean parameter prefs file");
             }
         }
         else
         {
-            //TODO
+            Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to locate application data directory while reading custom export boolean parameter prefs file");
         }
 
         return exportParamsPrefs;
@@ -435,7 +375,7 @@ struct ExportCustomBoolParamPrefs
             {
                 if (!DirectoryManager::TryCreateDirectoryRecursive(prefsDir))
                 {
-                    //TODO
+                    Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to create export prefs directory");
                     return false;
                 }
             }
@@ -467,20 +407,13 @@ struct ExportCustomBoolParamPrefs
 
             if (err || !file)
             {
-                // TODO
+                Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to open custom export boolean parameter prefs file for writing");
                 return false;
             }
 
             fwrite(&exportParamsPrefs.Version, sizeof(exportParamsPrefs.Version), 1, file);
 
             size_t customParamsCount = exportParamsPrefs.ParamTable.size();
-            //fwrite(&customParamsCount, sizeof(customParamsCount), 1, file);
-            //fwrite(&exportParamsPrefs.ParamTable, sizeof(std::pair<ExportParamString, bool>), customParamsCount, file);
-            //for (size_t i = 0; i < customParamsCount; i++)
-            //{
-            //    fwrite(&exportParamsPrefs.ParamTable[i].first, sizeof(ExportParamString), 1, file);
-            //    fwrite(&exportParamsPrefs.ParamTable[i].second, sizeof(bool), 1, file);
-            //}
 
             for (size_t i = 0; i < customParamsCount; i++)
             {
@@ -495,7 +428,7 @@ struct ExportCustomBoolParamPrefs
             return true;
         }
 
-        //TODO
+        Logger::GetLogger()->Log(L"[ExportCustomParams] Failed to find application data directory");
         return false;
     }
 };

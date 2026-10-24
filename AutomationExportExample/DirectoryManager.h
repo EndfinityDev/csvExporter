@@ -67,7 +67,6 @@ public:
 		HANDLE searchHandle = FindFirstFileW(searchQuery.c_str(), &fileData);
 		if (searchHandle == INVALID_HANDLE_VALUE) 
 		{
-			//TODO
 			return foundFiles; // No files found or directory doesn't exist
 		}
 

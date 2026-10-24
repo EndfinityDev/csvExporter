@@ -92,12 +92,12 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 		{
 			if (!DirectoryManager::TryCreateDirectoryIfNotExists(exportParamsPath))
 			{
-				//TODO
+				Logger::GetLogger()->Log(L"Failed to create ExportParams directory: " + exportParamsPath);
 			}
 		}
 		else
 		{
-			//TODO
+			Logger::GetLogger()->Log(L"Failed to create UserFiles directory: " + customFilePath);
 		}
 
 		LoadLuaResource();
@@ -109,12 +109,12 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 
 	if (!DirectoryManager::TryCreateDirectoryIfNotExists(exportParamsPath))
 	{
-		//TODO
+		Logger::GetLogger()->Log(L"Failed to create ExportParams directory: " + exportParamsPath);
 	}
 
 	// Try to load user files (if given)
 
-	std::wstring luaFileName = carData->GetStringData(ExporterStringData_LuaFileName)->Value; // TODO: support multiple lua files
+	std::wstring luaFileName = carData->GetStringData(ExporterStringData_LuaFileName)->Value;
 	std::wstring dataFileName =	carData->GetStringData(ExporterStringData_DataJSONFileName)->Value;
 	std::wstring translationsFileName = carData->GetStringData(ExporterStringData_TranslationsJSONFileName)->Value;
 
@@ -137,7 +137,6 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	}
 	else
 	{
-		// TODO: load resource lua file
 		LoadLuaResource();
 	}
 
@@ -202,13 +201,13 @@ void AuExpManager::ConfigureCustomParamData()
 
 	if (stringParameterCount != m_ExportCustomParamsGroup.StringParams.size())
 	{
-		//TODO
+		Logger::GetLogger()->Log(L"[ExportManager] Encountered mismatch between received and stored export string parameter counts");
 		return;
 	}
 
 	if (boolParameterCount != m_ExportCustomParamsGroup.BoolParams.size())
 	{
-		//TODO
+		Logger::GetLogger()->Log(L"[ExportManager] Encountered mismatch between received and stored export boolean parameter counts");
 		return;
 	}
 
@@ -684,6 +683,20 @@ void AuExpManager::SaveMesh(const AuCarExpMesh* mesh, const wchar_t* name)
 	return;
 }
 
+const wchar_t* AuExpManager::GetExportDirectory()
+{
+	TCHAR path[MAX_PATH];
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+	{
+		std::wstring exportDirectory = path + APPDATA_EXPORTER_DIR + L"\\Exports";
+		return exportDirectory.c_str();
+	}
+	else
+	{
+		return L"";
+	}
+}
+
 void AuExpManager::AddLuaFloatData(const AuCarExpArray<AuCarExpLuaFloatData>& Data)
 {
 	if (Data.GetCount() > 0)
@@ -765,7 +778,7 @@ void AuExpManager::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& data)
 		{
 			//outputFile.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>));
 			//locale = std::locale(std::locale::classic(), new std::codecvt_utf8_utf16<wchar_t>);
-			//TODO
+			Logger::GetLogger()->Log(L"[ExportManager] Failed to set Lua file locale, using default");
 		}
 	}
 

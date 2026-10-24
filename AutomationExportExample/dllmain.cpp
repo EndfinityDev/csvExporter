@@ -54,7 +54,9 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber
 //Gets the number of user-supplied strings that the plugin will be requesting
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCount)
 {
-	//we will want to get 3 lots of string information from the user:
+	Logger::CreateLogger(L"CSVExporter-PreInit.log", true);
+	Logger::GetLogger()->Log(L"GetRequiredStringDataCount");
+
 	*retCount = ExporterStringData_Count;
 
 	TCHAR path[MAX_PATH];
@@ -65,12 +67,17 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCo
 		*retCount += exportParams.StringParams.size();
 	}
 
+	Logger::FreeLogger();
+
 	return AuCarExpErrorCode_Success;
 }
 
 //Gets the user-supplied string information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUIStringData>& stringData, wchar_t const* locale)
 {
+	Logger::CreateLogger(L"CSVExporter-PreInit.log", false);
+	Logger::GetLogger()->Log(L"GetRequiredStringData");
+
 	unsigned int stringDataCount = ExporterStringData_Count;
 
 	ExportCustomParamsGroup exportParams;
@@ -87,6 +94,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	{
 		//Automation has not given us the number of items we asked for
 		//(this should never happen)
+		Logger::FreeLogger();
 		return AuCarExpErrorCode_UnknownError;
 	}
 
@@ -127,9 +135,12 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	wcscpy_s(stringData[ExporterStringData_Locale].ToolTip, L"The system locale to use for data and text formatting. Can be used along with a custom delimiter to export decimal point numbers with commas as delimiters. Examples: en-US, en-GB, ru-RU");
 	wcscpy_s(stringData[ExporterStringData_Locale].Value, prefs.Locale);
 
+	Logger::GetLogger()->Log(L"GetRequiredStringData: Loading prefs data");
+
 	std::unordered_map<std::wstring, std::wstring> exportParamSaveTable =
 		ExportCustomStringParamPrefs::ToWStringMap(ExportCustomStringParamPrefs::LoadFromFile(AuExpManager::APPDATA_EXPORTER_PREFS_DIR));
 
+	Logger::GetLogger()->Log(L"GetRequiredStringData: Gathered " + std::to_wstring(exportParams.StringParams.size()) + L" parameters from prefs file");
 	for (int i = 0; i < exportParams.StringParams.size(); i++)
 	{
 		wcscpy_s(stringData[ExporterStringData_Count + i].Label, exportParams.StringParams[i].Label.c_str());
@@ -146,6 +157,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 		}
 	}
 
+	Logger::FreeLogger();
 	return AuCarExpErrorCode_Success;
 }
 
@@ -153,6 +165,8 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCount)
 {
 	*retCount = ExporterBoolData_Count;
+	Logger::CreateLogger(L"CSVExporter-PreInit.log", false);
+	Logger::GetLogger()->Log(L"GetRequiredBoolDataCount");
 
 	TCHAR path[MAX_PATH];
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
@@ -162,12 +176,15 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCoun
 		*retCount += exportParams.BoolParams.size();
 	}
 
+	Logger::FreeLogger();
 	return AuCarExpErrorCode_Success;
 }
 
 //Gets the user-supplied boolean information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBoolData>& boolData, wchar_t const* locale)
 {
+	Logger::CreateLogger(L"CSVExporter-PreInit.log", false);
+	Logger::GetLogger()->Log(L"GetRequiredBoolData");
 	unsigned int boolDataCount = ExporterBoolData_Count;
 
 	ExportPrefs prefs = ExportPrefs::LoadFromFile();
@@ -192,11 +209,16 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 	{
 		//Automation has not given us the number of items we asked for
 		//(this should never happen)
+		Logger::FreeLogger();
 		return AuCarExpErrorCode_UnknownError;
 	}
 
+	Logger::GetLogger()->Log(L"GetRequiredBoolData: Loading prefs data");
+
 	std::unordered_map<std::wstring, bool> exportParamSaveTable =
 		ExportCustomBoolParamPrefs::ToWStringMap(ExportCustomBoolParamPrefs::LoadFromFile(AuExpManager::APPDATA_EXPORTER_PREFS_DIR));
+
+	Logger::GetLogger()->Log(L"GetRequiredBoolData: Gathered " + std::to_wstring(exportParams.BoolParams.size()) + L" parameters from prefs file");
 
 	for (int i = 0; i < exportParams.BoolParams.size(); i++)
 	{
@@ -214,17 +236,30 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolData(AuCarExpArray<AuCarExpUIBo
 		}
 	}
 
+	Logger::FreeLogger();
 	return AuCarExpErrorCode_Success;
 }
 
+AuCarExpErrorCode AuCarExportDLL::GetExportDirectory(AuCarExpArray<wchar_t>& retDir)
+{
+
+	//tell Automation which directory the plugin will be exporting files to (so this can be displayed in a message to the user):
+	wcscpy_s(retDir.GetData(), retDir.GetCount(), AuExpManager::GetExportDirectory());
+
+	//set the flags to none:
+
+	return AuCarExpErrorCode_Success;
+}
 
 AuCarExpErrorCode AuCarExportDLL::BeginExport(const AuCarExpCarData* carData, AuCarExpArray<wchar_t>& retDir, unsigned int* retFlags)
 {
+	Logger::CreateLogger(L"CSVExporter2.log", true);
+	Logger::GetLogger()->Log(L"BeginExport");
 	AuExpManager::CreateInstance();
 	AuCarExpErrorCode error = AuExpManager::GetInstance()->Init(carData);
 
 	//tell Automation which directory the plugin will be exporting files to (so this can be displayed in a message to the user):
-	wcscpy_s(retDir.GetData(), retDir.GetCount(), AuExpManager::GetInstance()->GetExportDirectory());
+	wcscpy_s(retDir.GetData(), retDir.GetCount(), AuExpManager::GetInstance()->GetCarExportDirectory());
 
 	//set the flags to none:
 	*retFlags = AuCarExpExporterFlags_None;
@@ -238,6 +273,8 @@ AuCarExpErrorCode AuCarExportDLL::EndExport()
 	//texture information is all good now, we can save the image files:
 	AuExpManager::GetInstance()->SaveImages();
 	AuExpManager::GetInstance()->EndExport();
+
+	Logger::GetLogger()->Log(L"EndExport");
 
 	return AuCarExpErrorCode_Success;
 }
@@ -258,6 +295,8 @@ AuCarExpErrorCode AuCarExportDLL::FreeAllData()
 {
 	//de-allocate everything:
 	AuExpManager::DestroyInstance();
+	Logger::GetLogger()->Log(L"FreeAllData");
+	Logger::FreeLogger();
 
 	return AuCarExpErrorCode_Success;
 }
@@ -407,6 +446,7 @@ AuCarExpErrorCode AuCarExportDLL::GetPreviewTransformData(const AuCarExpVector* 
 //Export the generated preview image for the car
 AuCarExpErrorCode AuCarExportDLL::AddPreviewImage(AuCarExpTexture* image)
 {
+	Logger::GetLogger()->Log(L"AddPreviewImage");
 	AuExpManager::GetInstance()->AddImage(image);
 	return AuCarExpErrorCode_Success;
 }
@@ -414,24 +454,28 @@ AuCarExpErrorCode AuCarExportDLL::AddPreviewImage(AuCarExpTexture* image)
 
 AuCarExpErrorCode AuCarExportDLL::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& Data)
 {
+	Logger::GetLogger()->Log(L"AddLuaFiles");
 	AuExpManager::GetInstance()->AddLuaFiles(Data);
 	return AuCarExpErrorCode_Success;
 }
 
 AuCarExpErrorCode AuCarExportDLL::AddLuaFloatData(const AuCarExpArray<AuCarExpLuaFloatData>& Data)
 {
+	Logger::GetLogger()->Log(L"AddLuaFloatData");
 	AuExpManager::GetInstance()->AddLuaFloatData(Data);
 	return AuCarExpErrorCode_Success;
 }
 
 AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpLuaStringData>& Data)
 {
+	Logger::GetLogger()->Log(L"AddLuaStringData");
 	AuExpManager::GetInstance()->AddLuaStringData(Data);
 	return AuCarExpErrorCode_Success;
 }
 
 AuCarExpErrorCode AuCarExportDLL::GetLuaFileCount(unsigned int* fileCount)
 {
+	Logger::GetLogger()->Log(L"GetLuaFileCount");
 	*fileCount = AuExpManager::GetInstance()->GetLuaFileCount();
 
 	return AuCarExpErrorCode_Success;
@@ -439,6 +483,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLuaFileCount(unsigned int* fileCount)
 
 AuCarExpErrorCode AuCarExportDLL::GetLuaFileLength(unsigned int* retLength, unsigned int FileNum)
 {
+	Logger::GetLogger()->Log(L"GetLuaFileLength");
 	*retLength = AuExpManager::GetInstance()->GetLuaFileLength(FileNum);
 
 	return AuCarExpErrorCode_Success;
@@ -446,6 +491,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLuaFileLength(unsigned int* retLength, unsi
 
 AuCarExpErrorCode AuCarExportDLL::GetLuaFile(AuCarExpArray<wchar_t>& stringBuffer, unsigned int FileNum)
 {
+	Logger::GetLogger()->Log(L"GetLuaFile");
 	if (!stringBuffer.GetData())
 	{
 		return AuCarExpErrorCode_UnknownError;
