@@ -498,6 +498,7 @@ bool AuExpManager::LoadDataEntryFromJSON(const std::string& entryKey, const json
 	}
 
 	m_LuaData.emplace_back(translation, luaName, dataType, doNotTranslate);
+	return true;
 }
 
 bool AuExpManager::LoadDataEntriesFromJSON(const json& arrayObject)

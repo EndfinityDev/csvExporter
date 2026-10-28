@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <map>
+#include <unordered_map>
 
 enum class CSVDataType : uint8_t
 {
@@ -12,7 +12,7 @@ enum class CSVDataType : uint8_t
 	CAR_NAME
 };
 
-static const std::map<std::wstring, CSVDataType> CSVDataTypeMap = {
+static const std::unordered_map<std::wstring, CSVDataType> CSVDataTypeMap = {
 	{ L"DataType_String", CSVDataType::STRING },
 	{ L"DataType_Float", CSVDataType::FLOAT },
 	{ L"DataType_ExporterVersion", CSVDataType::EXPORTER_VERSION },

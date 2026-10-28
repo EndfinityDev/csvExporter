@@ -48,7 +48,7 @@ struct WebValueRequestParams
 	bool TextOnFail;
 };
 
-static const std::map<std::string, ExportParamsWebResponseType> ExportParamsWebResponseTypeMap = {
+static const std::unordered_map<std::string, ExportParamsWebResponseType> ExportParamsWebResponseTypeMap = {
 	{ "text", ExportParamsWebResponseType::TEXT },
 	{ "json", ExportParamsWebResponseType::JSON },
 };

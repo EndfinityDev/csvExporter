@@ -120,14 +120,12 @@ private:
 
 	std::wstring m_ExportDirectory;
 
-	std::map<std::wstring, int> m_MeshNameCounts;
-
-	std::map<std::wstring, float> m_LuaFloatData;
-	std::map<std::wstring, std::wstring> m_LuaStringData;
-	std::map<std::wstring, AuCarLuaDataFile> m_LuaFDataFiles;
+	std::unordered_map<std::wstring, float> m_LuaFloatData;
+	std::unordered_map<std::wstring, std::wstring> m_LuaStringData;
+	std::unordered_map<std::wstring, AuCarLuaDataFile> m_LuaFDataFiles;
 
 	std::vector<LuaDataHeader> m_LuaData;
-	std::map<std::wstring, std::wstring> m_Translations;
+	std::unordered_map<std::wstring, std::wstring> m_Translations;
 
 	std::wstring m_FileName = L"";
 	std::wstring m_Delimiter = L"";

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <map>
+#include <unordered_map>
 
 #include "FileUtils.h"
 
@@ -21,7 +21,7 @@ enum class JSONSchemaResultType
 	STRING = 1 << 0,
 	INT = 1 << 1,
 	FLOAT = 1 << 2,
-	BOOL = 1 << 2,
+	BOOL = 1 << 3,
 
 	NUMBER = INT | FLOAT,
 
@@ -40,7 +40,7 @@ inline JSONSchemaResultType operator|(JSONSchemaResultType lhs, JSONSchemaResult
 		);
 }
 
-static const std::map<std::string, JSONSchemaResultType> JSONSchemaResultTypeMap = {
+static const std::unordered_map<std::string, JSONSchemaResultType> JSONSchemaResultTypeMap = {
 	{ "string", JSONSchemaResultType::STRING },
 	{ "str", JSONSchemaResultType::STRING },
 	{ "int", JSONSchemaResultType::INT },
