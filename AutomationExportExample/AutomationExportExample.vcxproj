@@ -76,26 +76,26 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Builds\$(Configuration)</OutDir>
-    <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
+    <OutDir>$(SolutionDir)Builds\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
     <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\Builds\$(Configuration)</OutDir>
-    <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
+    <OutDir>$(SolutionDir)Builds\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
     <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Builds\$(Configuration)</OutDir>
-    <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
+    <OutDir>$(SolutionDir)Builds\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
     <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\Builds\$(Configuration)</OutDir>
-    <IntDir>Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
+    <OutDir>$(SolutionDir)Builds\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)Bin\$(Configuration)_$(PlatformTarget)\</IntDir>
     <TargetName>$(ProjectName)2_$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -105,7 +105,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;$(SolutionDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +129,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions);CPPHTTPLIB_OPENSSL_SUPPORT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;$(SolutionDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,7 +154,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;$(SolutionDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,7 +182,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;AUTOMATIONEXPORTEXAMPLE_EXPORTS;PROJECT_FILENAME=L"$(TargetName)$(TargetExt)";%(PreprocessorDefinitions);CPPHTTPLIB_OPENSSL_SUPPORT</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\nlohmann\json\single_include;$(SolutionDir)thirdparty\yhirose\cpp-httplib\include;$(SolutionDir)thirdparty\openssl\$(PlatformTarget)\include;$(SolutionDir)Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -9,7 +9,7 @@ def main():
         cwd = os.getcwd()
         if not os.path.exists(cwd + "\\Builds\\.Distribution"):
             os.makedirs(cwd + "\\Builds\\.Distribution")
-        archive = zipfile.ZipFile(cwd + "\\Builds\\.Distribution\\csvExporter2.zip", mode="w")
+        archive = zipfile.ZipFile(cwd + "\\Builds\\.Distribution\\csvExporter2.zip", mode="w", compression=zipfile.ZIP_DEFLATED)
 
         archive.write(cwd + "\\Builds\\Release\\csvExporter2_x64.dll", "csvExporter2_x64.dll")
         archive.write(cwd + "\\Builds\\Release\\csvExporter2_x86.dll", "csvExporter2_x86.dll")

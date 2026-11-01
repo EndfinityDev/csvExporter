@@ -1,0 +1,5 @@
+#include "resource.h"
+
+IDR_ZIPFILE_BINARIES		RCDATA		"..\\Builds\\.Distribution\\Installer\\binaries.zip"
+IDR_ZIPFILE_USERFILES		RCDATA		"..\\Builds\\.Distribution\\Installer\\userfiles.zip"
+IDR_README					RCDATA		"..\\Builds\\.Distribution\\Installer\\ReadMe.txt"
