@@ -1,6 +1,4 @@
 #pragma once
-#include "stdafx.h"
-
 #include <string>
 #include <vector>
 
@@ -102,6 +100,20 @@ public:
 	{
 		DWORD att = GetFileAttributes(path.c_str());
 		return att != INVALID_FILE_ATTRIBUTES && (att & FILE_ATTRIBUTE_DIRECTORY);
+	}
+
+	inline static bool CheckPathIsNotDirectory(const std::wstring& path)
+	{
+		DWORD att = GetFileAttributes(path.c_str());
+		return att != INVALID_FILE_ATTRIBUTES && !(att & FILE_ATTRIBUTE_DIRECTORY);
+	}
+
+	static void NormalizePath(std::wstring& path)
+	{
+		for (wchar_t& c : path)
+		{
+			if (c == '/') c = '\\';
+		}
 	}
 
 private:

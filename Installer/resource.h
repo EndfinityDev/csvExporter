@@ -1,0 +1,5 @@
+#pragma once
+
+#define IDR_ZIPFILE_BINARIES	101
+#define IDR_ZIPFILE_USERFILES	102
+#define IDR_README				103

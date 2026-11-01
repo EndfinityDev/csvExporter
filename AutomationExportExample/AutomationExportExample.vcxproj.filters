@@ -14,12 +14,13 @@
     <ClCompile Include="JSONFileManager.cpp" />
     <ClCompile Include="HTTPManager.cpp" />
     <ClCompile Include="VersionChecker.cpp" />
+    <ClCompile Include="ExportCustomParamsManager.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csvExporter.h" />
     <ClInclude Include="DataType.h" />
     <ClInclude Include="DDSHeader.h" />
-    <ClInclude Include="EXPVERSION.h" />
     <ClInclude Include="CSVManager.h" />
     <ClInclude Include="ExportManager.h" />
     <ClInclude Include="Image.h" />
@@ -34,6 +35,13 @@
     <ClInclude Include="MessageBoxManager.h" />
     <ClInclude Include="HTTPManager.h" />
     <ClInclude Include="VersionChecker.h" />
+    <ClInclude Include="BuildDate.h" />
+    <ClInclude Include="ExportCustomParams.h" />
+    <ClInclude Include="ExportCustomParamsManager.h" />
+    <ClInclude Include="DirectoryManager.h" />
+    <ClInclude Include="ExportPrefs.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="StringUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="csvExporter.rc" />

@@ -20,7 +20,8 @@ Conversions = {
 	Liters = convertToImperial and 61.024 or 1,
 	Kilowatt = convertToImperial and 1.341 or 1,
 	Bar = convertToImperial and 14.504 or 1,
-	NM = convertToImperial and 0.7376 or 1
+	NM = convertToImperial and 0.7376 or 1,
+	L100KM = convertToImperial and 235.215 or 1
 }
 
 function DoExport(CarCalculator, CarFile)
@@ -209,7 +210,12 @@ function CExporter.ExportCarData(CarCalculator)
 	Data.OffroadRating 		= Results.Offroad
 	Data.PrestigeRating 	= Results.PrestigeValue
 	Data.ReliabilityRating 	= Results.Reliability
+	
 	Data.Economy 			= Results.Economy
+	if convertToImperial then
+		Data.Economy = Conversions.L100KM / Data.Economy
+	end
+
 	Data.PracticalityRating = Results.Practicality
 	Data.SafetyRating 		= Results.SafetyValue
 	Data.ComfortRating 		= Results.ComfortValue
