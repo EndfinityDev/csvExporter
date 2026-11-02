@@ -1,6 +1,6 @@
-#import shutil
 import os
 import time
+import shutil
 import zipfile
 import traceback
 
@@ -32,6 +32,9 @@ def main():
         archive.write(cwd + "\\Example_UserFiles\\.ExportParams\\imperial.json", "AutomationGame\\CSVExporter 2\\UserFiles\\.ExportParams\\imperial.json")
 
         archive.close()
+
+        shutil.copy2(cwd + "\\Builds\\Installer\\Release\\Installer_x64.exe", cwd + "\\Builds\\.Distribution\\CSVExporter2_Installer_x64.exe")
+        shutil.copy2(cwd + "\\Builds\\Installer\\Release\\Installer_x86.exe", cwd + "\\Builds\\.Distribution\\CSVExporter2_Installer_x86.exe")
         
         print("Packaging complete")
     except:
